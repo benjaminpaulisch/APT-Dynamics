@@ -21,26 +21,27 @@ public class GUIControl : MonoBehaviour {
 
     //GameObject[] cubeGameObjArr = new GameObject[3];  // Game Object Array
     private GameObject[] cubeGameObjArr = new GameObject[10];  // Game Object Array
+    private string[] stimulusPositions;
 
     // main GUI/Experiment parameters
     public int nrOfTrialsPerTask = 100;
     private int nrOfTrialsTotal;
-    public bool training = false;
-    public int repeatNrOfTrials = 1;
+    private bool training = false;
+    //public int repeatNrOfTrials = 1;
     //[HideInInspector] // Hides var below
-    private int repetition = 1;
+    //private int repetition = 1;
     //[HideInInspector] // Hides var below
     private int currentBlock = 0;
     //public int volatility = 1;
-    public float isiTime = -5f;
+    //public float isiTime = -5f;
 
     //new
     public float fixationDuration = 1f;             //500ms fixation cross is visible
     public float cueDurationAvg = 1.5f;             //1.5s cue average duration
     public float cueDurationVariation = 0.5f;       //500ms variation (so the cue duration is 1500ms +- 500ms
-    public float targetDurationMax = 5.0f;          //4s max target is visible
+    public float stimulusDurationMax = 5.0f;          //4s max target is visible
     public float feedbackDuration = 2.0f;           //1s feedback duration
-    public float minimumCollisionDuration = 1.0f;   //1s minimum collision duration for a successful response
+    public float minimumTaskDuration = 1.0f;   //1s minimum collision duration for a successful response
 
 
     public static float[] cueDurations;
@@ -189,6 +190,7 @@ public class GUIControl : MonoBehaviour {
         cubeGameObjArr[8] = cubeNearMiddleRight;
         cubeGameObjArr[9] = cubeNearRight;
 
+        stimulusPositions = new string[cubeGameObjArr.Length];
 
         // Randomize Cube Appearance Sequence
         RandomizeArray.ShuffleArray(CubeSeq);
@@ -253,7 +255,7 @@ public class GUIControl : MonoBehaviour {
         //start the Main Menu:
         StartMainMenu();
 
-    }
+    }//start()
     
 
     // Disable All Cubes rendering and collider properties
@@ -303,7 +305,38 @@ public class GUIControl : MonoBehaviour {
             // enable collision possibility
             startContinue.SetActive(true);
             resting.gameObject.GetComponent<Renderer>().enabled = true;
-            //GUIControl.marker.Write("block:start;currentBlockNr:"+currentBlock+";condition:"+feedback_type+";training:"+BoolToString(training));
+
+            //write experiment start marker
+            marker.Write(
+                "experiment:start;blockNr:" + currentBlock.ToString() + ";" +
+                "trialsPerTask:" + nrOfTrialsPerTask.ToString() + ";" +
+                "trialsTotal:" + nrOfTrialsTotal.ToString() + ";" +
+                "fixationDuration:" + fixationDuration.ToString() + ";" +
+                "cueDurationAvg:" + cueDurationAvg.ToString() + ";" +
+                "cueDurationVariation:" + cueDurationVariation.ToString() + ";" +
+                "stimulusDurationMax:" + stimulusDurationMax.ToString() + ";" +
+                "feedbackDuration:" + feedbackDuration.ToString() + ";" +
+                "minTaskDuration:" + minimumTaskDuration.ToString() + ";" +
+                "offsetNearPercent:" + offsetNearPercent.ToString() + ";" +
+                "offsetFarPercent:" + offsetFarPercent.ToString()
+                );
+
+            //write participant info (from configuration menu)
+            marker.Write(
+                "participantID:" + participantID + ";" +
+                "participantAge:" + participantAge.ToString() + ";" +
+                "participantGender" + participantGender + ";" +
+                "participantArmLength" + armLength
+                );
+
+            //write calibration info (from calibration menu)
+            marker.Write(
+                "posTable:" + table.transform.position.ToString() + ";" +
+                "posShoulder:" + shoulderPosition.ToString() + ";" +
+                "posMaxReach:" + maxReachPosition.ToString() + ";" +
+                "stimulusPositions:"+stimulusPositions.ToString()
+                );
+
             //Debug.Log("block:start;currentBlockNr:"+currentBlock+";condition:"+feedback_type+";training:"+BoolToString(training));
 
             Debug.Log("Participant Infos: ID: " + participantID + " age: " + participantAge.ToString() + " gender: " + participantGender + " arm length: " + armLength.ToString());
@@ -335,14 +368,14 @@ public class GUIControl : MonoBehaviour {
                     {
                         //enable fixation cross
                         fixationCross.SetActive(true);
-                        fixationCrossActivated = true;
+                        marker.Write("Fixation cross activated");
                         Debug.Log("Fixation Cross activated: " + actualTime.ToString());
+                        fixationCrossActivated = true;
 
                         // Enable flag to detect events of GameObject Cube
-                        flagTouchEvent = true;
+                        flagTouchEvent = true;  //[ToDo: is this still used anywhere?]
 
                         //GUIControl.marker.Write("box:spawned;condition:" + feedback_type + ";trial_nr:" + (((currentBlock - 1) * 100) + trialSeqCounter + 1) + ";normal_or_conflict:" + normConflict + ";cube:" + cubeGameObjArr[CubeSeq[cubeSeqCounter]] + ";isiTime:" + (isiTime + 6));
-                        //Debug.Log("box:spawned;condition:" + feedback_type + ";trial_nr:" + (((currentBlock - 1) * 100) + trialSeqCounter + 1) + ";normal_or_conflict:" + normConflict + ";cube:" + cubeGameObjArr[CubeSeq[cubeSeqCounter]] + ";isiTime:" + (isiTime + 6));
                     }
                 }
 
@@ -353,8 +386,10 @@ public class GUIControl : MonoBehaviour {
                     {
                         //deactivate fixation cross
                         fixationCross.SetActive(false);
-                        fixationCrossActivated = false;
+                        marker.Write("Fixation cross deactivated");
                         Debug.Log("Fixation Cross deactivated: " + actualTime.ToString());
+                        fixationCrossActivated = false;
+                        
 
                         //activate cue and set correct cue text
                         /*
@@ -365,14 +400,17 @@ public class GUIControl : MonoBehaviour {
                         if (currentTask.Contains("touch"))
                         {
                             cueText.GetComponent<UnityEngine.UI.Text>().text = "touch";
+                            marker.Write("cueTextActivated:touch");
+                            Debug.Log("Cue activated: touch " + actualTime.ToString());
                         }
                         else if(currentTask.Contains("point")) {
                             cueText.GetComponent<UnityEngine.UI.Text>().text = "point";
+                            marker.Write("cueTextActivated:point");
+                            Debug.Log("Cue activated: point " + actualTime.ToString());
                         }
 
                         cue.SetActive(true);
                         cueActivated = true;
-                        Debug.Log("Cue activated: " + actualTime.ToString());
                     }
                 }
 
@@ -385,8 +423,9 @@ public class GUIControl : MonoBehaviour {
                         {
                             //deactivate cue
                             cue.SetActive(false);
-                            cueActivated = false;
+                            marker.Write("cue text deactivated");
                             Debug.Log("Cue deactivated: " + actualTime.ToString());
+                            cueActivated = false;
 
                             //activate stimulus
                             if(currentTask.Contains("Near"))
@@ -398,17 +437,18 @@ public class GUIControl : MonoBehaviour {
                             {
                                 CubeVisible(cubeGameObjArr[CubePositions[cubeSeqCounter]]);     // determine which stimulus to render visible
                             }
+                            Debug.Log("Stimulus activated: " + actualTime.ToString());
 
                             reaction_start_time = actualTime;
 
                             targetActivated = true;
-                            Debug.Log("Target activated: " + actualTime.ToString());
+                            
                         }
 
                         //check for successful response (if the collision has reached the minimum duration)
                         if (collisionActive)
                         {
-                            if ((float)collisionDuration.ElapsedMilliseconds/1000 >= minimumCollisionDuration)
+                            if ((float)collisionDuration.ElapsedMilliseconds/1000 >= minimumTaskDuration)
                             {
                                 //activate correct/incorrect visual feedback
                                 visualFeedbackActive = true;
@@ -416,7 +456,7 @@ public class GUIControl : MonoBehaviour {
                             }
                         }
                         //if time for a reaction has run out -> go to next trial (but NOT if there is an active collision)
-                        else if(actualTime > fixationDuration + currentCueDuration + targetDurationMax)
+                        else if(actualTime > fixationDuration + currentCueDuration + stimulusDurationMax)
                         {
                             Debug.Log("Reaction time over. " + actualTime.ToString());
 
@@ -429,7 +469,7 @@ public class GUIControl : MonoBehaviour {
                     else
                     {
                         //wait for visual feedback to finish and then -> go to next trial
-                        if (actualTime > fixationDuration + currentCueDuration + reaction_time + minimumCollisionDuration + feedbackDuration)
+                        if (actualTime > fixationDuration + currentCueDuration + reaction_time + minimumTaskDuration + feedbackDuration)
                         {
                             //deactivate stimulus
                             DeactivateAllCubes();
@@ -451,14 +491,14 @@ public class GUIControl : MonoBehaviour {
             if (trialSeqCounter == nrOfTrialsTotal && actualTime > 0 && !experimentEnd) // after all trials are finished
             {
                 // block end
-                if (repetition < repeatNrOfTrials)
-                {
-                    repetition += 1;
+                //if (repetition < repeatNrOfTrials)
+                //{
+                    //repetition += 1;
                     endexp.gameObject.gameObject.GetComponent<Canvas>().enabled = true;
                     DeactivateAllCubes();
                     startContinue.SetActive(false);
                     flagStart = false;
-                }
+                //}
             }
 
             if (experimentEnd && actualTime > 0 && endUpdate) //!experimentEnd
@@ -542,6 +582,7 @@ public class GUIControl : MonoBehaviour {
         DeactivateAllCubes();
         
         GO.SetActive(true);
+        marker.Write("activateStimulus:" + GO.name);
 
         //added this here to activate the collider (cause may have been disabled after touch in earlier trial)
         GO.GetComponent<SphereCollider>().enabled = true;
@@ -721,6 +762,9 @@ public class GUIControl : MonoBehaviour {
 
             //move current object
             cupObjects[i].transform.position = CalculatePosition(cupObjects[i], newRootPosition, currentDistance, currentAngle);
+
+            //save position for lsl marker
+            stimulusPositions[i] = cupObjects[i].transform.position.ToString();
         }
 
     }
@@ -892,6 +936,7 @@ public class GUIControl : MonoBehaviour {
     public void StartTraining()
     {
         //This method is used for the "Start Training" button on the main menu. WHen the button is pressed this method is executed.
+        marker.Write("Main menu: Start Training button pressed");
         Debug.Log("Starting Training");
         expControlStatus = 3;
 
@@ -900,8 +945,9 @@ public class GUIControl : MonoBehaviour {
     public void StartExperiment()
     {
         //This method is used for the "Start Experiment" button on the main menu. WHen the button is pressed this method is executed.
-
+        marker.Write("Main menu: Start Experiment button pressed");
         Debug.Log("Starting Experiment");
+
         expControlStatus = 4;
 
         //activate and deactivate objects:
