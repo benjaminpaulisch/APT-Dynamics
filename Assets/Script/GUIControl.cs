@@ -10,14 +10,7 @@ public class GUIControl : MonoBehaviour {
 
     // create LSL markerstream
     public static LSLMarkerStream marker;
-
-    /* //[BPA: removed vibro feedback]
-    // add arduino
-    public static Arduino arduino;
-    */
-
-    //public static GameObject table, plane, leapmotion, instruct, textBox, endexp, startContinue, rehastim, resting, questionnaire, q, ra, la, send;
-    //[BPA: deleted rehastim]
+    
     public static GameObject table, plane, leapmotion, introGUI, textBox, endexp, startContinue, resting, questionnaire, q, ra, la, send, fixationCross, cue, cueText,
         shoulder, mainMenu, calibrationMenu, configurationMenu, inputParticipantID, inputParticipantAge, inputParticipantGender, inputArmLength, buttonExperiment,
         buttonTraining, buttonShoulderPos, textHintShoulderPos, textMissingInputs, tableSetup, buttonMaximumReach, buttonCupPositions, buttonTablePosition, textHintShoulderFirst,
@@ -28,8 +21,6 @@ public class GUIControl : MonoBehaviour {
 
     //GameObject[] cubeGameObjArr = new GameObject[3];  // Game Object Array
     private GameObject[] cubeGameObjArr = new GameObject[10];  // Game Object Array
-
-    //Vector3 cube1Vector, cube2Vector;
 
     // main GUI/Experiment parameters
     public int nrOfTrialsPerTask = 100;
@@ -61,25 +52,8 @@ public class GUIControl : MonoBehaviour {
     public static int[] trialTasks;
     private string currentTask;
 
-    /*  //[BPA: deleted EMS feedback]
-    // sets intensity level of EMS/FES feedback
-    public bool emsFeedbackCondition;
-    public int emsWidth = 200;
-    public int emsCurrent = 5;
-    public int pulseCount = 12;
-    */
-
-    /* //[BPA: removed vibro feedback]
-    // sets intensity level of vibrotactile feedback
-    public bool vibroFeedbackCondition;
-    public float vibroFeedbackDuration = 0.1f;
-    public int vibroStrength = 150;
-    */
-
     // Cube Seq if only Bigger cube has been used
-    //public static int[] CubeSeq = new int[] { 0, 1, 2 }; 
-    //public static int[] CubeSeq = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-    public static int[] CubeSeq = new int[] { 0, 1, 2, 3, 4};   //using one array for near and far cause it's easier
+    public static int[] CubeSeq = new int[] { 0, 1, 2, 3, 4};   //using the same array for near and far cause it's easier
     public static int[] CubePositions = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     public static int[] angles = new int[] {-40, -20, 0, 20, 40};
     public int offsetNearPercent = 50;
@@ -98,7 +72,6 @@ public class GUIControl : MonoBehaviour {
     public static bool flagStart = false;
     
     // trial logic handler
-    //public static bool updateTrialLogic = false;
     public static bool updateEndOfTrialLogic = false;
     public static bool experimentEnd = false;
     private bool endUpdate = true;
@@ -135,16 +108,6 @@ public class GUIControl : MonoBehaviour {
     private Vector3 shoulderPosition;
     private Vector3 maxReachPosition;
 
-    /* //[BPA: removed vibro feedback]
-    // logic vibro feedback
-    public static float elapsed;
-    public static bool vibroFeedback = false;
-    */
-
-    // event markers feedback channel
-    public static string feedback_type = "";
-    public static string normConflict = "";
-
     // parameter variables
     public static float reaction_time = 0;
     public static float reaction_time_temp = 0;
@@ -153,23 +116,6 @@ public class GUIControl : MonoBehaviour {
     //break timer
     public static float breakDurationCountdown;
 
-    /* //[BPA: remove questionaire]
-    // questionnaire variables
-    public static bool startedQuestionnaire = false;
-    public static bool nextQuestion = false;
-    public static string answer = "0";
-    public static string lastAnswer = "0";
-    public static int questionNr = 0;
-    private string elem = "0";
-    private bool answered = false;
-    public static int waitInterval = 0;
-    string[] questions = new string[]{"In der computererzeugten Welt hatte ich den Eindruck,\r\ndort gewesen zu sein...", 
-        "Ich hatte das Gefühl, in dem virtuellen Raum zu handeln\r\nstatt etwas von außen zu bedienen.",
-        "Wie bewußt war Ihnen die reale Welt, während Sie sich durch die virtuelle\r\nWelt bewegten (z.B. Geräusche, Raumtemperatur, andere Personen etc.)?",
-        "Wie sehr glich ihr Erleben der virtuellen Umgebung dem Erleben einer realen Umgebung"}; 
-    string[] left_anchors = new string[]{"überhaupt nicht", "trifft gar nicht zu", "extrem bewußt", "überhaupt nicht"};
-    string[] right_anchors = new string[]{"sehr stark", "trifft völlig zu", "unbewußt", "vollständig"};
-    */
 
     // Use this for initialization
     void Start()
@@ -179,26 +125,9 @@ public class GUIControl : MonoBehaviour {
 
         NormalConflictArr = new int[nrOfTrialsTotal];
 
-        /* //[BPA: removed vibro feedback]
-        if (vibroFeedbackCondition){
-            feedback_type = "vibro";
-        /*  //[BPA: deleted EMS feedback]
-        }
-        else if (emsFeedbackCondition){
-            feedback_type = "ems";
-        }else feedback_type = "visual";
-        */
-        feedback_type = "visual";
-
 
         // init LSL markerstream
         marker = FindObjectOfType<LSLMarkerStream>();
-
-        /* //[BPA: removed vibro feedback]
-        // init arduino
-        arduino = Arduino.global;
-		arduino.Setup(ConfigurePins);
-        */
         
         // Finding the game object 
         table = GameObject.Find("Table");
@@ -235,26 +164,7 @@ public class GUIControl : MonoBehaviour {
         breakCanvasVR = GameObject.Find("BreakCanvasVR");
         breakCanvasDesktop = GameObject.Find("BreakCanvasDesktop");
 
-
-        /* //[BPA: remove questionaire]
-        questionnaire = GameObject.Find("questionnaire");
-        q = GameObject.Find("question");
-        ra = GameObject.Find("right_anchor");
-        la = GameObject.Find("left_anchor");
-        send = GameObject.Find("send");
-        */
-
-        /*  //[BPA deleted rehastim]
-        // rehastim interface
-        rehastim = GameObject.Find("RehaStim");
-        */
-
-        // For Big Cube
-        /*
-        cubeLeft = GameObject.Find("CubeLeft");
-        cubeMiddle = GameObject.Find("CubeMiddle");
-        cubeRight = GameObject.Find("CubeRight");
-        */
+        //Stimulus
         cubeFarLeft = GameObject.Find("CubeFarLeft");
         cubeFarMiddleLeft = GameObject.Find("CubeFarMiddleLeft");
         cubeFarMiddle = GameObject.Find("CubeFarMiddle");
@@ -267,12 +177,7 @@ public class GUIControl : MonoBehaviour {
         cubeNearRight = GameObject.Find("CubeNearRight");
 
 
-        // Assign game objects to arrays
-        /*
-        cubeGameObjArr[0] = cubeLeft;
-        cubeGameObjArr[1] = cubeMiddle;
-        cubeGameObjArr[2] = cubeRight;
-        */
+        // Assign stimulus game objects to arrays
         cubeGameObjArr[0] = cubeFarLeft;
         cubeGameObjArr[1] = cubeFarMiddleLeft;
         cubeGameObjArr[2] = cubeFarMiddle;
@@ -292,22 +197,8 @@ public class GUIControl : MonoBehaviour {
         //create array with tasks for all trials
         trialTasks = new int[nrOfTrialsTotal];
 
-        /*
-        //fill array with tasks. For example: 4 different tasks and 100 trials per task - the array should contain 100 values of each task
-        for(int i=0; i<tasks.Length; i++)     //for every different task
-        {
-            for (int j=0; j<nrOfTrialsPerTask; j++)
-            {
-                //add current task to array
-                trialTasks[i*nrOfTrialsPerTask + j] = i;
-            }
-        }
-
-        //randomize the task array
-        RandomizeArray.ShuffleArray(trialTasks);
-        */
-
-        //new method for filling the trials while minimizing task repetition in subsequent trials
+        //Fill array with tasks. For example: 4 different tasks and 100 trials per task - the array should contain 100 values of each task.
+        //We use a method minimizing task repetition in subsequent trials.
         int tempTrialCounter = 0;
         int tempTaskCounter = 0;
         RandomizeArray.ShuffleArray(taskSeq);
@@ -330,7 +221,6 @@ public class GUIControl : MonoBehaviour {
 
         }
 
-
         /* //Debug: print out the array:
         Debug.Log("Shuffled trialTasks array:");
         for(int i=0; i<trialTasks.Length; i++)
@@ -338,28 +228,10 @@ public class GUIControl : MonoBehaviour {
             Debug.Log(tasks[trialTasks[i]]);
         }*/
 
-        /*
-        // Trial definition error with 1s and 0s for either conflict or normal trial depending on volatility of simulation
-        if (!training)
-        {
-            NormalConflictArr = RandomizeArray.GenerateArraySequences(nrOfTrialsTotal, 0.1, 5);
-        }*/
-
-        // todo fix GenerateArraySequence function so volatility param works
-        // if (volatility == 1)
-        // {
-        //     NormalConflictArr = RandomizeArray.GenerateArraySequences(nrOfTrials, 0.1, 5);
-        // }
-        // else if (volatility == 0)
-        // {
-        //     NormalConflictArr = RandomizeArray.GenerateArraySequences(nrOfTrials, 0.1, 5);
-        // }
-
 
         //generate list of cue times for all trials:
         cueDurations = new float[nrOfTrialsTotal];
 
-        //[ToDo: distribute only over one condition?]
         //Debug.Log("All cue durations:");
         for(int i=0; i<nrOfTrialsTotal; i++)
         {
@@ -369,22 +241,6 @@ public class GUIControl : MonoBehaviour {
         }
         //shuffle cue duration order
         RandomizeArray.ShuffleArray(cueDurations);
-
-        /*
-        // instruct and leapmotion game object remain visible and only table, plane and the end instruction are made invisible
-        table.gameObject.GetComponent<Renderer>().enabled = false;
-        plane.gameObject.GetComponent<Renderer>().enabled = false;
-        introGUI.gameObject.gameObject.GetComponent<Canvas>().enabled = true;
-        endexp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
-        resting.gameObject.GetComponent<Renderer>().enabled = false;
-        //questionnaire.SetActive(false);
-        fixationCross.SetActive(false);
-        cue.SetActive(false);
-
-        // hide startPosDisc
-        startContinue.SetActive(false);
-        DisableAllCubes(); // set color to white, disable renderer and sphereCollider
-        */
 
 
         //deactivate the "Start Experiment" and "Training" Buttons:
@@ -399,53 +255,11 @@ public class GUIControl : MonoBehaviour {
 
     }
     
-    /* //[BPA: removed vibro feedback]
-    void ConfigurePins() {
-		arduino.pinMode(3, PinMode.PWM);
-	}*/
 
     // Disable All Cubes rendering and collider properties
     public void DeactivateAllCubes()
     {
-
-        // Change color to white to all Big Cubes
-        /*
-        cubeLeft.gameObject.SetActive(false);
-        cubeMiddle.gameObject.SetActive(false);
-        cubeRight.gameObject.SetActive(false);
-        */
-
-        /*
-        cubeFarLeft.gameObject.SetActive(false);
-        cubeFarMiddleLeft.gameObject.SetActive(false);
-        cubeFarMiddle.gameObject.SetActive(false);
-        cubeFarMiddleRight.gameObject.SetActive(false);
-        cubeFarRight.gameObject.SetActive(false);
-        cubeNearLeft.gameObject.SetActive(false);
-        cubeNearMiddleLeft.gameObject.SetActive(false);
-        cubeNearMiddle.gameObject.SetActive(false);
-        cubeNearMiddleRight.gameObject.SetActive(false);
-        cubeNearRight.gameObject.SetActive(false);
-        */
-
-        /*
-        cubeLeft.gameObject.GetComponent<Renderer>().material.color = Color.white;
-        cubeMiddle.gameObject.GetComponent<Renderer>().material.color = Color.white;
-        cubeRight.gameObject.GetComponent<Renderer>().material.color = Color.white;
-        */
-        /*
-        cubeFarLeft.gameObject.GetComponent<Renderer>().material.color = Color.white;
-        cubeFarMiddleLeft.gameObject.GetComponent<Renderer>().material.color = Color.white;
-        cubeFarMiddle.gameObject.GetComponent<Renderer>().material.color = Color.white;
-        cubeFarMiddleRight.gameObject.GetComponent<Renderer>().material.color = Color.white;
-        cubeFarRight.gameObject.GetComponent<Renderer>().material.color = Color.white;
-        cubeNearLeft.gameObject.GetComponent<Renderer>().material.color = Color.white;
-        cubeNearMiddleLeft.gameObject.GetComponent<Renderer>().material.color = Color.white;
-        cubeNearMiddle.gameObject.GetComponent<Renderer>().material.color = Color.white;
-        cubeNearMiddleRight.gameObject.GetComponent<Renderer>().material.color = Color.white;
-        cubeNearRight.gameObject.GetComponent<Renderer>().material.color = Color.white;
-        */
-
+        //Deactivate all Stimulus and change color to white to all Big Cubes
         foreach (GameObject obj in cubeGameObjArr)
         {
             obj.SetActive(false);
@@ -489,8 +303,8 @@ public class GUIControl : MonoBehaviour {
             // enable collision possibility
             startContinue.SetActive(true);
             resting.gameObject.GetComponent<Renderer>().enabled = true;
-            GUIControl.marker.Write("block:start;currentBlockNr:"+currentBlock+";condition:"+feedback_type+";training:"+BoolToString(training));
-            Debug.Log("block:start;currentBlockNr:"+currentBlock+";condition:"+feedback_type+";training:"+BoolToString(training));
+            //GUIControl.marker.Write("block:start;currentBlockNr:"+currentBlock+";condition:"+feedback_type+";training:"+BoolToString(training));
+            //Debug.Log("block:start;currentBlockNr:"+currentBlock+";condition:"+feedback_type+";training:"+BoolToString(training));
 
             Debug.Log("Participant Infos: ID: " + participantID + " age: " + participantAge.ToString() + " gender: " + participantGender + " arm length: " + armLength.ToString());
 
@@ -504,15 +318,14 @@ public class GUIControl : MonoBehaviour {
         if (experimentStarted)
         {
             // add the time taken to render last frame, experiment logic is based on this parameter
-            // actual time is constantly growing
+            // actualTime is constantly growing
             actualTime += Time.deltaTime;
 
             if (trialSeqCounter < nrOfTrialsTotal && !experimentEnd) // run all trials
             {
                 // the following loop is then run each frame for a new started trial
-                //if(actualTime >= isiTime && actualTime <= 0)
 
-                //Start of trial and show fixation cross
+                //Start of trial: show fixation cross
                 if (actualTime <= fixationDuration)
                 {
                     // do once to update sequence of trials and to write marker
@@ -520,43 +333,16 @@ public class GUIControl : MonoBehaviour {
                     //should run only once at trial start
                     if (!fixationCrossActivated)
                     {
-                        // Visualize Cubes and assigned condition, do that only once
-                        //CubeVisible(cubeGameObjArr[CubeSeq[cubeSeqCounter]]); // determine which cube to render visible
-
                         //enable fixation cross
                         fixationCross.SetActive(true);
                         fixationCrossActivated = true;
                         Debug.Log("Fixation Cross activated: " + actualTime.ToString());
 
-                        /* //[BPA: remove the randomly wrong visual feedback]
-                        if (!training)
-                        {
-                            AssignedCondition(NormalConflictArr[trialSeqCounter], cubeGameObjArr[CubeSeq[cubeSeqCounter]]); // Assigning Cube Condition randomly
-                        }else
-                        {
-                            AssignedCondition(0, cubeGameObjArr[CubeSeq[cubeSeqCounter]]);
-                        }
-                        */
-
                         // Enable flag to detect events of GameObject Cube
                         flagTouchEvent = true;
 
-                        /*
-                        // Generate Event Message dynamically
-                        if (NormalConflictArr[trialSeqCounter] == 1 && !training)
-                        {
-                            normConflict = "conflict";
-                        }
-                        else
-                        {
-                            normConflict = "normal";
-                        }
-                        reaction_start_time = actualTime;
-                        updateTrialLogic = false;
-                        */
-
-                        GUIControl.marker.Write("box:spawned;condition:" + feedback_type + ";trial_nr:" + (((currentBlock - 1) * 100) + trialSeqCounter + 1) + ";normal_or_conflict:" + normConflict + ";cube:" + cubeGameObjArr[CubeSeq[cubeSeqCounter]] + ";isiTime:" + (isiTime + 6));
-                        Debug.Log("box:spawned;condition:" + feedback_type + ";trial_nr:" + (((currentBlock - 1) * 100) + trialSeqCounter + 1) + ";normal_or_conflict:" + normConflict + ";cube:" + cubeGameObjArr[CubeSeq[cubeSeqCounter]] + ";isiTime:" + (isiTime + 6));
+                        //GUIControl.marker.Write("box:spawned;condition:" + feedback_type + ";trial_nr:" + (((currentBlock - 1) * 100) + trialSeqCounter + 1) + ";normal_or_conflict:" + normConflict + ";cube:" + cubeGameObjArr[CubeSeq[cubeSeqCounter]] + ";isiTime:" + (isiTime + 6));
+                        //Debug.Log("box:spawned;condition:" + feedback_type + ";trial_nr:" + (((currentBlock - 1) * 100) + trialSeqCounter + 1) + ";normal_or_conflict:" + normConflict + ";cube:" + cubeGameObjArr[CubeSeq[cubeSeqCounter]] + ";isiTime:" + (isiTime + 6));
                     }
                 }
 
@@ -570,9 +356,7 @@ public class GUIControl : MonoBehaviour {
                         fixationCrossActivated = false;
                         Debug.Log("Fixation Cross deactivated: " + actualTime.ToString());
 
-                        //activate cue
-                        //ToDo: Set Text of cueText with the correct task
-                        cueText.GetComponent<UnityEngine.UI.Text>().text = currentTask;
+                        //activate cue and set correct cue text
                         /*
                         if(currentTask.Contains("grab"))
                         {
@@ -586,17 +370,16 @@ public class GUIControl : MonoBehaviour {
                             cueText.GetComponent<UnityEngine.UI.Text>().text = "point";
                         }
 
-                       cue.SetActive(true);
+                        cue.SetActive(true);
                         cueActivated = true;
                         Debug.Log("Cue activated: " + actualTime.ToString());
                     }
                 }
 
-                //after showing cue: show target
-                //if (actualTime > fixationDuration + currentCueDuration && actualTime <= fixationDuration + currentCueDuration + targetDurationMax)
+                //after showing cue: show stimulus
                 if (actualTime > fixationDuration + currentCueDuration)
                 {
-                    if(!taskSuccess)    //if the grab/point task has not been successful yet
+                    if(!taskSuccess)    //if the current task has not been successful yet
                     {
                         if (!targetActivated)
                         {
@@ -605,16 +388,15 @@ public class GUIControl : MonoBehaviour {
                             cueActivated = false;
                             Debug.Log("Cue deactivated: " + actualTime.ToString());
 
-                            //activate target
-                            //CubeVisible(cubeGameObjArr[CubeSeq[cubeSeqCounter]]); // determine which cube to render visible
+                            //activate stimulus
                             if(currentTask.Contains("Near"))
                             {
                                 //For the near positions we have to add 5 to the index, cause the near positions are the indexes 5-9 in the cubeGameObjArray
-                                CubeVisible(cubeGameObjArr[CubePositions[cubeSeqCounter+5]]);   // determine which cube to render visible
+                                CubeVisible(cubeGameObjArr[CubePositions[cubeSeqCounter+5]]);   // determine which stimulus to render visible
                             }
                             else
                             {
-                                CubeVisible(cubeGameObjArr[CubePositions[cubeSeqCounter]]);     // determine which cube to render visible
+                                CubeVisible(cubeGameObjArr[CubePositions[cubeSeqCounter]]);     // determine which stimulus to render visible
                             }
 
                             reaction_start_time = actualTime;
@@ -622,17 +404,6 @@ public class GUIControl : MonoBehaviour {
                             targetActivated = true;
                             Debug.Log("Target activated: " + actualTime.ToString());
                         }
-
-                        /*
-                        //if time for a reaction has run out -> go to next trial
-                        if(actualTime > fixationDuration + currentCueDuration + targetDurationMax)
-                        {
-                            Debug.Log("Reaction time over.");
-
-                            DisableAllCube();
-                            NextTrial();
-                        }*/
-
 
                         //check for successful response (if the collision has reached the minimum duration)
                         if (collisionActive)
@@ -644,7 +415,7 @@ public class GUIControl : MonoBehaviour {
                                 VisualFeeback(currentCollisionObj, currentResponseType);
                             }
                         }
-                        //if time for a reaction has run out -> go to next trial (but NOT if there is an active collision
+                        //if time for a reaction has run out -> go to next trial (but NOT if there is an active collision)
                         else if(actualTime > fixationDuration + currentCueDuration + targetDurationMax)
                         {
                             Debug.Log("Reaction time over. " + actualTime.ToString());
@@ -654,62 +425,32 @@ public class GUIControl : MonoBehaviour {
                         }
 
                     }
-                    //if the touch/point task has been successful
+                    //if the current task task has been successful
                     else
                     {
                         //wait for visual feedback to finish and then -> go to next trial
                         if (actualTime > fixationDuration + currentCueDuration + reaction_time + minimumCollisionDuration + feedbackDuration)
                         {
+                            //deactivate stimulus
                             DeactivateAllCubes();
-                            //startContinue.SetActive(true);
-                            //updateEndOfTrialLogic = false;
+
                             GUIControl.marker.Write("visualFeedback:off");
                             Debug.Log("visualFeedback:off " + actualTime.ToString());
+
+                            //transition to next trial
                             NextTrial();
                         }
                     }
  
                 }
 
-
-                /*
-                //if trial duration runs out, pause and wait for start of next trial
-                if (actualTime > 0 && !experimentEnd)
-                {
-                    if (updateEndOfTrialLogic && !experimentEnd)
-                    {
-                        DisableAllCube();
-                        startContinue.SetActive(true);
-                        updateEndOfTrialLogic = false;
-                        GUIControl.marker.Write("visualFeedback:off");
-                        Debug.Log("visualFeedback:off");
-                    }
-                }*/
             }
 
-            /* //[BPA: removed vibro feedback]
-            if (vibroFeedback)
-            {
-                if (elapsed > vibroFeedbackDuration)
-                {
-                    arduino.analogWrite(3, 0); // turn off vibro feedback
-                    vibroFeedback = false;
-                    if (!startedQuestionnaire)
-                    {
-                        GUIControl.marker.Write("vibroFeedback:off;vibroFeedbackDuration:"+elapsed);
-                        Debug.Log("vibroFeedback:off;vibroFeedbackDuration:"+elapsed);
-                    }
-                }
-                else
-                {
-                    elapsed += Time.deltaTime;
-                }
-            }*/
 
             // experiment end determined by nrOfTrials
             if (trialSeqCounter == nrOfTrialsTotal && actualTime > 0 && !experimentEnd) // after all trials are finished
             {
-                // block end, pause after 100 trials
+                // block end
                 if (repetition < repeatNrOfTrials)
                 {
                     repetition += 1;
@@ -718,26 +459,6 @@ public class GUIControl : MonoBehaviour {
                     startContinue.SetActive(false);
                     flagStart = false;
                 }
-                /* //[BPA: remove questionaire]
-                else
-                {
-                    if (!startedQuestionnaire)
-                    {
-                        DisableAllCube();
-                        startContinue.SetActive(false);
-                        questionnaire.SetActive(true);
-                        startedQuestionnaire = true;
-                        send.gameObject.GetComponent<Renderer>().material.color = Color.green;
-                    }
-
-                    if (nextQuestion)
-                    {
-                        q.GetComponent<UnityEngine.UI.Text>().text = questions[questionNr];
-                        la.GetComponent<UnityEngine.UI.Text>().text = left_anchors[questionNr];
-                        ra.GetComponent<UnityEngine.UI.Text>().text = right_anchors[questionNr];
-                        send.gameObject.GetComponent<Renderer>().material.color = Color.green;
-                    }
-                }*/
             }
 
             if (experimentEnd && actualTime > 0 && endUpdate) //!experimentEnd
@@ -747,14 +468,16 @@ public class GUIControl : MonoBehaviour {
                 plane.gameObject.GetComponent<Renderer>().enabled = false;
                 resting.gameObject.GetComponent<Renderer>().enabled = false;
                 endexp.gameObject.gameObject.GetComponent<Canvas>().enabled = true;
-                GUIControl.marker.Write("block:end;currentBlockNr:" + currentBlock + ";condition:" + feedback_type + ";training:" + BoolToString(training));
-                Debug.Log("block:end;currentBlockNr:" + currentBlock + ";condition:" + feedback_type + ";training:" + BoolToString(training));
+
+                //GUIControl.marker.Write("block:end;currentBlockNr:" + currentBlock + ";condition:" + feedback_type + ";training:" + BoolToString(training));
+                //Debug.Log("block:end;currentBlockNr:" + currentBlock + ";condition:" + feedback_type + ";training:" + BoolToString(training));
                 endUpdate = false;
             }
 
         }//if experimentStarted
    
     }//ControlTrial()
+
 
     public void TrialStart()
     {
@@ -764,14 +487,10 @@ public class GUIControl : MonoBehaviour {
         //set experiment control status to experiment (needed here when coninuing after break)
         expControlStatus = 4;
 
-        // set trial timer to 6 seconds (1-2 sec ISI, 4 secs response time)
-        //actualTime = -6.0f;
+        // reset trial time
         actualTime = 0.0f;
 
-        //updateTrialLogic = true;
         experimentStarted = true;   //activate flag to start the experiment
-
-        //isiTime = Random.Range(-5.0f, -4.0f);
 
         //currentCueDuration = Random.Range(cueDurationAvg - cueDurationVariation, cueDurationAvg + cueDurationVariation);
         currentCueDuration = cueDurations[trialSeqCounter];
@@ -783,27 +502,19 @@ public class GUIControl : MonoBehaviour {
         targetActivated = false;
     }
 
+
     public void NextTrial()
     {
         trialSeqCounter = trialSeqCounter + 1;
         cubeSeqCounter = cubeSeqCounter + 1;
-        // reshuffle cube appearance after one "cube order" (emsCurrently 3 objects) has been presented
+
+        // reshuffle stimulus sequence
         if (cubeSeqCounter == CubeSeq.Length-1)
         {
             cubeSeqCounter = 0;
-            RandomizeArray.ShuffleArray(CubeSeq); // Re-Randomize Cube Appearance Sequence
-            // in TU Berlin experiment (04/2018) cube location is not considered a factor of interest
-            // and is not going to be examined. Therefore randomize appearance of cube locations!   
+            RandomizeArray.ShuffleArray(CubeSeq); // re-randomize stimulus sequence 
         }
-        /*
-        // set wait time to 2 second, displays visual feedback for 2 second before hiding it and starting next trial
-        if (actualTime < -2.5f)
-        {
-            actualTime = -2.5f;
-        }
-        updateEndOfTrialLogic = true;
-        */
-
+        
         taskSuccess = false;
 
         collisionActive = false;
@@ -815,71 +526,14 @@ public class GUIControl : MonoBehaviour {
         {
             //start break not next trial
             if(trialSeqCounter == (int)(nrOfTrialsTotal/4) || trialSeqCounter == (int)(nrOfTrialsTotal*3/4))
-            {
-                //2min break
-                StartBreak(120f);
-            }
+                StartBreak(120f);  //2min break
             else
-            {
-                //3min break
-                StartBreak(180f);
-            }
-            
+                StartBreak(180f);  //3min break
         }
         else
-        {
             TrialStart();
-        }
         
     }
-
-    /* //[BPA: remove questionaire]
-    // write marker for questionnaire results
-    public void QuestMarker(GameObject GO)
-    {
-
-        if (GO.name == "send" && answered)
-        {
-            GUIControl.marker.Write("ipq_question_nr_"+(questionNr+1)+"_answer:"+answer);
-            Debug.Log("ipq_question_nr_"+(questionNr+1)+"_answer:"+answer);
-
-            // set answered flag
-            questionNr += 1;
-            nextQuestion = true;
-            actualTime = -1.0f;
-
-            // reset colors
-            GO.GetComponent<Renderer>().material.color = Color.red;
-            GameObject.Find(lastAnswer).GetComponent<Renderer>().material.color = Color.white;
-            answered = false;
-            lastAnswer = "0";
-        }
-
-        if (!(GO.name == "send") && !(GO.gameObject.GetComponent<Renderer>().material.color == Color.red))
-        {
-            GO.gameObject.GetComponent<Renderer>().material.color = Color.red;
-            answer = GO.name;
-            answered = true;
-
-            if (lastAnswer == "0")
-            {
-                lastAnswer = answer;
-            }
-            else
-            // find gameobject of last answer and make white
-            {
-                GameObject.Find(lastAnswer).GetComponent<Renderer>().material.color = Color.white;
-                lastAnswer = answer;
-            }
-        }
-        
-        if (questionNr > 3)
-        {
-            experimentEnd = true;
-            //wait for 2 seconds in the main loop before showing end of currentBlock
-            actualTime = -2.0f;
-        }
-    }*/
 
 
     // Enable selected cube for rendering and collider properties
@@ -889,15 +543,15 @@ public class GUIControl : MonoBehaviour {
         
         GO.SetActive(true);
 
-        //[BPA: added this here to activate the collider (cause may have been disabled after touch in earlier trial)
+        //added this here to activate the collider (cause may have been disabled after touch in earlier trial)
         GO.GetComponent<SphereCollider>().enabled = true;
     }
 
 
-    //starts the "early" feedback before minimum hit duration is reached. The feedback is primarily an aiming help.
+    //starts the "early" feedback before minimum task duration is reached. The feedback is primarily an aiming aid.
     public void StartVisualFeedback(GameObject GO, string collisionEvent)
     {
-        //check if collision already active but the visual feedback (green/red) is not active
+        //check if collision is already active but the visual feedback (green/red) is not active
         if (!collisionActive && !visualFeedbackActive)
         {
             //save current collision object reference for later
@@ -917,7 +571,6 @@ public class GUIControl : MonoBehaviour {
 
             if (collisionEvent == "point") {
                 //activate early visual feedback
-                //GO.gameObject.GetComponent<Renderer>().material.color = Color.yellow;
                 GO.gameObject.GetComponent<Renderer>().material.color = customYellow;
 
                 Debug.Log("Start visual feedback: yellow, " + collisionEvent + ", " + GO.gameObject.name + " " + actualTime.ToString());
@@ -929,17 +582,12 @@ public class GUIControl : MonoBehaviour {
 
                 Debug.Log("Start visual feedback: cyan, " + collisionEvent + ", " + GO.gameObject.name + " " + actualTime.ToString());
             }
-            
-
-            //ToDo: DebugLog (?)
-
         }
 
     }
 
 
-    //stops the "early" feedback when the object is not hit anymore (only if the minumim hit duration was not reached yet)
-    //public void StopVisualFeedback(GameObject GO, string collisionEvent)
+    //stops the "early" feedback when the object is not hit anymore (only if the minumim task duration was not reached)
     public void StopVisualFeedback(string collisionEvent)
     {
         //check if collision already active but the visual feedback (green/red) is not active
@@ -961,100 +609,41 @@ public class GUIControl : MonoBehaviour {
                 reaction_time_temp = 0;
 
                 //reset color of the collision object
-                //GO.gameObject.GetComponent<Renderer>().material.color = Color.white;
                 currentCollisionObj.GetComponent<Renderer>().material.color = Color.white;
 
                 Debug.Log("Stop visual feedback, reset color to white, " + collisionEvent + ", " + currentCollisionObj.gameObject.name + " " + actualTime.ToString());
 
                 //reset collision object
                 currentCollisionObj = null;
-
-                //ToDo: DebugLog (?)
             }
         }
 
     }
 
 
-    // Feedback of Cube on touch
-    //public void VisualFeeback(GameObject GO)
+    // Feedback of Stimulus on touch
     public void VisualFeeback(GameObject GO, string collisionEvent)     //collisionEvent should be "touch"/"grab"/"point"
     {
-
-        //if (!startedQuestionnaire)
-        //{
-            // disable both possible colliders
-            //GO.gameObject.GetComponent<SphereCollider>().enabled = false; // no collision with the cube anymore
-
-        // three feedback conditions in total
-        // 1: visual only
-
         //check if correct or incorrect feedback
         if (currentTask.Contains(collisionEvent))
         {
             //correct task feedback:
             GO.gameObject.GetComponent<Renderer>().material.color = Color.green;
-
             Debug.Log("Correct task visual feedback: green, " + collisionEvent + ", " + GO.gameObject.name + " " + actualTime.ToString());
         }
         else
         {
             //wrong task feedback:
             GO.gameObject.GetComponent<Renderer>().material.color = Color.red;
-
             Debug.Log("Wrong task visual feedback: red, " + collisionEvent + ", " + GO.gameObject.name + " " + actualTime.ToString());
         }
 
-        // calculate reaction time between stimulus onset and touching the stimulus cubes
-        //reaction_time = actualTime - reaction_start_time;
         reaction_time = reaction_time_temp;
 
-        //}
+        // LSL marking feedback type and intensity, todo correct make this better
+        //GUIControl.marker.Write("box:touched;condition:"+feedback_type+";reaction_time:"+reaction_time+";trial_nr:"+(((currentBlock-1)*100)+trialSeqCounter+1)+";normal_or_conflict:"+normConflict+";cube:"+GO+";isiTime:"+(isiTime+6));
+        //Debug.Log("box:touched;condition:"+feedback_type+";reaction_time:"+reaction_time+";trial_nr:"+(((currentBlock-1)*100)+trialSeqCounter+1)+";normal_or_conflict:"+normConflict+";cube:"+GO+";isiTime:"+(isiTime+6));
 
-        /* //[BPA: removed vibro feedback]
-        // 2: vibrotactile
-        if (vibroFeedbackCondition){
-            vibroFeedback = true;
-            arduino.analogWrite(3, vibroStrength); // motor ON
-            elapsed = 0;
-            if (!startedQuestionnaire)
-            {
-                GUIControl.marker.Write("box:touched;condition:"+feedback_type+";vibroFeedback:on;reaction_time:"+reaction_time+";trial_nr:"+(((currentBlock-1)*100)+trialSeqCounter+1)+";normal_or_conflict:"+normConflict+";cube:"+GO+";isiTime:"+(isiTime+6)+";vibro_duration:"+vibroFeedbackDuration);
-                Debug.Log("box:touched;condition:"+feedback_type+";vibroFeedback:on;reaction_time:"+reaction_time+";trial_nr:"+(((currentBlock-1)*100)+trialSeqCounter+1)+";normal_or_conflict:"+normConflict+";cube:"+GO+";isiTime:"+(isiTime+6)+";vibro_duration:"+vibroFeedbackDuration);
-            }
-        }*/
-        
-        /* // [BPA: deleted EMS feedback]
-        // 3: EMS/FES
-        if (emsFeedbackCondition){
-            for (int i = 0; i < pulseCount; i++)
-            {
-                SinglePulse.sendSinglePulse(1, emsWidth, emsCurrent);
-            }
-            if (!startedQuestionnaire)
-            {
-                GUIControl.marker.Write("box:touched;condition:"+feedback_type+";emsFeedback:on;reaction_time:"+reaction_time+";trial_nr:"+(((currentBlock-1)*100)+trialSeqCounter+1)+";normal_or_conflict:"+normConflict+";cube:"+GO+";isiTime:"+(isiTime+6)+";emsCurrent:"+emsCurrent+";emsWidth:"+emsWidth+";pulseCount:"+pulseCount);
-                Debug.Log("box:touched;condition:"+feedback_type+";emsFeedback:on;reaction_time:"+reaction_time+";trial_nr:"+(((currentBlock-1)*100)+trialSeqCounter+1)+";normal_or_conflict:"+normConflict+";cube:"+GO+";isiTime:"+(isiTime+6)+";emsCurrent:"+emsCurrent+";emsWidth:"+emsWidth+";pulseCount:"+pulseCount);
-            }
-        }*/
-
-        /* //[BPA: after removing vibro and EMS feedback this makes no sense here. I moved it to the top.]
-        else
-        {*/
-        //if (!startedQuestionnaire)
-        //{
-            // LSL marking feedback type and intensity, todo correct make this better
-            GUIControl.marker.Write("box:touched;condition:"+feedback_type+";reaction_time:"+reaction_time+";trial_nr:"+(((currentBlock-1)*100)+trialSeqCounter+1)+";normal_or_conflict:"+normConflict+";cube:"+GO+";isiTime:"+(isiTime+6));
-            Debug.Log("box:touched;condition:"+feedback_type+";reaction_time:"+reaction_time+";trial_nr:"+(((currentBlock-1)*100)+trialSeqCounter+1)+";normal_or_conflict:"+normConflict+";cube:"+GO+";isiTime:"+(isiTime+6));
-        //}
-        //}
-
-
-        /*
-        if (!startedQuestionnaire){
-            // continue with next trial
-            NextTrial();
-        }*/
         taskSuccess = true;
     }
 
@@ -1067,14 +656,8 @@ public class GUIControl : MonoBehaviour {
         Debug.Log("CalculatePosition: " + gameObject.name);
         Debug.Log("RootPos: " + rootPosition.ToString() + " distance: " + distance.ToString() + " angle: " + angle.ToString());
 
-        //float newX = distance * Mathf.Cos(angle * Mathf.Deg2Rad);
-        //float newZ = distance * Mathf.Sin(angle * Mathf.Deg2Rad);
-        //Debug.Log("newX: " + newX.ToString() + " newZ: " + newZ.ToString());
-
         var q = Quaternion.AngleAxis(angle, Vector3.up);
         Debug.Log("q: " + q.ToString());
-
-        //Vector3 currentPosition = gameObject.transform.position;
 
         //Vector3 newPosition = new Vector3(currentPosition.x + newX, currentPosition.y, currentPosition.z + newZ);
         Vector3 newPosition = rootPosition + q * Vector3.forward * distance;
@@ -1082,11 +665,9 @@ public class GUIControl : MonoBehaviour {
         Debug.Log("newPosition: " + newPosition.ToString());
 
         return newPosition;
-
     }
 
 
-    //public void MoveCups(GameObject[] cupObjects, Vector3 rootPosition, int armlength_cm, int[] angles, int offsetNear_percent, int offsetFar_percent)
     public void MoveCups(GameObject[] cupObjects, Vector3 rootPosition, Vector3 maxReachPosition , int[] angles, int offsetNear_percent, int offsetFar_percent)
     {
         //This method moves all cups into individual calculated positions.
@@ -1133,57 +714,17 @@ public class GUIControl : MonoBehaviour {
                 //currentDistance = armlength_cm - ((float)armlength_cm/100)*offsetNear_percent;
                 currentDistance = currentArmLength - (currentArmLength / 100) * offsetNear_percent;
             }
-            //Debug.Log("currentDistance in cm: " + currentDistance.ToString());
-            //currentDistance = currentDistance / 100;    //divide everything by 100 because cm -> meters
             Debug.Log("currentDistance in m: " + currentDistance.ToString());
 
             //change the height (y-axis) value from rootPosition to the cupObjects height value (so that is corretly positioned at table heigth)
             Vector3 newRootPosition = new Vector3(rootPosition.x, cupObjects[i].transform.position.y, rootPosition.z);
 
-            //for testing purpose alter the z value
-            //Vector3 newRootPosition = new Vector3(rootPosition.x, cupObjects[i].transform.position.y, rootPosition.z - 0.2f);
-
-
             //move current object
-            //cupObjects[i].transform.position = CalculatePosition(cupObjects[i], rootPosition, currentDistance, currentAngle);
             cupObjects[i].transform.position = CalculatePosition(cupObjects[i], newRootPosition, currentDistance, currentAngle);
-
         }
 
     }
 
-
-    /*
-    // Assigned randomly Normal and Conflict condition
-    public void AssignedCondition(int type, GameObject GO)
-    {
-        if (type == 0)
-        {
-            GO.GetComponent<SphereCollider>().enabled = true;
-            GO.GetComponent<SphereCollider>().radius = 0.85f;
-        }
-        else
-        {
-            GO.GetComponent<SphereCollider>().enabled = true;
-            GO.GetComponent<SphereCollider>().radius = 3f; // will be scaled by 3
-        }
-    }
-
-    // Assigned randomly Smalle and Bigger Cube Size
-    // not used in TU Berlin setup 04/2018
-    public void AssignedCubeSize(int type, GameObject GO)
-    {
-        if (type == 0)  // Set Smaller 
-        {
-            GO.transform.localScale = new Vector3(0.03f, 0.03f, 0.03f);
-            GO.transform.position = new Vector3(GO.transform.position.x, 0.75f, GO.transform.position.z); //Adjust Y-position
-            	
-        }
-        else // Set Bigger
-        {
-            GO.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
-        }
-    }*/
 
      static string BoolToString(bool b)
     {
@@ -1250,7 +791,6 @@ public class GUIControl : MonoBehaviour {
         shoulder.SetActive(false);
         breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
-
     }
 
 
@@ -1281,7 +821,6 @@ public class GUIControl : MonoBehaviour {
                 participantAge = 0;
                 inputParticipantAge.GetComponent<InputField>().text = "";
             }
-            
         }
 
         //participantGender
@@ -1305,7 +844,6 @@ public class GUIControl : MonoBehaviour {
                 armLength = 0;
                 inputArmLength.GetComponent<InputField>().text = "";
             }
-            
         }
         /*
         Debug.Log("participantID: " + participantID + " InputField.text: " + inputParticipantID.GetComponent<InputField>().text);
@@ -1349,7 +887,6 @@ public class GUIControl : MonoBehaviour {
         breakCanvasDesktop.SetActive(false);
 
         ActivateAllCubes();
-        
     }
 
     public void StartTraining()
@@ -1389,7 +926,6 @@ public class GUIControl : MonoBehaviour {
         shoulder.SetActive(false);
         breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
-
     }
 
 
@@ -1494,7 +1030,6 @@ public class GUIControl : MonoBehaviour {
     }
 
 
-
     public void SetTablePosition()
     {
         //How this should be done: 
@@ -1553,25 +1088,8 @@ public class GUIControl : MonoBehaviour {
 
 
     // Update is called once per frame
-    void Update () {
-
-        //Debug.Log(emsCurrent);     
-
-        /*
-        ControlState(); // run only once after hitting any key to start, in fact runs whenever key is hit
-
-        if (flagStart) // flagStart is true after hitting any key to start at the beginning or after block end
-        {
-            ControlTrial();
-        }*/
-        // var distance1 = Vector3.Distance(startContinue.transform.position, cubeLeft.transform.position);
-        // Debug.Log(distance1);
-        // var distance2 = Vector3.Distance(startContinue.transform.position, cubeRight.transform.position);
-        // Debug.Log(distance2);
-        // var distance3 = Vector3.Distance(startContinue.transform.position, cubeMiddle.transform.position);
-        // Debug.Log(distance3);
-
-        
+    void Update ()
+    {
         switch (expControlStatus) {
 
             case 0: //main menu
@@ -1598,42 +1116,15 @@ public class GUIControl : MonoBehaviour {
                 }
             case 2: //calibration
                 {
-                    /*
-                    //check if arm lemgth has been set
-                    if (armLengthSet)
-                    {
-                        buttonShoulderPos.GetComponent<Button>().interactable = true;
-
-                        if(trackerFoundShoulderPos)
-                        {
-                            textHintShoulderPos.SetActive(false);
-                        }
-                        else
-                        {
-                            textHintShoulderPos.SetActive(true);
-                        }
-                        
-                    }
-                    else
-                    {
-                        buttonShoulderPos.GetComponent<Button>().interactable = false;
-                        textHintConfigFirst.SetActive(true);
-                    }*/
-
                     //check if shoulder position has been set
                     if (shoulderSet)
                     {
                         buttonMaximumReach.GetComponent<Button>().interactable = true;
 
                         if(trackerFoundMaxReach)
-                        {
                             textHintShoulderFirst.SetActive(false);
-                        }
                         else
-                        {
-                            textHintShoulderFirst.SetActive(true);
-                        }
-                        
+                            textHintShoulderFirst.SetActive(true);                        
                     }
                     else
                     {
@@ -1647,20 +1138,15 @@ public class GUIControl : MonoBehaviour {
                         buttonCupPositions.GetComponent<Button>().interactable = true;
 
                         if(trackerFoundCupPos)
-                        {
                             textHintCupPos.SetActive(false);
-                        }
-                        else {
-                            textHintCupPos.SetActive(true);
-                        }
-                        
+                        else
+                            textHintCupPos.SetActive(true);                        
                     }
                     else
                     {
                         buttonCupPositions.GetComponent<Button>().interactable = false;
                         textHintCupPos.SetActive(true);
                     }
-
                     break;
                 }
             case 3: //training
@@ -1693,11 +1179,11 @@ public class GUIControl : MonoBehaviour {
                     }
 
                     //continue experiment
-
                     break;
                 }
 
         }
 
     }
+
 }

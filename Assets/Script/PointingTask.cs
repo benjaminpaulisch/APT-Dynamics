@@ -7,7 +7,7 @@ public class PointingTask : MonoBehaviour {
     //[BPA: created after the german tutorial https://viscircle.de/wie-sie-ein-raycast-in-unity-3d-erstellen-koennen/]
 
     private RaycastHit vision;          //used for detecting raycast collision
-    public float rayLength = 4.0f;             //used for assigning a length to the raycast
+    public float rayLength = 4.0f;      //used for assigning a length to the raycast
     private Rigidbody pointedObject;    //used to assign the object we're pointing at to a variable we can use
 
     public GUIControl GUIC;
@@ -40,7 +40,6 @@ public class PointingTask : MonoBehaviour {
 
                     //Debug.Log(vision.collider.name);    //output the name of the object our raycast is hitting
 
-                    //GUIC.VisualFeeback(vision.collider.gameObject, "point");
                     GUIC.StartVisualFeedback(vision.collider.gameObject, "point");
                 }
             }
@@ -54,7 +53,6 @@ public class PointingTask : MonoBehaviour {
             {
                 hitActive = false;
 
-                //GUIC.StopVisualFeedback(vision.collider.gameObject, "point");
                 GUIC.StopVisualFeedback("point");
             } 
         }
