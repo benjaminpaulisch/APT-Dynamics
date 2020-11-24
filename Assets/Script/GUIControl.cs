@@ -55,7 +55,8 @@ public class GUIControl : MonoBehaviour {
     public static float[] cueDurations;
     private float currentCueDuration;           //stores indivudual cue duration of the current trial
 
-    public static string[] tasks = new string[4] {"grabFar", "grabNear", "pointFar", "pointNear"};
+    //public static string[] tasks = new string[4] {"grabFar", "grabNear", "pointFar", "pointNear"};
+    public static string[] tasks = new string[4] { "touchFar", "touchNear", "pointFar", "pointNear" };
     public static int[] taskSeq = new int[] { 0, 1, 2, 3 };
     public static int[] trialTasks;
     private string currentTask;
@@ -572,16 +573,20 @@ public class GUIControl : MonoBehaviour {
                         //activate cue
                         //ToDo: Set Text of cueText with the correct task
                         cueText.GetComponent<UnityEngine.UI.Text>().text = currentTask;
-
+                        /*
                         if(currentTask.Contains("grab"))
                         {
                             cueText.GetComponent<UnityEngine.UI.Text>().text = "grab";
+                        }*/
+                        if (currentTask.Contains("touch"))
+                        {
+                            cueText.GetComponent<UnityEngine.UI.Text>().text = "touch";
                         }
                         else if(currentTask.Contains("point")) {
                             cueText.GetComponent<UnityEngine.UI.Text>().text = "point";
                         }
 
-                        cue.SetActive(true);
+                       cue.SetActive(true);
                         cueActivated = true;
                         Debug.Log("Cue activated: " + actualTime.ToString());
                     }
@@ -649,7 +654,7 @@ public class GUIControl : MonoBehaviour {
                         }
 
                     }
-                    //if the grab/point task has been successful
+                    //if the touch/point task has been successful
                     else
                     {
                         //wait for visual feedback to finish and then -> go to next trial
@@ -917,7 +922,8 @@ public class GUIControl : MonoBehaviour {
 
                 Debug.Log("Start visual feedback: yellow, " + collisionEvent + ", " + GO.gameObject.name + " " + actualTime.ToString());
             }
-            if (collisionEvent == "grab") {
+            //if (collisionEvent == "grab") {
+            if (collisionEvent == "touch") {
                 //activate early visual feedback
                 GO.gameObject.GetComponent<Renderer>().material.color = Color.cyan;
 

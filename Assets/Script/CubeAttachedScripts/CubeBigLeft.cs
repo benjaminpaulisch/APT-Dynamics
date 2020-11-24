@@ -12,7 +12,8 @@ public class CubeBigLeft : MonoBehaviour {
         //{
             //GUIC.VisualFeeback(gameObject);
             //GUIC.VisualFeeback(gameObject, "grab");
-            GUIC.StartVisualFeedback(gameObject, "grab");
+            //GUIC.StartVisualFeedback(gameObject, "grab");
+            GUIC.StartVisualFeedback(gameObject, "touch");
             //GUIControl.flagTouchEvent = false; // Disable touch event action until next trial 
         //    GUIC.flagTouchEvent = false; // Disable touch event action until next trial 
         //}             
@@ -21,7 +22,8 @@ public class CubeBigLeft : MonoBehaviour {
     private void OnTriggerExit(Collider other)
     {
         //GUIC.StopVisualFeedback(gameObject, "grab");
-        GUIC.StopVisualFeedback("grab");
+        //GUIC.StopVisualFeedback("grab");
+        GUIC.StopVisualFeedback("touch");
 
     }
 }
