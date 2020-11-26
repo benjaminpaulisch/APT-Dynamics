@@ -9,7 +9,7 @@ using UnityEngine.UI;
 public class GUIControl : MonoBehaviour {
 
     // create LSL markerstream
-    public static LSLMarkerStream marker;
+    public LSLMarkerStream marker;
     
     public static GameObject table, plane, leapmotion, introGUI, textBox, endexp, startContinue, resting, questionnaire, q, ra, la, send, fixationCross, cue, cueText,
         shoulder, mainMenu, calibrationMenu, configurationMenu, inputParticipantID, inputParticipantAge, inputParticipantGender, inputArmLength, buttonExperiment,
@@ -52,6 +52,8 @@ public class GUIControl : MonoBehaviour {
     public static int[] taskSeq = new int[] { 0, 1, 2, 3 };
     public static int[] trialTasks;
     private string currentTask;
+    private string currentCondition;
+    private GameObject currentStimulusObj;
 
     // Cube Seq if only Bigger cube has been used
     public static int[] CubeSeq = new int[] { 0, 1, 2, 3, 4};   //using the same array for near and far cause it's easier
@@ -390,24 +392,10 @@ public class GUIControl : MonoBehaviour {
                         Debug.Log("Fixation Cross deactivated: " + actualTime.ToString());
                         fixationCrossActivated = false;
                         
-
                         //activate cue and set correct cue text
-                        /*
-                        if(currentTask.Contains("grab"))
-                        {
-                            cueText.GetComponent<UnityEngine.UI.Text>().text = "grab";
-                        }*/
-                        if (currentTask.Contains("touch"))
-                        {
-                            cueText.GetComponent<UnityEngine.UI.Text>().text = "touch";
-                            marker.Write("cueTextActivated:touch");
-                            Debug.Log("Cue activated: touch " + actualTime.ToString());
-                        }
-                        else if(currentTask.Contains("point")) {
-                            cueText.GetComponent<UnityEngine.UI.Text>().text = "point";
-                            marker.Write("cueTextActivated:point");
-                            Debug.Log("Cue activated: point " + actualTime.ToString());
-                        }
+                        cueText.GetComponent<UnityEngine.UI.Text>().text = currentTask;
+                        marker.Write("cueTextActivated:" + currentTask);
+                        Debug.Log("Cue activated: " + currentTask + " " + actualTime.ToString());
 
                         cue.SetActive(true);
                         cueActivated = true;
@@ -428,17 +416,10 @@ public class GUIControl : MonoBehaviour {
                             cueActivated = false;
 
                             //activate stimulus
-                            if(currentTask.Contains("Near"))
-                            {
-                                //For the near positions we have to add 5 to the index, cause the near positions are the indexes 5-9 in the cubeGameObjArray
-                                CubeVisible(cubeGameObjArr[CubePositions[cubeSeqCounter+5]]);   // determine which stimulus to render visible
-                            }
-                            else
-                            {
-                                CubeVisible(cubeGameObjArr[CubePositions[cubeSeqCounter]]);     // determine which stimulus to render visible
-                            }
+                            CubeVisible(currentStimulusObj);
                             Debug.Log("Stimulus activated: " + actualTime.ToString());
 
+                            //set reaction start time
                             reaction_start_time = actualTime;
 
                             targetActivated = true;
@@ -455,17 +436,18 @@ public class GUIControl : MonoBehaviour {
                                 VisualFeeback(currentCollisionObj, currentResponseType);
                             }
                         }
-                        //if time for a reaction has run out -> go to next trial (but NOT if there is an active collision)
+                        //if time for a response has run out -> go to next trial (but NOT if there is an active collision)
                         else if(actualTime > fixationDuration + currentCueDuration + stimulusDurationMax)
                         {
-                            Debug.Log("Reaction time over. " + actualTime.ToString());
-
+                            marker.Write("response time over");
+                            Debug.Log("REsponse time over. " + actualTime.ToString());
+                            
                             DeactivateAllCubes();
                             NextTrial();
                         }
 
                     }
-                    //if the current task task has been successful
+                    //if the current task has been successful
                     else
                     {
                         //wait for visual feedback to finish and then -> go to next trial
@@ -473,8 +455,8 @@ public class GUIControl : MonoBehaviour {
                         {
                             //deactivate stimulus
                             DeactivateAllCubes();
-
-                            GUIControl.marker.Write("visualFeedback:off");
+                            marker.Write("visual feeback duration over");
+                            marker.Write("visualFeedback:off");
                             Debug.Log("visualFeedback:off " + actualTime.ToString());
 
                             //transition to next trial
@@ -532,12 +514,37 @@ public class GUIControl : MonoBehaviour {
 
         experimentStarted = true;   //activate flag to start the experiment
 
+        //set cure duration for current trial
         //currentCueDuration = Random.Range(cueDurationAvg - cueDurationVariation, cueDurationAvg + cueDurationVariation);
         currentCueDuration = cueDurations[trialSeqCounter];
         Debug.Log("currentCueDuration: " + currentCueDuration.ToString());
 
-        currentTask = tasks[trialTasks[trialSeqCounter]];
-        Debug.Log("Current task: " + currentTask);
+        //set task for current trial
+        if (tasks[trialTasks[trialSeqCounter]].Contains("point"))
+            currentTask = "point";
+        else if (tasks[trialTasks[trialSeqCounter]].Contains("touch"))
+            currentTask = "touch";
+
+        //set condition for current trial
+        if (tasks[trialTasks[trialSeqCounter]].Contains("far"))
+            currentCondition = "far";
+        else if (tasks[trialTasks[trialSeqCounter]].Contains("Near"))
+            currentCondition = "near";
+
+        //set stimulus object for current trial
+        if (currentTask == "near")
+        {
+            //For the near positions we have to add 5 to the index, cause the near positions are the indexes 5-9 in the cubeGameObjArray
+            currentStimulusObj = cubeGameObjArr[CubePositions[cubeSeqCounter + 5]];
+        }
+        else if (currentTask == "far")
+        {
+            currentStimulusObj = cubeGameObjArr[CubePositions[cubeSeqCounter]];
+        }
+
+        //write trial start marker
+        marker.Write("trialStart:" + trialSeqCounter.ToString() + ";task:" + currentTask + ";condition:" + currentCondition + ";cueDuration:" + currentCueDuration.ToString() + ";stimulusPosition:" + currentStimulusObj.gameObject.name);
+        Debug.Log("Current task: " + currentTask + " current condition: " + currentCondition);
 
         targetActivated = false;
     }
@@ -545,6 +552,9 @@ public class GUIControl : MonoBehaviour {
 
     public void NextTrial()
     {
+        //send trial end marker
+        marker.Write("trialEnd:" + trialSeqCounter.ToString());
+
         trialSeqCounter = trialSeqCounter + 1;
         cubeSeqCounter = cubeSeqCounter + 1;
 
@@ -589,7 +599,7 @@ public class GUIControl : MonoBehaviour {
     }
 
 
-    //starts the "early" feedback before minimum task duration is reached. The feedback is primarily an aiming aid.
+    //starts the "initial" feedback before minimum task duration is reached. The feedback is primarily an aiming aid.
     public void StartVisualFeedback(GameObject GO, string collisionEvent)
     {
         //check if collision is already active but the visual feedback (green/red) is not active
@@ -613,14 +623,14 @@ public class GUIControl : MonoBehaviour {
             if (collisionEvent == "point") {
                 //activate early visual feedback
                 GO.gameObject.GetComponent<Renderer>().material.color = customYellow;
-
+                marker.Write("initialVisualFeedbackStarted:" + collisionEvent + "; color:yellow;object:" + GO.gameObject.name);
                 Debug.Log("Start visual feedback: yellow, " + collisionEvent + ", " + GO.gameObject.name + " " + actualTime.ToString());
             }
             //if (collisionEvent == "grab") {
             if (collisionEvent == "touch") {
                 //activate early visual feedback
                 GO.gameObject.GetComponent<Renderer>().material.color = Color.cyan;
-
+                marker.Write("initialVisualFeedbackStarted:" + collisionEvent + "; color:cyan;object:" + GO.gameObject.name);
                 Debug.Log("Start visual feedback: cyan, " + collisionEvent + ", " + GO.gameObject.name + " " + actualTime.ToString());
             }
         }
@@ -628,7 +638,7 @@ public class GUIControl : MonoBehaviour {
     }
 
 
-    //stops the "early" feedback when the object is not hit anymore (only if the minumim task duration was not reached)
+    //stops the "initial" feedback when the object is not hit anymore (only if the minumim task duration was not reached)
     public void StopVisualFeedback(string collisionEvent)
     {
         //check if collision already active but the visual feedback (green/red) is not active
@@ -651,7 +661,7 @@ public class GUIControl : MonoBehaviour {
 
                 //reset color of the collision object
                 currentCollisionObj.GetComponent<Renderer>().material.color = Color.white;
-
+                marker.Write("initialVisualFeedbackStopped:" + collisionEvent + "; color:white;object:" + currentCollisionObj.gameObject.name);
                 Debug.Log("Stop visual feedback, reset color to white, " + collisionEvent + ", " + currentCollisionObj.gameObject.name + " " + actualTime.ToString());
 
                 //reset collision object
@@ -666,24 +676,22 @@ public class GUIControl : MonoBehaviour {
     public void VisualFeeback(GameObject GO, string collisionEvent)     //collisionEvent should be "touch"/"grab"/"point"
     {
         //check if correct or incorrect feedback
-        if (currentTask.Contains(collisionEvent))
+        if (currentTask == collisionEvent)
         {
             //correct task feedback:
             GO.gameObject.GetComponent<Renderer>().material.color = Color.green;
+            marker.Write("visualFeedbackStarted:" + collisionEvent + ";color:green;correctTask:true;responseTime:" + reaction_time_temp.ToString());
             Debug.Log("Correct task visual feedback: green, " + collisionEvent + ", " + GO.gameObject.name + " " + actualTime.ToString());
         }
         else
         {
             //wrong task feedback:
             GO.gameObject.GetComponent<Renderer>().material.color = Color.red;
+            marker.Write("visualFeedbackStarted:" + collisionEvent + ";color:red;correctTask:false;responseTime:" + reaction_time_temp.ToString());
             Debug.Log("Wrong task visual feedback: red, " + collisionEvent + ", " + GO.gameObject.name + " " + actualTime.ToString());
         }
 
         reaction_time = reaction_time_temp;
-
-        // LSL marking feedback type and intensity, todo correct make this better
-        //GUIControl.marker.Write("box:touched;condition:"+feedback_type+";reaction_time:"+reaction_time+";trial_nr:"+(((currentBlock-1)*100)+trialSeqCounter+1)+";normal_or_conflict:"+normConflict+";cube:"+GO+";isiTime:"+(isiTime+6));
-        //Debug.Log("box:touched;condition:"+feedback_type+";reaction_time:"+reaction_time+";trial_nr:"+(((currentBlock-1)*100)+trialSeqCounter+1)+";normal_or_conflict:"+normConflict+";cube:"+GO+";isiTime:"+(isiTime+6));
 
         taskSuccess = true;
     }
@@ -987,6 +995,7 @@ public class GUIControl : MonoBehaviour {
         breakCanvasVR.SetActive(true);
         breakCanvasDesktop.SetActive(true);
 
+        marker.Write("break:start;afterTriel:" + trialSeqCounter.ToString() + ";breakDuration:" + breakDuration.ToString());
         Debug.Log(breakDuration.ToString() + " second break started...");
     }
 
@@ -996,9 +1005,12 @@ public class GUIControl : MonoBehaviour {
         breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
 
+        marker.Write("break:end;afterTriel:" + trialSeqCounter.ToString());
+
         //activate startContinue so that the participant can continue with experiment
         startContinue.SetActive(true);
 
+        marker.Write("break over, waiting for manual continue");
         Debug.Log("Break time is over. Waiting for participant to continue...");
     }
 

@@ -7,6 +7,8 @@ public class start_pos_hand : MonoBehaviour {
 
     void OnTriggerEnter(Collider other) // in case of collision with leap motion tracked hand and cube gameObject
     {
+        GUIC.marker.Write("start/continue button pressed");
+
         GUIC.TrialStart();
     }
 }
