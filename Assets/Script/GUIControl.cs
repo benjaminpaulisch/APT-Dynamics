@@ -119,6 +119,8 @@ public class GUIControl : MonoBehaviour {
     //break timer
     public static float breakDurationCountdown;
 
+    private string tempMarkerText = "";
+
 
     // Use this for initialization
     void Start()
@@ -253,6 +255,7 @@ public class GUIControl : MonoBehaviour {
 
         textHintTablePos.SetActive(false);
         textHintShoulderPos.SetActive(false);
+        endexp.SetActive(false);
 
         //start the Main Menu:
         StartMainMenu();
@@ -285,13 +288,11 @@ public class GUIControl : MonoBehaviour {
     // Start of experiment
     public void ControlState()
     {    
-        if (Input.GetMouseButtonDown(0))
+        //if (Input.GetMouseButtonDown(0))
         // after hitting any key once, the Input.anyKeyDown is otherwise false for every frame update
         // therefore the if clause code is only run once at the beginning when hitting any key to start
-        {
-
-            //trialSeqCounter = 99;
-            // run a block of the experiment
+        //{
+            // run experiment
             flagStart = true;
             experimentEnd = false;
             currentBlock += 1;
@@ -301,7 +302,8 @@ public class GUIControl : MonoBehaviour {
             table.gameObject.GetComponent<Renderer>().enabled = true;
             plane.gameObject.GetComponent<Renderer>().enabled = true;
             introGUI.gameObject.GetComponent<Canvas>().enabled = false;
-            endexp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
+            //endexp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
+            endexp.SetActive(false);
             //questionnaire.SetActive(false);
 
             // enable collision possibility
@@ -309,8 +311,8 @@ public class GUIControl : MonoBehaviour {
             resting.gameObject.GetComponent<Renderer>().enabled = true;
 
             //write experiment start marker
-            marker.Write(
-                "experiment:start;blockNr:" + currentBlock.ToString() + ";" +
+            tempMarkerText = 
+                "experiment:start;" +
                 "trialsPerTask:" + nrOfTrialsPerTask.ToString() + ";" +
                 "trialsTotal:" + nrOfTrialsTotal.ToString() + ";" +
                 "fixationDuration:" + fixationDuration.ToString() + ";" +
@@ -320,30 +322,29 @@ public class GUIControl : MonoBehaviour {
                 "feedbackDuration:" + feedbackDuration.ToString() + ";" +
                 "minTaskDuration:" + minimumTaskDuration.ToString() + ";" +
                 "offsetNearPercent:" + offsetNearPercent.ToString() + ";" +
-                "offsetFarPercent:" + offsetFarPercent.ToString()
-                );
+                "offsetFarPercent:" + offsetFarPercent.ToString();
+            marker.Write(tempMarkerText);
+            Debug.Log(tempMarkerText);
 
             //write participant info (from configuration menu)
-            marker.Write(
+            tempMarkerText =
                 "participantID:" + participantID + ";" +
                 "participantAge:" + participantAge.ToString() + ";" +
                 "participantGender" + participantGender + ";" +
-                "participantArmLength" + armLength
-                );
+                "participantArmLength" + armLength;
+            marker.Write(tempMarkerText);
+            Debug.Log(tempMarkerText);
 
             //write calibration info (from calibration menu)
-            marker.Write(
+            tempMarkerText =
                 "posTable:" + table.transform.position.ToString() + ";" +
                 "posShoulder:" + shoulderPosition.ToString() + ";" +
                 "posMaxReach:" + maxReachPosition.ToString() + ";" +
-                "stimulusPositions:"+stimulusPositions.ToString()
-                );
-
-            //Debug.Log("block:start;currentBlockNr:"+currentBlock+";condition:"+feedback_type+";training:"+BoolToString(training));
-
-            Debug.Log("Participant Infos: ID: " + participantID + " age: " + participantAge.ToString() + " gender: " + participantGender + " arm length: " + armLength.ToString());
-
-        }
+                "armLengthCalculated:" + armLengthCalculated.ToString() + ";" +
+                "stimulusPositions:" + stimulusPositions.ToString();
+            marker.Write(tempMarkerText);
+            Debug.Log(tempMarkerText);
+        //}
     }
 
     //  Control all trials 
@@ -440,7 +441,7 @@ public class GUIControl : MonoBehaviour {
                         else if(actualTime > fixationDuration + currentCueDuration + stimulusDurationMax)
                         {
                             marker.Write("response time over");
-                            Debug.Log("REsponse time over. " + actualTime.ToString());
+                            Debug.Log("response time over. " + actualTime.ToString());
                             
                             DeactivateAllCubes();
                             NextTrial();
@@ -455,7 +456,10 @@ public class GUIControl : MonoBehaviour {
                         {
                             //deactivate stimulus
                             DeactivateAllCubes();
+
                             marker.Write("visual feeback duration over");
+                            Debug.Log("visual feeback duration over");
+
                             marker.Write("visualFeedback:off");
                             Debug.Log("visualFeedback:off " + actualTime.ToString());
 
@@ -466,9 +470,25 @@ public class GUIControl : MonoBehaviour {
  
                 }
 
+            }//run all trials
+
+
+            if (experimentEnd)  // after all trials are finished
+            {
+                //write expemriment end marker
+                marker.Write("experiment:end");
+                Debug.Log("experiment:end");
+
+                //activate experiment end text
+                endexp.SetActive(true);
+
+                experimentStarted = false;
+
+                //go to main menu
+                StartMainMenu();
             }
 
-
+            /*
             // experiment end determined by nrOfTrials
             if (trialSeqCounter == nrOfTrialsTotal && actualTime > 0 && !experimentEnd) // after all trials are finished
             {
@@ -495,6 +515,7 @@ public class GUIControl : MonoBehaviour {
                 //Debug.Log("block:end;currentBlockNr:" + currentBlock + ";condition:" + feedback_type + ";training:" + BoolToString(training));
                 endUpdate = false;
             }
+            */
 
         }//if experimentStarted
    
@@ -507,7 +528,7 @@ public class GUIControl : MonoBehaviour {
         startContinue.SetActive(false);
 
         //set experiment control status to experiment (needed here when coninuing after break)
-        expControlStatus = 4;
+        //expControlStatus = 4;
 
         // reset trial time
         actualTime = 0.0f;
@@ -517,7 +538,7 @@ public class GUIControl : MonoBehaviour {
         //set cure duration for current trial
         //currentCueDuration = Random.Range(cueDurationAvg - cueDurationVariation, cueDurationAvg + cueDurationVariation);
         currentCueDuration = cueDurations[trialSeqCounter];
-        Debug.Log("currentCueDuration: " + currentCueDuration.ToString());
+        //Debug.Log("currentCueDuration: " + currentCueDuration.ToString());
 
         //set task for current trial
         if (tasks[trialTasks[trialSeqCounter]].Contains("point"))
@@ -526,25 +547,31 @@ public class GUIControl : MonoBehaviour {
             currentTask = "touch";
 
         //set condition for current trial
-        if (tasks[trialTasks[trialSeqCounter]].Contains("far"))
+        if (tasks[trialTasks[trialSeqCounter]].Contains("Far"))
             currentCondition = "far";
         else if (tasks[trialTasks[trialSeqCounter]].Contains("Near"))
             currentCondition = "near";
 
         //set stimulus object for current trial
-        if (currentTask == "near")
+        if (currentCondition == "near")
         {
             //For the near positions we have to add 5 to the index, cause the near positions are the indexes 5-9 in the cubeGameObjArray
             currentStimulusObj = cubeGameObjArr[CubePositions[cubeSeqCounter + 5]];
         }
-        else if (currentTask == "far")
+        else if (currentCondition == "far")
         {
             currentStimulusObj = cubeGameObjArr[CubePositions[cubeSeqCounter]];
         }
 
         //write trial start marker
-        marker.Write("trialStart:" + trialSeqCounter.ToString() + ";task:" + currentTask + ";condition:" + currentCondition + ";cueDuration:" + currentCueDuration.ToString() + ";stimulusPosition:" + currentStimulusObj.gameObject.name);
-        Debug.Log("Current task: " + currentTask + " current condition: " + currentCondition);
+        tempMarkerText =
+            "trialStart:" + trialSeqCounter.ToString() + ";" +
+            "task:" + currentTask + ";" +
+            "condition:" + currentCondition + ";" +
+            "cueDuration:" + currentCueDuration.ToString() + ";" +
+            "stimulusPosition:" + currentStimulusObj.gameObject.name;
+        marker.Write(tempMarkerText);
+        Debug.Log(tempMarkerText);
 
         targetActivated = false;
     }
@@ -554,6 +581,7 @@ public class GUIControl : MonoBehaviour {
     {
         //send trial end marker
         marker.Write("trialEnd:" + trialSeqCounter.ToString());
+        Debug.Log("trialEnd:" + trialSeqCounter.ToString());
 
         trialSeqCounter = trialSeqCounter + 1;
         cubeSeqCounter = cubeSeqCounter + 1;
@@ -572,14 +600,18 @@ public class GUIControl : MonoBehaviour {
         collisionDuration.Reset();
 
         //break after 1/4, 1/2, 3/4 of total trials:
-        if(trialSeqCounter == (int)(nrOfTrialsTotal/4) || trialSeqCounter == (int)(nrOfTrialsTotal/2) || trialSeqCounter == (int)(nrOfTrialsTotal*3/4))
+        if (trialSeqCounter == (int)(nrOfTrialsTotal / 4) || trialSeqCounter == (int)(nrOfTrialsTotal / 2) || trialSeqCounter == (int)(nrOfTrialsTotal * 3 / 4))
         {
             //start break not next trial
-            if(trialSeqCounter == (int)(nrOfTrialsTotal/4) || trialSeqCounter == (int)(nrOfTrialsTotal*3/4))
+            if (trialSeqCounter == (int)(nrOfTrialsTotal / 4) || trialSeqCounter == (int)(nrOfTrialsTotal * 3 / 4))
                 StartBreak(120f);  //2min break
             else
                 StartBreak(180f);  //3min break
         }
+        //check if all trials have been run
+        else if (trialSeqCounter == nrOfTrialsTotal)
+            //set flag for experiment end and don't start another trial
+            experimentEnd = true;
         else
             TrialStart();
         
@@ -593,6 +625,7 @@ public class GUIControl : MonoBehaviour {
         
         GO.SetActive(true);
         marker.Write("activateStimulus:" + GO.name);
+        Debug.Log("activateStimulus:" + GO.name);
 
         //added this here to activate the collider (cause may have been disabled after touch in earlier trial)
         GO.GetComponent<SphereCollider>().enabled = true;
@@ -623,15 +656,25 @@ public class GUIControl : MonoBehaviour {
             if (collisionEvent == "point") {
                 //activate early visual feedback
                 GO.gameObject.GetComponent<Renderer>().material.color = customYellow;
-                marker.Write("initialVisualFeedbackStarted:" + collisionEvent + "; color:yellow;object:" + GO.gameObject.name);
-                Debug.Log("Start visual feedback: yellow, " + collisionEvent + ", " + GO.gameObject.name + " " + actualTime.ToString());
+
+                tempMarkerText =
+                    "initialVisualFeedbackStarted:" + collisionEvent + ";" +
+                    "color:yellow;" +
+                    "object:" + GO.gameObject.name;
+                marker.Write(tempMarkerText);
+                Debug.Log(tempMarkerText + " " + actualTime.ToString());
             }
             //if (collisionEvent == "grab") {
             if (collisionEvent == "touch") {
                 //activate early visual feedback
                 GO.gameObject.GetComponent<Renderer>().material.color = Color.cyan;
-                marker.Write("initialVisualFeedbackStarted:" + collisionEvent + "; color:cyan;object:" + GO.gameObject.name);
-                Debug.Log("Start visual feedback: cyan, " + collisionEvent + ", " + GO.gameObject.name + " " + actualTime.ToString());
+
+                tempMarkerText =
+                    "initialVisualFeedbackStarted:" + collisionEvent + ";" +
+                    " color:cyan;" +
+                    "object:" + GO.gameObject.name;
+                marker.Write(tempMarkerText);
+                Debug.Log(tempMarkerText + " " + actualTime.ToString());
             }
         }
 
@@ -661,8 +704,13 @@ public class GUIControl : MonoBehaviour {
 
                 //reset color of the collision object
                 currentCollisionObj.GetComponent<Renderer>().material.color = Color.white;
-                marker.Write("initialVisualFeedbackStopped:" + collisionEvent + "; color:white;object:" + currentCollisionObj.gameObject.name);
-                Debug.Log("Stop visual feedback, reset color to white, " + collisionEvent + ", " + currentCollisionObj.gameObject.name + " " + actualTime.ToString());
+
+                tempMarkerText =
+                    "initialVisualFeedbackStopped:" + collisionEvent + ";" +
+                    " color:white;" +
+                    "object:" + currentCollisionObj.gameObject.name;
+                marker.Write(tempMarkerText);
+                Debug.Log(tempMarkerText + " " + actualTime.ToString());
 
                 //reset collision object
                 currentCollisionObj = null;
@@ -680,15 +728,27 @@ public class GUIControl : MonoBehaviour {
         {
             //correct task feedback:
             GO.gameObject.GetComponent<Renderer>().material.color = Color.green;
-            marker.Write("visualFeedbackStarted:" + collisionEvent + ";color:green;correctTask:true;responseTime:" + reaction_time_temp.ToString());
-            Debug.Log("Correct task visual feedback: green, " + collisionEvent + ", " + GO.gameObject.name + " " + actualTime.ToString());
+
+            tempMarkerText =
+                "visualFeedbackStarted:" + collisionEvent + ";" +
+                "color:green;" +
+                "correctTask:true;" +
+                "responseTime:" + reaction_time_temp.ToString();
+            marker.Write(tempMarkerText);
+            Debug.Log(tempMarkerText + " " + actualTime.ToString());
         }
         else
         {
             //wrong task feedback:
             GO.gameObject.GetComponent<Renderer>().material.color = Color.red;
-            marker.Write("visualFeedbackStarted:" + collisionEvent + ";color:red;correctTask:false;responseTime:" + reaction_time_temp.ToString());
-            Debug.Log("Wrong task visual feedback: red, " + collisionEvent + ", " + GO.gameObject.name + " " + actualTime.ToString());
+
+            tempMarkerText =
+                "visualFeedbackStarted:" + collisionEvent + ";" +
+                "color:red;" +
+                "correctTask:false;" +
+                "responseTime:" + reaction_time_temp.ToString();
+            marker.Write(tempMarkerText);
+            Debug.Log(tempMarkerText + " " + actualTime.ToString());
         }
 
         reaction_time = reaction_time_temp;
@@ -702,16 +762,16 @@ public class GUIControl : MonoBehaviour {
         //This method calculates the new position of an object if it is moved using a distance and an angle from a root position
         //and returns the new position as a Vector3.
 
-        Debug.Log("CalculatePosition: " + gameObject.name);
-        Debug.Log("RootPos: " + rootPosition.ToString() + " distance: " + distance.ToString() + " angle: " + angle.ToString());
+        //Debug.Log("CalculatePosition: " + gameObject.name);
+        //Debug.Log("RootPos: " + rootPosition.ToString() + " distance: " + distance.ToString() + " angle: " + angle.ToString());
 
         var q = Quaternion.AngleAxis(angle, Vector3.up);
-        Debug.Log("q: " + q.ToString());
+        //Debug.Log("q: " + q.ToString());
 
         //Vector3 newPosition = new Vector3(currentPosition.x + newX, currentPosition.y, currentPosition.z + newZ);
         Vector3 newPosition = rootPosition + q * Vector3.forward * distance;
 
-        Debug.Log("newPosition: " + newPosition.ToString());
+        //Debug.Log("newPosition: " + newPosition.ToString());
 
         return newPosition;
     }
@@ -763,7 +823,7 @@ public class GUIControl : MonoBehaviour {
                 //currentDistance = armlength_cm - ((float)armlength_cm/100)*offsetNear_percent;
                 currentDistance = currentArmLength - (currentArmLength / 100) * offsetNear_percent;
             }
-            Debug.Log("currentDistance in m: " + currentDistance.ToString());
+            //Debug.Log("currentDistance in m: " + currentDistance.ToString());
 
             //change the height (y-axis) value from rootPosition to the cupObjects height value (so that is corretly positioned at table heigth)
             Vector3 newRootPosition = new Vector3(rootPosition.x, cupObjects[i].transform.position.y, rootPosition.z);
@@ -808,7 +868,7 @@ public class GUIControl : MonoBehaviour {
         resting.SetActive(false);
         //questionnaire.SetActive(false);
         //endexp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
-        endexp.SetActive(false);
+        //endexp.SetActive(false);      //commented out so that the text will stay after experiment ended and main menu is displayed for experimenter (but not for participant)
         shoulder.SetActive(false);
         breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
@@ -991,12 +1051,18 @@ public class GUIControl : MonoBehaviour {
         //set experiment control status to "break"
         expControlStatus = 5;
 
+        experimentStarted = false;
+
         //activate break text
         breakCanvasVR.SetActive(true);
         breakCanvasDesktop.SetActive(true);
 
-        marker.Write("break:start;afterTriel:" + trialSeqCounter.ToString() + ";breakDuration:" + breakDuration.ToString());
-        Debug.Log(breakDuration.ToString() + " second break started...");
+        tempMarkerText =
+            "break:start;" +
+            "afterTrial:" + (trialSeqCounter-1).ToString() + ";" +
+            "breakDuration:" + breakDuration.ToString();
+        marker.Write(tempMarkerText);
+        Debug.Log(tempMarkerText);
     }
 
     public void StopBreak()
@@ -1005,13 +1071,16 @@ public class GUIControl : MonoBehaviour {
         breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
 
-        marker.Write("break:end;afterTriel:" + trialSeqCounter.ToString());
+        marker.Write("break:end;afterTrial:" + (trialSeqCounter-1).ToString());
+        Debug.Log("break:end;afterTrial:" + (trialSeqCounter-1).ToString());
 
         //activate startContinue so that the participant can continue with experiment
         startContinue.SetActive(true);
 
         marker.Write("break over, waiting for manual continue");
         Debug.Log("Break time is over. Waiting for participant to continue...");
+
+        expControlStatus = 4;
     }
 
 
@@ -1030,7 +1099,7 @@ public class GUIControl : MonoBehaviour {
             shoulderSet = true;
             trackerFoundShoulderPos = true;
             textHintShoulderPos.SetActive(false);
-            Debug.Log("shoulderPosition: " + shoulderPosition.ToString());
+            //Debug.Log("shoulderPosition: " + shoulderPosition.ToString());
         }
         catch (System.Exception e)
         {
@@ -1057,7 +1126,7 @@ public class GUIControl : MonoBehaviour {
         {
             maxReachPosition = tracker.transform.position;
             maxReachSet = true;
-            Debug.Log("maxReachPosition: " + maxReachPosition.ToString());
+            //Debug.Log("maxReachPosition: " + maxReachPosition.ToString());
 
             //calculate armlength based on the tracking positions of shoulder and maxReach (just for fun and curiosity):
             //pythagoras: a²+b²=c² 
@@ -1065,7 +1134,7 @@ public class GUIControl : MonoBehaviour {
             //b: forward position difference between shoulder and maxReach position
             //c=sqrt(a²+b²)
             armLengthCalculated = Mathf.Sqrt( Mathf.Pow(shoulderPosition.y-maxReachPosition.y, 2) + Mathf.Pow(shoulderPosition.z-maxReachPosition.z, 2));
-            Debug.Log("armLengthCalculated: " + armLengthCalculated.ToString());
+            //Debug.Log("armLengthCalculated: " + armLengthCalculated.ToString());
 
         }
         catch (System.Exception e)
@@ -1114,23 +1183,24 @@ public class GUIControl : MonoBehaviour {
         try
         {
             trackerPosition = tracker.transform.position;
+            /*
             Debug.Log("TrackerPostion: " + trackerPosition.ToString());
             Debug.Log("TableSize: " + tableSize.ToString());
             Debug.Log("tablePosition: " + tablePosition.ToString());
             Debug.Log("tableLocalPosition: " + tableLocalPosition.ToString());
-
+            */
             //calculate offset
             float offsetX = trackerPosition.x - resting.transform.position.x;       //resting position because the Tracker should be put at the resting position
             float offsetY = trackerPosition.y-trackerHeightOffset - tableSize.y - tablePosition.y;    //table height
             float offsetZ = trackerPosition.z - resting.transform.position.z;       //resting position because the Tracker should be put at the resting position
 
-            Debug.Log("offsetX: " + offsetX.ToString() + " offsetY: " + offsetY.ToString() + " offsetZ: " + offsetZ.ToString());
+            //Debug.Log("offsetX: " + offsetX.ToString() + " offsetY: " + offsetY.ToString() + " offsetZ: " + offsetZ.ToString());
 
             //move virtual table (we move the parent object "tableSetup" instead of only the table, because we also need the other objects connected to the table to move the same)
             tableSetup.transform.position = new Vector3(tableSetupPosition.x + offsetX, tableSetupPosition.y + offsetY, tableSetupPosition.z + offsetZ);
 
-            Debug.Log("new tablePosition: " + tablePosition.ToString());
-            Debug.Log("new tableLocalPosition: " + tableLocalPosition.ToString());
+            //Debug.Log("new tablePosition: " + tablePosition.ToString());
+            //Debug.Log("new tableLocalPosition: " + tableLocalPosition.ToString());
 
             textHintTablePos.SetActive(false);
             tablePosSet = true;
