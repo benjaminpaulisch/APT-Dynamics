@@ -12,7 +12,7 @@ public class GUIControl : MonoBehaviour {
     public LSLMarkerStream marker;
     
     public static GameObject table, plane, leapmotion, introGUI, textBox, endexp, startContinue, resting, questionnaire, q, ra, la, send, fixationCross, cue, cueText,
-        shoulder, mainMenu, calibrationMenu, configurationMenu, inputParticipantID, inputParticipantAge, inputParticipantGender, inputArmLength, buttonExperiment,
+        mainMenu, calibrationMenu, configurationMenu, inputParticipantID, inputParticipantAge, inputParticipantGender, inputArmLength, buttonExperiment,
         buttonTraining, buttonShoulderPos, textHintShoulderPos, textMissingInputs, tableSetup, buttonMaximumReach, buttonCupPositions, buttonTablePosition, textHintShoulderFirst,
         textHintCupPos, textHintTablePos, breakCanvasVR, breakCanvasDesktop;
 
@@ -146,7 +146,7 @@ public class GUIControl : MonoBehaviour {
         fixationCross = GameObject.Find("FixationCross");
         cue = GameObject.Find("Cue");
         cueText = GameObject.Find("CueText");
-        shoulder = GameObject.Find("Shoulder");
+        //shoulder = GameObject.Find("Shoulder");
         mainMenu = GameObject.Find("MainMenu");
         calibrationMenu = GameObject.Find("CalibrationMenu");
         configurationMenu = GameObject.Find("ConfigurationMenu");
@@ -869,7 +869,7 @@ public class GUIControl : MonoBehaviour {
         //questionnaire.SetActive(false);
         //endexp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
         //endexp.SetActive(false);      //commented out so that the text will stay after experiment ended and main menu is displayed for experimenter (but not for participant)
-        shoulder.SetActive(false);
+        //shoulder.SetActive(false);
         breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
 
@@ -900,7 +900,7 @@ public class GUIControl : MonoBehaviour {
         //questionnaire.SetActive(false);
         //endexp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
         endexp.SetActive(false);
-        shoulder.SetActive(false);
+        //shoulder.SetActive(false);
         breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
     }
@@ -994,7 +994,7 @@ public class GUIControl : MonoBehaviour {
         //questionnaire.SetActive(false);
         //endexp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
         endexp.SetActive(false);
-        shoulder.SetActive(true);
+        //shoulder.SetActive(true);
         breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
 
@@ -1037,7 +1037,7 @@ public class GUIControl : MonoBehaviour {
         //questionnaire.SetActive(false);
         //endexp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
         endexp.SetActive(false);
-        shoulder.SetActive(false);
+        //shoulder.SetActive(false);
         breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
     }
