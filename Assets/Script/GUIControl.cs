@@ -94,7 +94,7 @@ public class GUIControl : MonoBehaviour {
     private string participantID;
     private int participantAge;
     private string participantGender;
-    private int armLength;
+    private float armLength;
     private float armLengthCalculated;
     public static bool idSet = false;
     public static bool ageSet = false;
@@ -918,45 +918,56 @@ public class GUIControl : MonoBehaviour {
             idSet = true;
             participantID = inputParticipantID.GetComponent<InputField>().text;
         }
+        else
+            idSet = false;
 
         //participantAge
         if (inputParticipantAge.GetComponent<InputField>().text != "")
         {
-            ageSet = true;
             try
             {
                 participantAge = int.Parse(inputParticipantAge.GetComponent<InputField>().text);
+                ageSet = true;
             }
             catch (System.FormatException e)
             {
                 Debug.LogException(e);
                 participantAge = 0;
                 inputParticipantAge.GetComponent<InputField>().text = "";
+                ageSet = false;
             }
         }
+        else
+            ageSet = false;
 
         //participantGender
-        if (!inputParticipantGender.GetComponent<Dropdown>().value.Equals("?"))
+        if (!inputParticipantGender.GetComponent<Dropdown>().options[inputParticipantGender.GetComponent<Dropdown>().value].text.Equals("?"))
         {
             genderSet = true;
             participantGender = inputParticipantGender.GetComponent<Dropdown>().options[inputParticipantGender.GetComponent<Dropdown>().value].text;
         }
+        else
+            genderSet = false;
 
         //armLength
         if (inputArmLength.GetComponent<InputField>().text != "")
         {
-            armLengthSet  = true;
             try
             {
-                armLength = int.Parse(inputArmLength.GetComponent<InputField>().text);
+                armLength = (int.Parse(inputArmLength.GetComponent<InputField>().text)/10); //mm -> cm
+                Debug.Log("armLength: " + armLength.ToString());
+                armLengthSet = true;
             }
             catch (System.Exception e)
             {
                 Debug.LogException(e);
                 armLength = 0;
                 inputArmLength.GetComponent<InputField>().text = "";
+                armLengthSet = false;
             }
         }
+        else
+            armLengthSet = false;
         /*
         Debug.Log("participantID: " + participantID + " InputField.text: " + inputParticipantID.GetComponent<InputField>().text);
         Debug.Log("participantAge: " + participantAge.ToString() + " InputField.text: " + inputParticipantAge.GetComponent<InputField>().text);
