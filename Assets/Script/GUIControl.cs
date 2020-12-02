@@ -96,7 +96,6 @@ public class GUIControl : MonoBehaviour {
     private bool trainingTwo = false;
     private int trainingOneRunNo = 0;
     private int trainingTwoRunNo = 0;
-    private int trainingTrialCounter = 0;
 
     // experiment specific
     private int nrOfTrialsTotal;
@@ -105,7 +104,7 @@ public class GUIControl : MonoBehaviour {
     
 
     // Game objects
-    public static GameObject table, plane, leapmotion, introGUI, textBox, endexp, startContinue, resting, questionnaire, q, ra, la, send, fixationCross, cue, cueText,
+    public static GameObject table, plane, leapmotion, instructionsExp, textBox, endexp, startContinue, resting, questionnaire, q, ra, la, send, fixationCross, cue, cueText,
         mainMenu, calibrationMenu, configurationMenu, inputParticipantID, inputParticipantAge, inputParticipantGender, inputArmLength, buttonExperiment,
         buttonTraining, buttonShoulderPos, textHintShoulderPos, textMissingInputs, tableSetup, buttonMaximumReach, buttonCupPositions, buttonTablePosition, textHintShoulderFirst,
         textHintCupPos, textHintTablePos, breakCanvasVR, breakCanvasDesktop;
@@ -124,7 +123,7 @@ public class GUIControl : MonoBehaviour {
         table = GameObject.Find("Table");
         plane = GameObject.Find("Plane");
         leapmotion = GameObject.Find("LeapHandController");
-        introGUI = GameObject.Find("IntroGUI");
+        instructionsExp = GameObject.Find("InstructionsExp");
         textBox = GameObject.Find("TextBox");
         endexp = GameObject.Find("End");
         startContinue = GameObject.Find("StartContinue");
@@ -244,12 +243,13 @@ public class GUIControl : MonoBehaviour {
 
         }
 
+        /*
         //Debug: print out the array:
         Debug.Log("Shuffled tempTrialTasks array:");
         for(int i=0; i< tempTrialTasks.Length; i++)
         {
             Debug.Log(taskNames[tempTrialTasks[i]]);
-        }
+        }*/
 
         return tempTrialTasks;
     }
@@ -262,13 +262,14 @@ public class GUIControl : MonoBehaviour {
 
         float[] tempDurations = new float[totalTrials];
 
-        //Debug.Log("All cue durations:");
+        /*
+        Debug.Log("All cue durations:");
         for (int i = 0; i < totalTrials; i++)
         {
             //the goal here is to get linear distributed values in the range of cueDurationAvg-cueDuRationVariation and cueDurationAvg+cueDuRationVariation
             tempDurations[i] = i * (durationVariation * 2 / (totalTrials - 1)) + durationAverage - durationVariation;
             Debug.Log(tempDurations[i].ToString());
-        }
+        }*/
         //shuffle cue duration order
         RandomizeArray.ShuffleArray(tempDurations);
 
@@ -300,7 +301,7 @@ public class GUIControl : MonoBehaviour {
         //activate/deactivate objects
         table.gameObject.GetComponent<Renderer>().enabled = true;
         plane.gameObject.GetComponent<Renderer>().enabled = true;
-        introGUI.gameObject.GetComponent<Canvas>().enabled = false;
+        //instructionsExp.gameObject.GetComponent<Canvas>().enabled = false;
         //endexp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
         endexp.SetActive(false);
         //questionnaire.SetActive(false);
@@ -497,11 +498,14 @@ public class GUIControl : MonoBehaviour {
 
     public void TrialStart()
     {
-        // disable collide on start disc
+        //deactivate start/Continue button
         startContinue.SetActive(false);
 
+        //deactivate instructions
+        instructionsExp.SetActive(false);
+
         //set experiment control status to experiment (needed here when coninuing after break)
-        //expControlStatus = 4;
+        //expControlStatus = 5;
 
         // reset trial time
         actualTime = 0.0f;
@@ -509,7 +513,6 @@ public class GUIControl : MonoBehaviour {
         experimentStarted = true;   //activate flag to start the experiment
 
         //set cure duration for current trial
-        //currentCueDuration = Random.Range(cueDurationAvg - cueDurationVariation, cueDurationAvg + cueDurationVariation);
         currentCueDuration = cueDurations[trialSeqCounter];
         //Debug.Log("currentCueDuration: " + currentCueDuration.ToString());
 
@@ -827,8 +830,8 @@ public class GUIControl : MonoBehaviour {
         mainMenu.gameObject.SetActive(true);
         calibrationMenu.SetActive(false);
         configurationMenu.SetActive(false);
-        //introGUI.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
-        introGUI.SetActive(false);
+        //instructionsExp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
+        instructionsExp.SetActive(false);
         //plane.gameObject.GetComponent<Renderer>().enabled = false;
         plane.SetActive(false);
         fixationCross.SetActive(false);
@@ -858,8 +861,8 @@ public class GUIControl : MonoBehaviour {
         mainMenu.gameObject.SetActive(false);
         calibrationMenu.SetActive(false);
         configurationMenu.SetActive(true);
-        //introGUI.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
-        introGUI.SetActive(false);
+        //instructionsExp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
+        instructionsExp.SetActive(false);
         //plane.gameObject.GetComponent<Renderer>().enabled = false;
         plane.SetActive(false);
         fixationCross.SetActive(false);
@@ -963,8 +966,8 @@ public class GUIControl : MonoBehaviour {
         mainMenu.gameObject.SetActive(false);
         calibrationMenu.SetActive(true);
         configurationMenu.SetActive(false);
-        //introGUI.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
-        introGUI.SetActive(false);
+        //instructionsExp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
+        instructionsExp.SetActive(false);
         //plane.gameObject.GetComponent<Renderer>().enabled = false;
         plane.SetActive(true);
         fixationCross.SetActive(false);
@@ -986,7 +989,7 @@ public class GUIControl : MonoBehaviour {
     }
 
 
-    public void StartTraining()
+    public void StartTrainingOne()
     {
         //This method is used for the "Start Training" button on the main menu. WHen the button is pressed this method is executed.
         marker.Write("Main menu: Start Training button pressed");
@@ -998,8 +1001,8 @@ public class GUIControl : MonoBehaviour {
         mainMenu.gameObject.SetActive(false);
         calibrationMenu.SetActive(false);
         configurationMenu.SetActive(false);
-        //introGUI.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
-        introGUI.SetActive(true);
+        //instructionsExp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
+        instructionsExp.SetActive(true);
         //plane.gameObject.GetComponent<Renderer>().enabled = false;
         plane.SetActive(true);
         fixationCross.SetActive(false);
@@ -1020,23 +1023,33 @@ public class GUIControl : MonoBehaviour {
     }
 
 
-    // Start of experiment
-    public void InitTraining()
+    public void InitTrainingOne()
     {
-        //if (Input.GetMouseButtonDown(0))
-        // after hitting any key once, the Input.anyKeyDown is otherwise false for every frame update
-        // therefore the if clause code is only run once at the beginning when hitting any key to start
-        //{
-        // run experiment
-        trainingStarted = true;
-        trainingEnd = false;
+        //set experiment control vars
+        flagStart = true;
+        experimentEnd = false;
+        //currentBlock += 1;
+        trialSeqCounter = 0;
+
+        //calculate total number of trials
+        nrOfTrialsTotal = trialsPerTaskTraining * tasks.Length;
+
+        //create array with tasks for all trials
+        trialTasks = CreateTrialTaskArray(nrOfTrialsTotal, taskSeq, tasks);
+
+        //create array with cue durations for all tasks
+        cueDurations = CreateCueDurationArray(nrOfTrialsTotal, cueDurationAvg, cueDurationVariation);
+
+        // Randomize Cube Appearance Sequence
+        RandomizeArray.ShuffleArray(CubeSeq);
+
+        trainingOne = true;
         trainingOneRunNo += 1;
-        trainingTrialCounter = 0;
 
         // Making instruction invisible in scene and start rendering table and plane
         table.gameObject.GetComponent<Renderer>().enabled = true;
         plane.gameObject.GetComponent<Renderer>().enabled = true;
-        introGUI.gameObject.GetComponent<Canvas>().enabled = false;
+        //instructionsExp.gameObject.GetComponent<Canvas>().enabled = false;
         //endexp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
         endexp.SetActive(false);
         //questionnaire.SetActive(false);
@@ -1046,10 +1059,11 @@ public class GUIControl : MonoBehaviour {
         resting.gameObject.GetComponent<Renderer>().enabled = true;
 
         //write experiment start marker
-        /*
+
         tempMarkerText =
-            "training:start;" +
-            "trialsPerTask:" + trialsPerTask.ToString() + ";" +
+            "training1:start;" +
+            "trialsPerTask:" + trialsPerTaskTraining.ToString() + ";" +
+            "RunNo:" + trainingOneRunNo.ToString() + ";" +
             "trialsTotal:" + nrOfTrialsTotal.ToString() + ";" +
             "fixationDuration:" + fixationDuration.ToString() + ";" +
             "cueDurationAvg:" + cueDurationAvg.ToString() + ";" +
@@ -1061,7 +1075,7 @@ public class GUIControl : MonoBehaviour {
             "offsetFarPercent:" + offsetFarPercent.ToString();
         marker.Write(tempMarkerText);
         Debug.Log(tempMarkerText);
-        */
+
         //write participant info (from configuration menu)
         tempMarkerText =
             "participantID:" + participantID + ";" +
@@ -1080,7 +1094,116 @@ public class GUIControl : MonoBehaviour {
             "stimulusPositions:" + stimulusPositions.ToString();
         marker.Write(tempMarkerText);
         Debug.Log(tempMarkerText);
-        //}
+
+    }
+
+
+    public void StartTrainingTwo()
+    {
+        //This method is used for the "Start Training" button on the main menu. WHen the button is pressed this method is executed.
+        marker.Write("Main menu: Start Training button pressed");
+        Debug.Log("Starting Training");
+
+        expControlStatus = 4;
+
+        //activate and deactivate objects:
+        mainMenu.gameObject.SetActive(false);
+        calibrationMenu.SetActive(false);
+        configurationMenu.SetActive(false);
+        //instructionsExp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
+        instructionsExp.SetActive(true);
+        //plane.gameObject.GetComponent<Renderer>().enabled = false;
+        plane.SetActive(true);
+        fixationCross.SetActive(false);
+        cue.SetActive(false);
+        //table.gameObject.GetComponent<Renderer>().enabled = false;
+        table.SetActive(true);
+        DeactivateAllCubes();
+        startContinue.SetActive(true);
+        //resting.gameObject.GetComponent<Renderer>().enabled = false;
+        resting.SetActive(true);
+        //questionnaire.SetActive(false);
+        //endexp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
+        endexp.SetActive(false);
+        //shoulder.SetActive(false);
+        breakCanvasVR.SetActive(false);
+        breakCanvasDesktop.SetActive(false);
+
+    }
+
+
+    public void InitTrainingTwo()
+    {
+        //set experiment control vars
+        flagStart = true;
+        experimentEnd = false;
+        //currentBlock += 1;
+        trialSeqCounter = 0;
+
+        //calculate total number of trials
+        nrOfTrialsTotal = trialsPerTaskTraining * tasks.Length;
+
+        //create array with tasks for all trials
+        trialTasks = CreateTrialTaskArray(nrOfTrialsTotal, taskSeq, tasks);
+
+        //create array with cue durations for all tasks
+        cueDurations = CreateCueDurationArray(nrOfTrialsTotal, cueDurationAvg, cueDurationVariation);
+
+        // Randomize Cube Appearance Sequence
+        RandomizeArray.ShuffleArray(CubeSeq);
+
+        trainingTwo = true;
+        trainingTwoRunNo += 1;
+
+        // Making instruction invisible in scene and start rendering table and plane
+        table.gameObject.GetComponent<Renderer>().enabled = true;
+        plane.gameObject.GetComponent<Renderer>().enabled = true;
+        //instructionsExp.gameObject.GetComponent<Canvas>().enabled = false;
+        //endexp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
+        endexp.SetActive(false);
+        //questionnaire.SetActive(false);
+
+        // enable collision possibility
+        startContinue.SetActive(true);
+        resting.gameObject.GetComponent<Renderer>().enabled = true;
+
+        //write experiment start marker
+        
+        tempMarkerText =
+            "training2:start;" +
+            "RunNo:" + trainingTwoRunNo.ToString() + ";" +
+            "trialsPerTask:" + trialsPerTaskTraining.ToString() + ";" +
+            "trialsTotal:" + nrOfTrialsTotal.ToString() + ";" +
+            "fixationDuration:" + fixationDuration.ToString() + ";" +
+            "cueDurationAvg:" + cueDurationAvg.ToString() + ";" +
+            "cueDurationVariation:" + cueDurationVariation.ToString() + ";" +
+            "stimulusDurationMax:" + stimulusDurationMax.ToString() + ";" +
+            "feedbackDuration:" + feedbackDuration.ToString() + ";" +
+            "minTaskDuration:" + minimumTaskDuration.ToString() + ";" +
+            "offsetNearPercent:" + offsetNearPercent.ToString() + ";" +
+            "offsetFarPercent:" + offsetFarPercent.ToString();
+        marker.Write(tempMarkerText);
+        Debug.Log(tempMarkerText);
+        
+        //write participant info (from configuration menu)
+        tempMarkerText =
+            "participantID:" + participantID + ";" +
+            "participantAge:" + participantAge.ToString() + ";" +
+            "participantGender" + participantGender + ";" +
+            "participantArmLength" + armLength;
+        marker.Write(tempMarkerText);
+        Debug.Log(tempMarkerText);
+
+        //write calibration info (from calibration menu)
+        tempMarkerText =
+            "posTable:" + table.transform.position.ToString() + ";" +
+            "posShoulder:" + shoulderPosition.ToString() + ";" +
+            "posMaxReach:" + maxReachPosition.ToString() + ";" +
+            "armLengthCalculated:" + armLengthCalculated.ToString() + ";" +
+            "stimulusPositions:" + stimulusPositions.ToString();
+        marker.Write(tempMarkerText);
+        Debug.Log(tempMarkerText);
+        
     }
 
     /*
@@ -1126,14 +1249,14 @@ public class GUIControl : MonoBehaviour {
         marker.Write("Main menu: Start Experiment button pressed");
         Debug.Log("Starting Experiment");
 
-        expControlStatus = 4;
+        expControlStatus = 5;
 
         //activate and deactivate objects:
         mainMenu.gameObject.SetActive(false);
         calibrationMenu.SetActive(false);
         configurationMenu.SetActive(false);
-        //introGUI.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
-        introGUI.SetActive(true);
+        //instructionsExp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
+        instructionsExp.SetActive(true);
         //plane.gameObject.GetComponent<Renderer>().enabled = false;
         plane.SetActive(true);
         fixationCross.SetActive(false);
@@ -1159,7 +1282,7 @@ public class GUIControl : MonoBehaviour {
         breakDurationCountdown = breakDuration;
 
         //set experiment control status to "break"
-        expControlStatus = 5;
+        expControlStatus = 6;
 
         experimentStarted = false;
 
@@ -1190,7 +1313,7 @@ public class GUIControl : MonoBehaviour {
         marker.Write("break over, waiting for manual continue");
         Debug.Log("Break time is over. Waiting for participant to continue...");
 
-        expControlStatus = 4;
+        expControlStatus = 5;
     }
 
 
@@ -1387,16 +1510,25 @@ public class GUIControl : MonoBehaviour {
                     }
                     break;
                 }
-            case 3: //training
+            case 3: //training 1 (like experiment but shorter)
                 {
                     if (trainingStarted)
                         //RunTraining();
                         ControlTrial();
                     else
-                        InitTraining(); // run only once after
+                        InitTrainingOne(); // run only once after
                     break;
                 }
-            case 4: //experiment
+            case 4: //training 2 (like experiment but shorter)
+                {
+                    if (trainingStarted)
+                        //RunTraining();
+                        ControlTrial();
+                    else
+                        InitTrainingTwo(); // run only once after
+                    break;
+                }
+            case 5: //experiment
                 {
                     if (flagStart)
                         ControlTrial();
@@ -1404,7 +1536,7 @@ public class GUIControl : MonoBehaviour {
                         InitExperiment(); // run only once
                     break;
                 }
-            case 5: //break
+            case 6: //break
                 {
                     breakDurationCountdown -= Time.deltaTime;
 
