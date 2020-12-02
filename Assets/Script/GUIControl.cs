@@ -8,129 +8,115 @@ using UnityEngine.UI;
 
 public class GUIControl : MonoBehaviour {
 
-    // create LSL markerstream
-    public LSLMarkerStream marker;
-    
-    public static GameObject table, plane, leapmotion, introGUI, textBox, endexp, startContinue, resting, questionnaire, q, ra, la, send, fixationCross, cue, cueText,
-        mainMenu, calibrationMenu, configurationMenu, inputParticipantID, inputParticipantAge, inputParticipantGender, inputArmLength, buttonExperiment,
-        buttonTraining, buttonShoulderPos, textHintShoulderPos, textMissingInputs, tableSetup, buttonMaximumReach, buttonCupPositions, buttonTablePosition, textHintShoulderFirst,
-        textHintCupPos, textHintTablePos, breakCanvasVR, breakCanvasDesktop;
-
-    //GameObject cubeMiddle, cubeLeft, cubeRight;
-    private GameObject cubeFarLeft, cubeFarMiddleLeft, cubeFarMiddle, cubeFarMiddleRight, cubeFarRight, cubeNearLeft, cubeNearMiddleLeft, cubeNearMiddle, cubeNearMiddleRight, cubeNearRight;
-
-    //GameObject[] cubeGameObjArr = new GameObject[3];  // Game Object Array
-    private GameObject[] cubeGameObjArr = new GameObject[10];  // Game Object Array
-    private string[] stimulusPositions;
-
-    // main GUI/Experiment parameters
-    public int nrOfTrialsPerTask = 100;
-    private int nrOfTrialsTotal;
-    private bool training = false;
-    //public int repeatNrOfTrials = 1;
-    //[HideInInspector] // Hides var below
-    //private int repetition = 1;
-    //[HideInInspector] // Hides var below
-    private int currentBlock = 0;
-    //public int volatility = 1;
-    //public float isiTime = -5f;
-
-    //new
-    public float fixationDuration = 1f;             //500ms fixation cross is visible
+    //Inspector Interface:
+    [Header("General Config")]
+    public float fixationDuration = 1f;             //1s fixation cross is visible
     public float cueDurationAvg = 1.5f;             //1.5s cue average duration
     public float cueDurationVariation = 0.5f;       //500ms variation (so the cue duration is 1500ms +- 500ms
-    public float stimulusDurationMax = 5.0f;          //4s max target is visible
-    public float feedbackDuration = 2.0f;           //1s feedback duration
-    public float minimumTaskDuration = 1.0f;   //1s minimum collision duration for a successful response
+    public float stimulusDurationMax = 5.0f;          //5s max target is visible
+    public float feedbackDuration = 2.0f;           //2s feedback duration
+    public float minimumTaskDuration = 1.0f;        //1s minimum collision duration for a successful response
+    public int[] stimulusAngles = new int[] {-40, -20, 0, 20, 40};    //the angles at which the stimulus can be positioned from the shoulder
+    public int offsetNearPercent = 50;              //offset from maximum reach position
+    public int offsetFarPercent = 20;               //offset from maximum reach position
+
+    [Header("Experiment specific")]
+    public int trialsPerTask = 100;
+
+    [Header("Training specific")]
+    public int trialsPerTaskTraining = 5;
+
+    [Header("Misc")]
+    public LSLMarkerStream marker;
 
 
-    public static float[] cueDurations;
-    private float currentCueDuration;           //stores indivudual cue duration of the current trial
-
-    //public static string[] tasks = new string[4] {"grabFar", "grabNear", "pointFar", "pointNear"};
+    [HideInInspector] // Hides vars from Inspector
+    // general
     public static string[] tasks = new string[4] { "touchFar", "touchNear", "pointFar", "pointNear" };
-    public static int[] taskSeq = new int[] { 0, 1, 2, 3 };
-    public static int[] trialTasks;
+    private int[] taskSeq = new int[] { 0, 1, 2, 3 };
+    private int[] trialTasks;
     private string currentTask;
     private string currentCondition;
     private GameObject currentStimulusObj;
-
-    // Cube Seq if only Bigger cube has been used
-    public static int[] CubeSeq = new int[] { 0, 1, 2, 3, 4};   //using the same array for near and far cause it's easier
-    public static int[] CubePositions = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-    public static int[] angles = new int[] {-40, -20, 0, 20, 40};
-    public int offsetNearPercent = 50;
-    public int offsetFarPercent = 20;
-
-    float sphereRadius = 0;
-    public static float actualTime = 0; // start timer at 0
-
-    private int[] NormalConflictArr;
-    
+    private string[] stimulusPositions;
+    private int[] CubeSeq = new int[] { 0, 1, 2, 3, 4 };   //using the same array for near and far cause it's easier
+    private int[] CubePositions = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    private int cubeSeqCounter = 0;
     public static int trialSeqCounter;
-    public static int cubeSeqCounter = 0;
-    
-    [HideInInspector] // Hides var below
-    public bool flagTouchEvent = false;
-    public static bool flagStart = false;
-    
-    // trial logic handler
-    public static bool updateEndOfTrialLogic = false;
-    public static bool experimentEnd = false;
-    private bool endUpdate = true;
-
-    public static bool experimentStarted = false;
-    public static bool fixationCrossActivated = false;
-    public static bool cueActivated = false;
-    public static bool targetActivated = false;
-    public static bool taskSuccess = false;
-    public static bool collisionActive = false;
     public static string currentResponseType = "none";
     public static System.Diagnostics.Stopwatch collisionDuration = new System.Diagnostics.Stopwatch();
     private static GameObject currentCollisionObj = null;
-    public static bool visualFeedbackActive = false;
     private static Color32 customYellow = new Color32(255, 191, 0, 255);
-    private int expControlStatus;
+    private Vector3 shoulderPosition;
+    private Vector3 maxReachPosition;
+    private string tempMarkerText = "";
+
+    private float actualTime = 0;       // start timer at 0
+    private float reaction_time = 0;
+    private float reaction_time_temp = 0;
+    private float reaction_start_time = 0;
+
     private string participantID;
     private int participantAge;
     private string participantGender;
     private float armLength;
     private float armLengthCalculated;
-    public static bool idSet = false;
-    public static bool ageSet = false;
-    public static bool genderSet = false;
-    public static bool armLengthSet = false;
-    public static bool shoulderSet = false;
-    public static bool maxReachSet = false;
-    public static bool cupPositionsSet = false;
-    public static bool tablePosSet = false;
+
+    // experiment logic handler
+    private bool idSet = false;
+    private bool ageSet = false;
+    private bool genderSet = false;
+    private bool armLengthSet = false;
+    private bool shoulderSet = false;
+    private bool maxReachSet = false;
+    private bool cupPositionsSet = false;
+    private bool tablePosSet = false;
     private bool trackerFoundShoulderPos = true;
     private bool trackerFoundMaxReach = true;
     private bool trackerFoundCupPos = true;
+    public static bool visualFeedbackActive = false;
+    private int expControlStatus;
+    private float breakDurationCountdown;       //break timer
 
-    private Vector3 shoulderPosition;
-    private Vector3 maxReachPosition;
+    // trial logic handler
+    private bool experimentStarted = false;
+    private bool fixationCrossActivated = false;
+    private bool cueActivated = false;
+    private bool targetActivated = false;
+    private bool taskSuccess = false;
+    private bool collisionActive = false;
+    //public bool flagTouchEvent = false;
+    public static bool flagStart = false;
+    public static bool experimentEnd = false;
 
-    // parameter variables
-    public static float reaction_time = 0;
-    public static float reaction_time_temp = 0;
-    public static float reaction_start_time = 0;
+    // training specific
+    private bool trainingStarted = true;
+    private bool trainingEnd = false;
+    private bool trainingOne = false;
+    private bool trainingTwo = false;
+    private int trainingOneRunNo = 0;
+    private int trainingTwoRunNo = 0;
+    private int trainingTrialCounter = 0;
 
-    //break timer
-    public static float breakDurationCountdown;
+    // experiment specific
+    private int nrOfTrialsTotal;
+    private float[] cueDurations;
+    private float currentCueDuration;           //stores individual cue duration of the current trial
+    
 
-    private string tempMarkerText = "";
+    // Game objects
+    public static GameObject table, plane, leapmotion, introGUI, textBox, endexp, startContinue, resting, questionnaire, q, ra, la, send, fixationCross, cue, cueText,
+        mainMenu, calibrationMenu, configurationMenu, inputParticipantID, inputParticipantAge, inputParticipantGender, inputArmLength, buttonExperiment,
+        buttonTraining, buttonShoulderPos, textHintShoulderPos, textMissingInputs, tableSetup, buttonMaximumReach, buttonCupPositions, buttonTablePosition, textHintShoulderFirst,
+        textHintCupPos, textHintTablePos, breakCanvasVR, breakCanvasDesktop;
+    private GameObject cubeFarLeft, cubeFarMiddleLeft, cubeFarMiddle, cubeFarMiddleRight, cubeFarRight, cubeNearLeft, cubeNearMiddleLeft, cubeNearMiddle, cubeNearMiddleRight, cubeNearRight;
+    private GameObject[] cubeGameObjArr = new GameObject[10];
+
 
 
     // Use this for initialization
     void Start()
     {
-        //calculate total number of trials
-        nrOfTrialsTotal = nrOfTrialsPerTask * tasks.Length;
-
-        NormalConflictArr = new int[nrOfTrialsTotal];
-
-
         // init LSL markerstream
         marker = FindObjectOfType<LSLMarkerStream>();
         
@@ -181,7 +167,6 @@ public class GUIControl : MonoBehaviour {
         cubeNearMiddleRight = GameObject.Find("CubeNearMiddleRight");
         cubeNearRight = GameObject.Find("CubeNearRight");
 
-
         // Assign stimulus game objects to arrays
         cubeGameObjArr[0] = cubeFarLeft;
         cubeGameObjArr[1] = cubeFarMiddleLeft;
@@ -195,58 +180,6 @@ public class GUIControl : MonoBehaviour {
         cubeGameObjArr[9] = cubeNearRight;
 
         stimulusPositions = new string[cubeGameObjArr.Length];
-
-        // Randomize Cube Appearance Sequence
-        RandomizeArray.ShuffleArray(CubeSeq);
-
-
-        //create array with tasks for all trials
-        trialTasks = new int[nrOfTrialsTotal];
-
-        //Fill array with tasks. For example: 4 different tasks and 100 trials per task - the array should contain 100 values of each task.
-        //We use a method minimizing task repetition in subsequent trials.
-        int tempTrialCounter = 0;
-        int tempTaskCounter = 0;
-        RandomizeArray.ShuffleArray(taskSeq);
-
-        //Debug.Log("Task sequence:");
-
-        while(tempTrialCounter < trialTasks.Length)
-        {
-            if(tempTaskCounter >= taskSeq.Length)
-            {
-                tempTaskCounter = 0;
-                RandomizeArray.ShuffleArray(taskSeq);
-            }
-
-            trialTasks[tempTrialCounter] = taskSeq[tempTaskCounter];
-            //Debug.Log(tasks[taskSeq[tempTaskCounter]]);
-
-            tempTaskCounter++;
-            tempTrialCounter++;
-
-        }
-
-        /* //Debug: print out the array:
-        Debug.Log("Shuffled trialTasks array:");
-        for(int i=0; i<trialTasks.Length; i++)
-        {
-            Debug.Log(tasks[trialTasks[i]]);
-        }*/
-
-
-        //generate list of cue times for all trials:
-        cueDurations = new float[nrOfTrialsTotal];
-
-        //Debug.Log("All cue durations:");
-        for(int i=0; i<nrOfTrialsTotal; i++)
-        {
-            //the goal here is to get linear distributed values in the range of cueDurationAvg-cueDuRationVariation and cueDurationAvg+cueDuRationVariation
-            cueDurations[i] = i * (cueDurationVariation*2 / (nrOfTrialsTotal-1)) + cueDurationAvg - cueDurationVariation;
-            //Debug.Log(cueDurations[i].ToString());
-        }
-        //shuffle cue duration order
-        RandomizeArray.ShuffleArray(cueDurations);
 
 
         //deactivate the "Start Experiment" and "Training" Buttons:
@@ -285,69 +218,133 @@ public class GUIControl : MonoBehaviour {
     }
 
 
-    // Start of experiment
-    public void ControlState()
-    {    
-        //if (Input.GetMouseButtonDown(0))
-        // after hitting any key once, the Input.anyKeyDown is otherwise false for every frame update
-        // therefore the if clause code is only run once at the beginning when hitting any key to start
-        //{
-            // run experiment
-            flagStart = true;
-            experimentEnd = false;
-            currentBlock += 1;
-            trialSeqCounter = 0;
+    public int[] CreateTrialTaskArray(int totalTrials, int[] taskSequence, string[] taskNames)
+    {
+        //Fill an array with tasks. For example: 4 different tasks and 100 trials per task - the array should contain 100 values of each task.
+        //We use a method minimizing task repetition in subsequent trials.
+        int tempTrialCounter = 0;
+        int tempTaskCounter = 0;
+        int[] tempTrialTasks = new int[totalTrials];
+        RandomizeArray.ShuffleArray(taskSequence);
 
-            // Making instruction invisible in scene and start rendering table and plane
-            table.gameObject.GetComponent<Renderer>().enabled = true;
-            plane.gameObject.GetComponent<Renderer>().enabled = true;
-            introGUI.gameObject.GetComponent<Canvas>().enabled = false;
-            //endexp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
-            endexp.SetActive(false);
-            //questionnaire.SetActive(false);
+        //Debug.Log("Task sequence:");
 
-            // enable collision possibility
-            startContinue.SetActive(true);
-            resting.gameObject.GetComponent<Renderer>().enabled = true;
+        while (tempTrialCounter < totalTrials)
+        {
+            if (tempTaskCounter >= taskSequence.Length)
+            {
+                tempTaskCounter = 0;
+                RandomizeArray.ShuffleArray(taskSequence);
+            }
 
-            //write experiment start marker
-            tempMarkerText = 
-                "experiment:start;" +
-                "trialsPerTask:" + nrOfTrialsPerTask.ToString() + ";" +
-                "trialsTotal:" + nrOfTrialsTotal.ToString() + ";" +
-                "fixationDuration:" + fixationDuration.ToString() + ";" +
-                "cueDurationAvg:" + cueDurationAvg.ToString() + ";" +
-                "cueDurationVariation:" + cueDurationVariation.ToString() + ";" +
-                "stimulusDurationMax:" + stimulusDurationMax.ToString() + ";" +
-                "feedbackDuration:" + feedbackDuration.ToString() + ";" +
-                "minTaskDuration:" + minimumTaskDuration.ToString() + ";" +
-                "offsetNearPercent:" + offsetNearPercent.ToString() + ";" +
-                "offsetFarPercent:" + offsetFarPercent.ToString();
-            marker.Write(tempMarkerText);
-            Debug.Log(tempMarkerText);
+            tempTrialTasks[tempTrialCounter] = taskSequence[tempTaskCounter];
 
-            //write participant info (from configuration menu)
-            tempMarkerText =
-                "participantID:" + participantID + ";" +
-                "participantAge:" + participantAge.ToString() + ";" +
-                "participantGender" + participantGender + ";" +
-                "participantArmLength" + armLength;
-            marker.Write(tempMarkerText);
-            Debug.Log(tempMarkerText);
+            tempTaskCounter++;
+            tempTrialCounter++;
 
-            //write calibration info (from calibration menu)
-            tempMarkerText =
-                "posTable:" + table.transform.position.ToString() + ";" +
-                "posShoulder:" + shoulderPosition.ToString() + ";" +
-                "posMaxReach:" + maxReachPosition.ToString() + ";" +
-                "armLengthCalculated:" + armLengthCalculated.ToString() + ";" +
-                "stimulusPositions:" + stimulusPositions.ToString();
-            marker.Write(tempMarkerText);
-            Debug.Log(tempMarkerText);
-        //}
+        }
+
+        //Debug: print out the array:
+        Debug.Log("Shuffled tempTrialTasks array:");
+        for(int i=0; i< tempTrialTasks.Length; i++)
+        {
+            Debug.Log(taskNames[tempTrialTasks[i]]);
+        }
+
+        return tempTrialTasks;
     }
 
-    //  Control all trials 
+
+    public float[] CreateCueDurationArray(int totalTrials, float durationAverage, float durationVariation)
+    {
+        //Create an array with cue times for all trials. The duration will vary in each trial and the range will be the durationAverage +- the durationVariation.
+        //The individual durations will be distributed evenly within the range.
+
+        float[] tempDurations = new float[totalTrials];
+
+        //Debug.Log("All cue durations:");
+        for (int i = 0; i < totalTrials; i++)
+        {
+            //the goal here is to get linear distributed values in the range of cueDurationAvg-cueDuRationVariation and cueDurationAvg+cueDuRationVariation
+            tempDurations[i] = i * (durationVariation * 2 / (totalTrials - 1)) + durationAverage - durationVariation;
+            Debug.Log(tempDurations[i].ToString());
+        }
+        //shuffle cue duration order
+        RandomizeArray.ShuffleArray(tempDurations);
+
+        return tempDurations;
+    }
+
+
+    public void InitExperiment()
+    {   
+        //set experiment control vars
+        flagStart = true;
+        experimentEnd = false;
+        //currentBlock += 1;
+        trialSeqCounter = 0;
+
+        //calculate total number of trials
+        nrOfTrialsTotal = trialsPerTask * tasks.Length;
+
+        //create array with tasks for all trials
+        trialTasks = CreateTrialTaskArray(nrOfTrialsTotal, taskSeq, tasks);
+
+        //create array with cue durations for all tasks
+        cueDurations = CreateCueDurationArray(nrOfTrialsTotal, cueDurationAvg, cueDurationVariation);
+
+        // Randomize Cube Appearance Sequence
+        RandomizeArray.ShuffleArray(CubeSeq);
+
+
+        //activate/deactivate objects
+        table.gameObject.GetComponent<Renderer>().enabled = true;
+        plane.gameObject.GetComponent<Renderer>().enabled = true;
+        introGUI.gameObject.GetComponent<Canvas>().enabled = false;
+        //endexp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
+        endexp.SetActive(false);
+        //questionnaire.SetActive(false);
+        startContinue.SetActive(true);
+        resting.gameObject.GetComponent<Renderer>().enabled = true;
+
+        //write experiment start marker
+        tempMarkerText = 
+            "experiment:start;" +
+            "trialsPerTask:" + trialsPerTask.ToString() + ";" +
+            "trialsTotal:" + nrOfTrialsTotal.ToString() + ";" +
+            "fixationDuration:" + fixationDuration.ToString() + ";" +
+            "cueDurationAvg:" + cueDurationAvg.ToString() + ";" +
+            "cueDurationVariation:" + cueDurationVariation.ToString() + ";" +
+            "stimulusDurationMax:" + stimulusDurationMax.ToString() + ";" +
+            "feedbackDuration:" + feedbackDuration.ToString() + ";" +
+            "minTaskDuration:" + minimumTaskDuration.ToString() + ";" +
+            "offsetNearPercent:" + offsetNearPercent.ToString() + ";" +
+            "offsetFarPercent:" + offsetFarPercent.ToString();
+        marker.Write(tempMarkerText);
+        Debug.Log(tempMarkerText);
+
+        //write participant info (from configuration menu)
+        tempMarkerText =
+            "participantID:" + participantID + ";" +
+            "participantAge:" + participantAge.ToString() + ";" +
+            "participantGender" + participantGender + ";" +
+            "participantArmLength" + armLength;
+        marker.Write(tempMarkerText);
+        Debug.Log(tempMarkerText);
+
+        //write calibration info (from calibration menu)
+        tempMarkerText =
+            "posTable:" + table.transform.position.ToString() + ";" +
+            "posShoulder:" + shoulderPosition.ToString() + ";" +
+            "posMaxReach:" + maxReachPosition.ToString() + ";" +
+            "armLengthCalculated:" + armLengthCalculated.ToString() + ";" +
+            "stimulusPositions:" + stimulusPositions.ToString();
+        marker.Write(tempMarkerText);
+        Debug.Log(tempMarkerText);
+
+    }
+
+    
     public void ControlTrial()
     {
         //Check if flag has been activated through TrialStart() via touching the startButton in VR
@@ -357,123 +354,15 @@ public class GUIControl : MonoBehaviour {
             // actualTime is constantly growing
             actualTime += Time.deltaTime;
 
-            if (trialSeqCounter < nrOfTrialsTotal && !experimentEnd) // run all trials
+            // run all trials
+            if (trialSeqCounter < nrOfTrialsTotal && !experimentEnd) 
             {
-                // the following loop is then run each frame for a new started trial
+                RunTrial();
 
-                //Start of trial: show fixation cross
-                if (actualTime <= fixationDuration)
-                {
-                    // do once to update sequence of trials and to write marker
+            }
 
-                    //should run only once at trial start
-                    if (!fixationCrossActivated)
-                    {
-                        //enable fixation cross
-                        fixationCross.SetActive(true);
-                        marker.Write("Fixation cross activated");
-                        Debug.Log("Fixation Cross activated: " + actualTime.ToString());
-                        fixationCrossActivated = true;
-
-                        // Enable flag to detect events of GameObject Cube
-                        flagTouchEvent = true;  //[ToDo: is this still used anywhere?]
-
-                        //GUIControl.marker.Write("box:spawned;condition:" + feedback_type + ";trial_nr:" + (((currentBlock - 1) * 100) + trialSeqCounter + 1) + ";normal_or_conflict:" + normConflict + ";cube:" + cubeGameObjArr[CubeSeq[cubeSeqCounter]] + ";isiTime:" + (isiTime + 6));
-                    }
-                }
-
-                //after fixation cross: show cue
-                if (actualTime > fixationDuration && actualTime <= fixationDuration + currentCueDuration)
-                {
-                    if (!cueActivated)
-                    {
-                        //deactivate fixation cross
-                        fixationCross.SetActive(false);
-                        marker.Write("Fixation cross deactivated");
-                        Debug.Log("Fixation Cross deactivated: " + actualTime.ToString());
-                        fixationCrossActivated = false;
-                        
-                        //activate cue and set correct cue text
-                        cueText.GetComponent<UnityEngine.UI.Text>().text = currentTask;
-                        marker.Write("cueTextActivated:" + currentTask);
-                        Debug.Log("Cue activated: " + currentTask + " " + actualTime.ToString());
-
-                        cue.SetActive(true);
-                        cueActivated = true;
-                    }
-                }
-
-                //after showing cue: show stimulus
-                if (actualTime > fixationDuration + currentCueDuration)
-                {
-                    if(!taskSuccess)    //if the current task has not been successful yet
-                    {
-                        if (!targetActivated)
-                        {
-                            //deactivate cue
-                            cue.SetActive(false);
-                            marker.Write("cue text deactivated");
-                            Debug.Log("Cue deactivated: " + actualTime.ToString());
-                            cueActivated = false;
-
-                            //activate stimulus
-                            CubeVisible(currentStimulusObj);
-                            Debug.Log("Stimulus activated: " + actualTime.ToString());
-
-                            //set reaction start time
-                            reaction_start_time = actualTime;
-
-                            targetActivated = true;
-                            
-                        }
-
-                        //check for successful response (if the collision has reached the minimum duration)
-                        if (collisionActive)
-                        {
-                            if ((float)collisionDuration.ElapsedMilliseconds/1000 >= minimumTaskDuration)
-                            {
-                                //activate correct/incorrect visual feedback
-                                visualFeedbackActive = true;
-                                VisualFeeback(currentCollisionObj, currentResponseType);
-                            }
-                        }
-                        //if time for a response has run out -> go to next trial (but NOT if there is an active collision)
-                        else if(actualTime > fixationDuration + currentCueDuration + stimulusDurationMax)
-                        {
-                            marker.Write("response time over");
-                            Debug.Log("response time over. " + actualTime.ToString());
-                            
-                            DeactivateAllCubes();
-                            NextTrial();
-                        }
-
-                    }
-                    //if the current task has been successful
-                    else
-                    {
-                        //wait for visual feedback to finish and then -> go to next trial
-                        if (actualTime > fixationDuration + currentCueDuration + reaction_time + minimumTaskDuration + feedbackDuration)
-                        {
-                            //deactivate stimulus
-                            DeactivateAllCubes();
-
-                            marker.Write("visual feeback duration over");
-                            Debug.Log("visual feeback duration over");
-
-                            marker.Write("visualFeedback:off");
-                            Debug.Log("visualFeedback:off " + actualTime.ToString());
-
-                            //transition to next trial
-                            NextTrial();
-                        }
-                    }
- 
-                }
-
-            }//run all trials
-
-
-            if (experimentEnd)  // after all trials are finished
+            // after all trials are finished
+            if (experimentEnd)  
             {
                 //write expemriment end marker
                 marker.Write("experiment:end");
@@ -488,38 +377,122 @@ public class GUIControl : MonoBehaviour {
                 StartMainMenu();
             }
 
-            /*
-            // experiment end determined by nrOfTrials
-            if (trialSeqCounter == nrOfTrialsTotal && actualTime > 0 && !experimentEnd) // after all trials are finished
-            {
-                // block end
-                //if (repetition < repeatNrOfTrials)
-                //{
-                    //repetition += 1;
-                    endexp.gameObject.gameObject.GetComponent<Canvas>().enabled = true;
-                    DeactivateAllCubes();
-                    startContinue.SetActive(false);
-                    flagStart = false;
-                //}
-            }
-
-            if (experimentEnd && actualTime > 0 && endUpdate) //!experimentEnd
-            {
-                //questionnaire.SetActive(false);
-                table.gameObject.GetComponent<Renderer>().enabled = false;
-                plane.gameObject.GetComponent<Renderer>().enabled = false;
-                resting.gameObject.GetComponent<Renderer>().enabled = false;
-                endexp.gameObject.gameObject.GetComponent<Canvas>().enabled = true;
-
-                //GUIControl.marker.Write("block:end;currentBlockNr:" + currentBlock + ";condition:" + feedback_type + ";training:" + BoolToString(training));
-                //Debug.Log("block:end;currentBlockNr:" + currentBlock + ";condition:" + feedback_type + ";training:" + BoolToString(training));
-                endUpdate = false;
-            }
-            */
-
         }//if experimentStarted
    
     }//ControlTrial()
+
+
+    public void RunTrial()
+    {
+        //Start of trial: show fixation cross
+        if (actualTime <= fixationDuration)
+        {
+            // do once to update sequence of trials and to write marker
+
+            //should run only once at trial start
+            if (!fixationCrossActivated)
+            {
+                //enable fixation cross
+                fixationCross.SetActive(true);
+                marker.Write("Fixation cross activated");
+                Debug.Log("Fixation Cross activated: " + actualTime.ToString());
+                fixationCrossActivated = true;
+
+                // Enable flag to detect events of GameObject Cube
+                //flagTouchEvent = true;  //[ToDo: is this still used anywhere?]
+
+            }
+        }
+
+        //after fixation cross: show cue
+        if (actualTime > fixationDuration && actualTime <= fixationDuration + currentCueDuration)
+        {
+            if (!cueActivated)
+            {
+                //deactivate fixation cross
+                fixationCross.SetActive(false);
+                marker.Write("Fixation cross deactivated");
+                Debug.Log("Fixation Cross deactivated: " + actualTime.ToString());
+                fixationCrossActivated = false;
+
+                //activate cue and set correct cue text
+                cueText.GetComponent<UnityEngine.UI.Text>().text = currentTask;
+                marker.Write("cueTextActivated:" + currentTask);
+                Debug.Log("Cue activated: " + currentTask + " " + actualTime.ToString());
+
+                cue.SetActive(true);
+                cueActivated = true;
+            }
+        }
+
+        //after showing cue: show stimulus
+        if (actualTime > fixationDuration + currentCueDuration)
+        {
+            if (!taskSuccess)    //if the current task has not been successful yet
+            {
+                if (!targetActivated)
+                {
+                    //deactivate cue
+                    cue.SetActive(false);
+                    marker.Write("cue text deactivated");
+                    Debug.Log("Cue deactivated: " + actualTime.ToString());
+                    cueActivated = false;
+
+                    //activate stimulus
+                    CubeVisible(currentStimulusObj);
+                    Debug.Log("Stimulus activated: " + actualTime.ToString());
+
+                    //set reaction start time
+                    reaction_start_time = actualTime;
+
+                    targetActivated = true;
+
+                }
+
+                //check for successful response (if the collision has reached the minimum duration)
+                if (collisionActive)
+                {
+                    if ((float)collisionDuration.ElapsedMilliseconds / 1000 >= minimumTaskDuration)
+                    {
+                        //activate correct/incorrect visual feedback
+                        visualFeedbackActive = true;
+                        VisualFeeback(currentCollisionObj, currentResponseType);
+                    }
+                }
+                //if time for a response has run out -> go to next trial (but NOT if there is an active collision)
+                else if (actualTime > fixationDuration + currentCueDuration + stimulusDurationMax)
+                {
+                    marker.Write("response time over");
+                    Debug.Log("response time over. " + actualTime.ToString());
+
+                    DeactivateAllCubes();
+                    NextTrial();
+                }
+
+            }
+            //if the current task has been successful
+            else
+            {
+                //wait for visual feedback to finish and then -> go to next trial
+                if (actualTime > fixationDuration + currentCueDuration + reaction_time + minimumTaskDuration + feedbackDuration)
+                {
+                    //deactivate stimulus
+                    DeactivateAllCubes();
+
+                    marker.Write("visual feeback duration over");
+                    Debug.Log("visual feeback duration over");
+
+                    marker.Write("visualFeedback:off");
+                    Debug.Log("visualFeedback:off " + actualTime.ToString());
+
+                    //transition to next trial
+                    NextTrial();
+                }
+            }
+
+        }
+
+    }
 
 
     public void TrialStart()
@@ -1012,15 +985,141 @@ public class GUIControl : MonoBehaviour {
         ActivateAllCubes();
     }
 
+
     public void StartTraining()
     {
         //This method is used for the "Start Training" button on the main menu. WHen the button is pressed this method is executed.
         marker.Write("Main menu: Start Training button pressed");
         Debug.Log("Starting Training");
+
         expControlStatus = 3;
 
+        //activate and deactivate objects:
+        mainMenu.gameObject.SetActive(false);
+        calibrationMenu.SetActive(false);
+        configurationMenu.SetActive(false);
+        //introGUI.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
+        introGUI.SetActive(true);
+        //plane.gameObject.GetComponent<Renderer>().enabled = false;
+        plane.SetActive(true);
+        fixationCross.SetActive(false);
+        cue.SetActive(false);
+        //table.gameObject.GetComponent<Renderer>().enabled = false;
+        table.SetActive(true);
+        DeactivateAllCubes();
+        startContinue.SetActive(true);
+        //resting.gameObject.GetComponent<Renderer>().enabled = false;
+        resting.SetActive(true);
+        //questionnaire.SetActive(false);
+        //endexp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
+        endexp.SetActive(false);
+        //shoulder.SetActive(false);
+        breakCanvasVR.SetActive(false);
+        breakCanvasDesktop.SetActive(false);
+
     }
-    
+
+
+    // Start of experiment
+    public void InitTraining()
+    {
+        //if (Input.GetMouseButtonDown(0))
+        // after hitting any key once, the Input.anyKeyDown is otherwise false for every frame update
+        // therefore the if clause code is only run once at the beginning when hitting any key to start
+        //{
+        // run experiment
+        trainingStarted = true;
+        trainingEnd = false;
+        trainingOneRunNo += 1;
+        trainingTrialCounter = 0;
+
+        // Making instruction invisible in scene and start rendering table and plane
+        table.gameObject.GetComponent<Renderer>().enabled = true;
+        plane.gameObject.GetComponent<Renderer>().enabled = true;
+        introGUI.gameObject.GetComponent<Canvas>().enabled = false;
+        //endexp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
+        endexp.SetActive(false);
+        //questionnaire.SetActive(false);
+
+        // enable collision possibility
+        startContinue.SetActive(true);
+        resting.gameObject.GetComponent<Renderer>().enabled = true;
+
+        //write experiment start marker
+        /*
+        tempMarkerText =
+            "training:start;" +
+            "trialsPerTask:" + trialsPerTask.ToString() + ";" +
+            "trialsTotal:" + nrOfTrialsTotal.ToString() + ";" +
+            "fixationDuration:" + fixationDuration.ToString() + ";" +
+            "cueDurationAvg:" + cueDurationAvg.ToString() + ";" +
+            "cueDurationVariation:" + cueDurationVariation.ToString() + ";" +
+            "stimulusDurationMax:" + stimulusDurationMax.ToString() + ";" +
+            "feedbackDuration:" + feedbackDuration.ToString() + ";" +
+            "minTaskDuration:" + minimumTaskDuration.ToString() + ";" +
+            "offsetNearPercent:" + offsetNearPercent.ToString() + ";" +
+            "offsetFarPercent:" + offsetFarPercent.ToString();
+        marker.Write(tempMarkerText);
+        Debug.Log(tempMarkerText);
+        */
+        //write participant info (from configuration menu)
+        tempMarkerText =
+            "participantID:" + participantID + ";" +
+            "participantAge:" + participantAge.ToString() + ";" +
+            "participantGender" + participantGender + ";" +
+            "participantArmLength" + armLength;
+        marker.Write(tempMarkerText);
+        Debug.Log(tempMarkerText);
+
+        //write calibration info (from calibration menu)
+        tempMarkerText =
+            "posTable:" + table.transform.position.ToString() + ";" +
+            "posShoulder:" + shoulderPosition.ToString() + ";" +
+            "posMaxReach:" + maxReachPosition.ToString() + ";" +
+            "armLengthCalculated:" + armLengthCalculated.ToString() + ";" +
+            "stimulusPositions:" + stimulusPositions.ToString();
+        marker.Write(tempMarkerText);
+        Debug.Log(tempMarkerText);
+        //}
+    }
+
+    /*
+    //  Control all trials 
+    public void RunTraining()
+    {
+        //Check if flag has been activated through TrialStart() via touching the startButton in VR
+        if (trainingStarted)
+        {
+            // add the time taken to render last frame, experiment logic is based on this parameter
+            // actualTime is constantly growing
+            actualTrainingTime += Time.deltaTime;
+
+            if (trainingTrialCounter < nrOfTrainingTrialsTotal && !trainingEnd) // run all trials
+            {
+                RunTrial();
+            }//run all trials
+
+
+            if (trainingEnd)  // after all trials are finished
+            {
+                //write expemriment end marker
+                marker.Write("training:end");
+                Debug.Log("training:end");
+
+                //activate experiment end text
+                endexp.SetActive(true);
+
+                trainingStarted = false;
+
+                //go to main menu
+                StartMainMenu();
+            }
+
+        }
+
+    }*/
+
+
     public void StartExperiment()
     {
         //This method is used for the "Start Experiment" button on the main menu. WHen the button is pressed this method is executed.
@@ -1162,7 +1261,7 @@ public class GUIControl : MonoBehaviour {
         //calculate all cup positions according to the armlength and move them to the new positions:
         //MoveCups(cubeGameObjArr, resting.transform.position, 70, angles, offsetNearPercent, offsetFarPercent);
         //MoveCups(cubeGameObjArr, shoulder.transform.position, armLength, angles, offsetNearPercent, offsetFarPercent);
-        MoveCups(cubeGameObjArr, shoulderPosition, maxReachPosition, angles, offsetNearPercent, offsetFarPercent);
+        MoveCups(cubeGameObjArr, shoulderPosition, maxReachPosition, stimulusAngles, offsetNearPercent, offsetFarPercent);
 
         cupPositionsSet = true;
     }
@@ -1290,20 +1389,19 @@ public class GUIControl : MonoBehaviour {
                 }
             case 3: //training
                 {
+                    if (trainingStarted)
+                        //RunTraining();
+                        ControlTrial();
+                    else
+                        InitTraining(); // run only once after
                     break;
                 }
             case 4: //experiment
                 {
-                    //ControlState(); // run only once after hitting any key to start, in fact runs whenever key is hit
-
-                    if (flagStart) // flagStart is true after hitting any key to start at the beginning or after block end
-                    {
+                    if (flagStart)
                         ControlTrial();
-                    }
                     else
-                    {
-                        ControlState(); // run only once after hitting any key to start, in fact runs whenever key is hit
-                    }
+                        InitExperiment(); // run only once
                     break;
                 }
             case 5: //break
@@ -1312,10 +1410,8 @@ public class GUIControl : MonoBehaviour {
 
                     //check break timer
                     if (breakDurationCountdown <= 0)
-                    {
                         //stop break and continue with experiment
                         StopBreak();
-                    }
 
                     //continue experiment
                     break;
