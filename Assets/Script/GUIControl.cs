@@ -22,6 +22,12 @@ public class GUIControl : MonoBehaviour {
 
     [Header("Experiment specific")]
     public int trialsPerTask = 100;
+    public float firstBreakSeconds = 120f;
+    public float secondBreakSeconds = 180f;
+    public float thirdBreakSeconds = 120f;
+
+    [Header("Learning specific")]
+    public int trialsPerTaskLearning = 5;
 
     [Header("Training specific")]
     public int trialsPerTaskTraining = 5;
@@ -89,24 +95,28 @@ public class GUIControl : MonoBehaviour {
     public static bool flagStart = false;
     public static bool experimentEnd = false;
 
+    // learning specific
+    private bool learningStarted = false;
+    private int learningRunNo = 0;
+    private string endTextLearning = "The learning block has ended.\nPlease contact the experimenter.";
+
     // training specific
-    private bool trainingStarted = true;
-    private bool trainingEnd = false;
-    private bool trainingOne = false;
-    private bool trainingTwo = false;
-    private int trainingOneRunNo = 0;
-    private int trainingTwoRunNo = 0;
+    private bool trainingStarted = false;
+    private int trainingRunNo = 0;
+    private string endTextTraining = "The training block has ended.\nPlease contact the experimenter.";
 
     // experiment specific
     private int nrOfTrialsTotal;
     private float[] cueDurations;
     private float currentCueDuration;           //stores individual cue duration of the current trial
-    
+    private int experimentRunNo = 0;
+    private string endTextExp = "The experiment has ended.\nThank you for your participation.";
+
 
     // Game objects
-    public static GameObject table, plane, leapmotion, instructionsExp, textBox, endexp, startContinue, resting, questionnaire, q, ra, la, send, fixationCross, cue, cueText,
+    public static GameObject table, plane, leapmotion, instructionsExp, textBox, end, endTextBox, startContinue, resting, questionnaire, q, ra, la, send, fixationCross, cue, cueText,
         mainMenu, calibrationMenu, configurationMenu, inputParticipantID, inputParticipantAge, inputParticipantGender, inputArmLength, buttonExperiment,
-        buttonTraining, buttonShoulderPos, textHintShoulderPos, textMissingInputs, tableSetup, buttonMaximumReach, buttonCupPositions, buttonTablePosition, textHintShoulderFirst,
+        buttonLearning, buttonTraining, buttonShoulderPos, textHintShoulderPos, textMissingInputs, tableSetup, buttonMaximumReach, buttonCupPositions, buttonTablePosition, textHintShoulderFirst,
         textHintCupPos, textHintTablePos, breakCanvasVR, breakCanvasDesktop;
     private GameObject cubeFarLeft, cubeFarMiddleLeft, cubeFarMiddle, cubeFarMiddleRight, cubeFarRight, cubeNearLeft, cubeNearMiddleLeft, cubeNearMiddle, cubeNearMiddleRight, cubeNearRight;
     private GameObject[] cubeGameObjArr = new GameObject[10];
@@ -125,7 +135,8 @@ public class GUIControl : MonoBehaviour {
         leapmotion = GameObject.Find("LeapHandController");
         instructionsExp = GameObject.Find("InstructionsExp");
         textBox = GameObject.Find("TextBox");
-        endexp = GameObject.Find("End");
+        end = GameObject.Find("End");
+        endTextBox = GameObject.Find("EndTextBox");
         startContinue = GameObject.Find("StartContinue");
         resting = GameObject.Find("resting");
         fixationCross = GameObject.Find("FixationCross");
@@ -140,6 +151,7 @@ public class GUIControl : MonoBehaviour {
         inputParticipantGender = GameObject.Find("DropdownGender");
         inputArmLength = GameObject.Find("InputParticipantArmLength");
         buttonExperiment = GameObject.Find("ButtonExperiment");
+        buttonLearning = GameObject.Find("ButtonLearning");
         buttonTraining = GameObject.Find("ButtonTraining");
         buttonShoulderPos = GameObject.Find("ButtonShoulderPos");
         textHintShoulderPos = GameObject.Find("TextHintShoulderPos");
@@ -183,11 +195,11 @@ public class GUIControl : MonoBehaviour {
 
         //deactivate the "Start Experiment" and "Training" Buttons:
         buttonExperiment.GetComponent<Button>().interactable = false;
-        buttonTraining.GetComponent<Button>().interactable = false;
+        buttonLearning.GetComponent<Button>().interactable = false;
 
         textHintTablePos.SetActive(false);
         textHintShoulderPos.SetActive(false);
-        endexp.SetActive(false);
+        end.SetActive(false);
 
         //start the Main Menu:
         StartMainMenu();
@@ -203,6 +215,7 @@ public class GUIControl : MonoBehaviour {
         {
             obj.SetActive(false);
             obj.GetComponent<Renderer>().material.color = Color.white;
+            obj.GetComponent<SphereCollider>().enabled = false;
         }
 
     }
@@ -212,6 +225,7 @@ public class GUIControl : MonoBehaviour {
         foreach (GameObject obj in cubeGameObjArr)
         {
             obj.SetActive(true);
+            obj.GetComponent<SphereCollider>().enabled = true;
         }
 
     }
@@ -262,14 +276,14 @@ public class GUIControl : MonoBehaviour {
 
         float[] tempDurations = new float[totalTrials];
 
-        /*
-        Debug.Log("All cue durations:");
+        
+        //Debug.Log("All cue durations:");
         for (int i = 0; i < totalTrials; i++)
         {
             //the goal here is to get linear distributed values in the range of cueDurationAvg-cueDuRationVariation and cueDurationAvg+cueDuRationVariation
             tempDurations[i] = i * (durationVariation * 2 / (totalTrials - 1)) + durationAverage - durationVariation;
-            Debug.Log(tempDurations[i].ToString());
-        }*/
+            //Debug.Log(tempDurations[i].ToString());
+        }
         //shuffle cue duration order
         RandomizeArray.ShuffleArray(tempDurations);
 
@@ -282,7 +296,7 @@ public class GUIControl : MonoBehaviour {
         //set experiment control vars
         flagStart = true;
         experimentEnd = false;
-        //currentBlock += 1;
+        experimentRunNo += 1;
         trialSeqCounter = 0;
 
         //calculate total number of trials
@@ -297,20 +311,20 @@ public class GUIControl : MonoBehaviour {
         // Randomize Cube Appearance Sequence
         RandomizeArray.ShuffleArray(CubeSeq);
 
-
         //activate/deactivate objects
         table.gameObject.GetComponent<Renderer>().enabled = true;
         plane.gameObject.GetComponent<Renderer>().enabled = true;
-        //instructionsExp.gameObject.GetComponent<Canvas>().enabled = false;
-        //endexp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
-        endexp.SetActive(false);
-        //questionnaire.SetActive(false);
+        end.SetActive(false);
         startContinue.SetActive(true);
         resting.gameObject.GetComponent<Renderer>().enabled = true;
+
+        //set correct end text
+        endTextBox.GetComponent<Text>().text = endTextExp;
 
         //write experiment start marker
         tempMarkerText = 
             "experiment:start;" +
+            "runNo:" + experimentRunNo.ToString() + ";" +
             "trialsPerTask:" + trialsPerTask.ToString() + ";" +
             "trialsTotal:" + nrOfTrialsTotal.ToString() + ";" +
             "fixationDuration:" + fixationDuration.ToString() + ";" +
@@ -359,18 +373,30 @@ public class GUIControl : MonoBehaviour {
             if (trialSeqCounter < nrOfTrialsTotal && !experimentEnd) 
             {
                 RunTrial();
-
             }
 
             // after all trials are finished
             if (experimentEnd)  
             {
-                //write expemriment end marker
-                marker.Write("experiment:end");
-                Debug.Log("experiment:end");
+                //write specific end marker
+                if (learningStarted)
+                {
+                    marker.Write("learning:end");
+                    Debug.Log("learning:end");
+                }
+                else if (trainingStarted)
+                {
+                    marker.Write("training:end");
+                    Debug.Log("training:end");
+                }
+                else
+                {
+                    marker.Write("experiment:end");
+                    Debug.Log("experiment:end");
+                }
 
                 //activate experiment end text
-                endexp.SetActive(true);
+                end.SetActive(true);
 
                 experimentStarted = false;
 
@@ -388,9 +414,6 @@ public class GUIControl : MonoBehaviour {
         //Start of trial: show fixation cross
         if (actualTime <= fixationDuration)
         {
-            // do once to update sequence of trials and to write marker
-
-            //should run only once at trial start
             if (!fixationCrossActivated)
             {
                 //enable fixation cross
@@ -401,7 +424,6 @@ public class GUIControl : MonoBehaviour {
 
                 // Enable flag to detect events of GameObject Cube
                 //flagTouchEvent = true;  //[ToDo: is this still used anywhere?]
-
             }
         }
 
@@ -502,7 +524,13 @@ public class GUIControl : MonoBehaviour {
         startContinue.SetActive(false);
 
         //deactivate instructions
-        instructionsExp.SetActive(false);
+        if (instructionsExp.activeSelf)
+        {
+            instructionsExp.SetActive(false);
+            marker.Write("instructions deactivated");
+            Debug.Log("instructions deactivated");
+        }
+        
 
         //set experiment control status to experiment (needed here when coninuing after break)
         //expControlStatus = 5;
@@ -575,21 +603,41 @@ public class GUIControl : MonoBehaviour {
         visualFeedbackActive = false;
         collisionDuration.Reset();
 
-        //break after 1/4, 1/2, 3/4 of total trials:
-        if (trialSeqCounter == (int)(nrOfTrialsTotal / 4) || trialSeqCounter == (int)(nrOfTrialsTotal / 2) || trialSeqCounter == (int)(nrOfTrialsTotal * 3 / 4))
-        {
-            //start break not next trial
-            if (trialSeqCounter == (int)(nrOfTrialsTotal / 4) || trialSeqCounter == (int)(nrOfTrialsTotal * 3 / 4))
-                StartBreak(120f);  //2min break
-            else
-                StartBreak(180f);  //3min break
-        }
+
         //check if all trials have been run
-        else if (trialSeqCounter == nrOfTrialsTotal)
+        if (trialSeqCounter == nrOfTrialsTotal)
+        {
             //set flag for experiment end and don't start another trial
             experimentEnd = true;
+        }
         else
-            TrialStart();
+        {
+            //ONLY during experiment and NOT during learning or training: BREAK TIME after 1/4, 1/2, 3/4 of total trials:
+            if (!(trainingStarted || learningStarted))
+            {
+                //check if start BREAK TIME or next trial
+                if (trialSeqCounter == (int)(nrOfTrialsTotal / 4))  //first break after 25% of trials
+                {
+                    StartBreak(firstBreakSeconds);
+                }
+                else if (trialSeqCounter == (int)(nrOfTrialsTotal / 2)) //second break after 50% trials
+                {
+                    StartBreak(secondBreakSeconds);
+                }
+                else if (trialSeqCounter == (int)(nrOfTrialsTotal * 3 / 4)) //thrid break after 75% trials
+                {
+                    StartBreak(thirdBreakSeconds);
+                }
+                else
+                {
+                    TrialStart();
+                }
+            }
+            else
+            {
+                TrialStart();
+            }
+        }
         
     }
 
@@ -843,11 +891,16 @@ public class GUIControl : MonoBehaviour {
         //resting.gameObject.GetComponent<Renderer>().enabled = false;
         resting.SetActive(false);
         //questionnaire.SetActive(false);
-        //endexp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
-        //endexp.SetActive(false);      //commented out so that the text will stay after experiment ended and main menu is displayed for experimenter (but not for participant)
+        //end.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
+        //end.SetActive(false);      //commented out so that the text will stay after experiment ended and main menu is displayed for experimenter (but not for participant)
         //shoulder.SetActive(false);
         breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
+
+        //reset control flags:
+        flagStart = false;
+        learningStarted = false;
+        trainingStarted = false;
 
     }
 
@@ -874,8 +927,8 @@ public class GUIControl : MonoBehaviour {
         //resting.gameObject.GetComponent<Renderer>().enabled = false;
         resting.SetActive(false);
         //questionnaire.SetActive(false);
-        //endexp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
-        endexp.SetActive(false);
+        //end.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
+        end.SetActive(false);
         //shoulder.SetActive(false);
         breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
@@ -979,8 +1032,8 @@ public class GUIControl : MonoBehaviour {
         //resting.gameObject.GetComponent<Renderer>().enabled = false;
         resting.SetActive(true);
         //questionnaire.SetActive(false);
-        //endexp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
-        endexp.SetActive(false);
+        //end.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
+        end.SetActive(false);
         //shoulder.SetActive(true);
         breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
@@ -989,11 +1042,11 @@ public class GUIControl : MonoBehaviour {
     }
 
 
-    public void StartTrainingOne()
+    public void StartLearning()
     {
-        //This method is used for the "Start Training" button on the main menu. WHen the button is pressed this method is executed.
-        marker.Write("Main menu: Start Training button pressed");
-        Debug.Log("Starting Training");
+        //This method is used for the "Start Learning" button on the main menu. When the button is pressed this method is executed.
+        marker.Write("Main menu: Start Learning button pressed");
+        Debug.Log("Starting Learning");
 
         expControlStatus = 3;
 
@@ -1014,8 +1067,8 @@ public class GUIControl : MonoBehaviour {
         //resting.gameObject.GetComponent<Renderer>().enabled = false;
         resting.SetActive(true);
         //questionnaire.SetActive(false);
-        //endexp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
-        endexp.SetActive(false);
+        //end.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
+        end.SetActive(false);
         //shoulder.SetActive(false);
         breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
@@ -1023,16 +1076,18 @@ public class GUIControl : MonoBehaviour {
     }
 
 
-    public void InitTrainingOne()
+    public void InitLearning()
     {
         //set experiment control vars
-        flagStart = true;
+        //flagStart = true;
+        learningStarted = true;
         experimentEnd = false;
         //currentBlock += 1;
         trialSeqCounter = 0;
+        learningRunNo += 1;
 
         //calculate total number of trials
-        nrOfTrialsTotal = trialsPerTaskTraining * tasks.Length;
+        nrOfTrialsTotal = trialsPerTaskLearning * tasks.Length;
 
         //create array with tasks for all trials
         trialTasks = CreateTrialTaskArray(nrOfTrialsTotal, taskSeq, tasks);
@@ -1043,27 +1098,27 @@ public class GUIControl : MonoBehaviour {
         // Randomize Cube Appearance Sequence
         RandomizeArray.ShuffleArray(CubeSeq);
 
-        trainingOne = true;
-        trainingOneRunNo += 1;
-
         // Making instruction invisible in scene and start rendering table and plane
         table.gameObject.GetComponent<Renderer>().enabled = true;
         plane.gameObject.GetComponent<Renderer>().enabled = true;
         //instructionsExp.gameObject.GetComponent<Canvas>().enabled = false;
-        //endexp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
-        endexp.SetActive(false);
+        //end.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
+        end.SetActive(false);
         //questionnaire.SetActive(false);
 
         // enable collision possibility
         startContinue.SetActive(true);
         resting.gameObject.GetComponent<Renderer>().enabled = true;
 
+        //set correct end text
+        endTextBox.GetComponent<Text>().text = endTextLearning;
+
         //write experiment start marker
 
         tempMarkerText =
             "training1:start;" +
-            "trialsPerTask:" + trialsPerTaskTraining.ToString() + ";" +
-            "RunNo:" + trainingOneRunNo.ToString() + ";" +
+            "RunNo:" + learningRunNo.ToString() + ";" +
+            "trialsPerTask:" + trialsPerTaskLearning.ToString() + ";" +
             "trialsTotal:" + nrOfTrialsTotal.ToString() + ";" +
             "fixationDuration:" + fixationDuration.ToString() + ";" +
             "cueDurationAvg:" + cueDurationAvg.ToString() + ";" +
@@ -1098,9 +1153,9 @@ public class GUIControl : MonoBehaviour {
     }
 
 
-    public void StartTrainingTwo()
+    public void StartTraining()
     {
-        //This method is used for the "Start Training" button on the main menu. WHen the button is pressed this method is executed.
+        //This method is used for the "Start Training" button on the main menu. When the button is pressed this method is executed.
         marker.Write("Main menu: Start Training button pressed");
         Debug.Log("Starting Training");
 
@@ -1110,21 +1165,19 @@ public class GUIControl : MonoBehaviour {
         mainMenu.gameObject.SetActive(false);
         calibrationMenu.SetActive(false);
         configurationMenu.SetActive(false);
-        //instructionsExp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
+
         instructionsExp.SetActive(true);
-        //plane.gameObject.GetComponent<Renderer>().enabled = false;
+        marker.Write("instructions activated");
+        Debug.Log("Instructions activated");
+
         plane.SetActive(true);
         fixationCross.SetActive(false);
         cue.SetActive(false);
-        //table.gameObject.GetComponent<Renderer>().enabled = false;
         table.SetActive(true);
         DeactivateAllCubes();
         startContinue.SetActive(true);
-        //resting.gameObject.GetComponent<Renderer>().enabled = false;
         resting.SetActive(true);
-        //questionnaire.SetActive(false);
-        //endexp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
-        endexp.SetActive(false);
+        end.SetActive(false);
         //shoulder.SetActive(false);
         breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
@@ -1132,13 +1185,15 @@ public class GUIControl : MonoBehaviour {
     }
 
 
-    public void InitTrainingTwo()
+    public void InitTraining()
     {
         //set experiment control vars
-        flagStart = true;
+        //flagStart = true;
+        trainingStarted = true;
         experimentEnd = false;
         //currentBlock += 1;
         trialSeqCounter = 0;
+        trainingRunNo += 1;
 
         //calculate total number of trials
         nrOfTrialsTotal = trialsPerTaskTraining * tasks.Length;
@@ -1152,26 +1207,25 @@ public class GUIControl : MonoBehaviour {
         // Randomize Cube Appearance Sequence
         RandomizeArray.ShuffleArray(CubeSeq);
 
-        trainingTwo = true;
-        trainingTwoRunNo += 1;
-
         // Making instruction invisible in scene and start rendering table and plane
         table.gameObject.GetComponent<Renderer>().enabled = true;
         plane.gameObject.GetComponent<Renderer>().enabled = true;
-        //instructionsExp.gameObject.GetComponent<Canvas>().enabled = false;
-        //endexp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
-        endexp.SetActive(false);
+        instructionsExp.SetActive(true);
+        //end.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
+        end.SetActive(false);
         //questionnaire.SetActive(false);
 
         // enable collision possibility
         startContinue.SetActive(true);
         resting.gameObject.GetComponent<Renderer>().enabled = true;
 
+        //set correct end text
+        endTextBox.GetComponent<Text>().text = endTextTraining;
+
         //write experiment start marker
-        
         tempMarkerText =
-            "training2:start;" +
-            "RunNo:" + trainingTwoRunNo.ToString() + ";" +
+            "training:start;" +
+            "RunNo:" + trainingRunNo.ToString() + ";" +
             "trialsPerTask:" + trialsPerTaskTraining.ToString() + ";" +
             "trialsTotal:" + nrOfTrialsTotal.ToString() + ";" +
             "fixationDuration:" + fixationDuration.ToString() + ";" +
@@ -1230,7 +1284,7 @@ public class GUIControl : MonoBehaviour {
                 Debug.Log("training:end");
 
                 //activate experiment end text
-                endexp.SetActive(true);
+                end.SetActive(true);
 
                 trainingStarted = false;
 
@@ -1255,8 +1309,11 @@ public class GUIControl : MonoBehaviour {
         mainMenu.gameObject.SetActive(false);
         calibrationMenu.SetActive(false);
         configurationMenu.SetActive(false);
-        //instructionsExp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
+
         instructionsExp.SetActive(true);
+        marker.Write("instructions activated");
+        Debug.Log("Instructions activated");
+
         //plane.gameObject.GetComponent<Renderer>().enabled = false;
         plane.SetActive(true);
         fixationCross.SetActive(false);
@@ -1268,11 +1325,12 @@ public class GUIControl : MonoBehaviour {
         //resting.gameObject.GetComponent<Renderer>().enabled = false;
         resting.SetActive(true);
         //questionnaire.SetActive(false);
-        //endexp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
-        endexp.SetActive(false);
+        //end.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
+        end.SetActive(false);
         //shoulder.SetActive(false);
         breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
+
     }
 
 
@@ -1459,12 +1517,14 @@ public class GUIControl : MonoBehaviour {
                     if (idSet && ageSet && genderSet && armLengthSet && cupPositionsSet && tablePosSet)
                     {
                         buttonExperiment.GetComponent<Button>().interactable = true;
+                        buttonLearning.GetComponent<Button>().interactable = true;
                         buttonTraining.GetComponent<Button>().interactable = true;
                         textMissingInputs.SetActive(false);
                     }
                     else
                     {
                         buttonExperiment.GetComponent<Button>().interactable = false;
+                        buttonLearning.GetComponent<Button>().interactable = false;
                         buttonTraining.GetComponent<Button>().interactable = false;
                         textMissingInputs.SetActive(true);
                     }
@@ -1510,22 +1570,20 @@ public class GUIControl : MonoBehaviour {
                     }
                     break;
                 }
-            case 3: //training 1 (like experiment but shorter)
+            case 3: //learning (manual trial start and consecutive trials for each task task)
                 {
-                    if (trainingStarted)
-                        //RunTraining();
+                    if (learningStarted)
                         ControlTrial();
                     else
-                        InitTrainingOne(); // run only once after
+                        InitLearning(); // run only once after
                     break;
                 }
-            case 4: //training 2 (like experiment but shorter)
+            case 4: //training (like experiment but shorter)
                 {
                     if (trainingStarted)
-                        //RunTraining();
                         ControlTrial();
                     else
-                        InitTrainingTwo(); // run only once after
+                        InitTraining(); // run only once after
                     break;
                 }
             case 5: //experiment
