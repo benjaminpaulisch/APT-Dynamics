@@ -531,7 +531,6 @@ public class GUIControl : MonoBehaviour {
             Debug.Log("instructions deactivated");
         }
         
-
         //set experiment control status to experiment (needed here when coninuing after break)
         //expControlStatus = 5;
 
@@ -560,11 +559,11 @@ public class GUIControl : MonoBehaviour {
         if (currentCondition == "near")
         {
             //For the near positions we have to add 5 to the index, cause the near positions are the indexes 5-9 in the cubeGameObjArray
-            currentStimulusObj = cubeGameObjArr[CubePositions[cubeSeqCounter + 5]];
+            currentStimulusObj = cubeGameObjArr[CubePositions[CubeSeq[cubeSeqCounter] + 5]];
         }
         else if (currentCondition == "far")
         {
-            currentStimulusObj = cubeGameObjArr[CubePositions[cubeSeqCounter]];
+            currentStimulusObj = cubeGameObjArr[CubePositions[CubeSeq[cubeSeqCounter]]];
         }
 
         //write trial start marker
@@ -591,7 +590,7 @@ public class GUIControl : MonoBehaviour {
         cubeSeqCounter = cubeSeqCounter + 1;
 
         // reshuffle stimulus sequence
-        if (cubeSeqCounter == CubeSeq.Length-1)
+        if (cubeSeqCounter == CubeSeq.Length)
         {
             cubeSeqCounter = 0;
             RandomizeArray.ShuffleArray(CubeSeq); // re-randomize stimulus sequence 
@@ -1054,20 +1053,18 @@ public class GUIControl : MonoBehaviour {
         mainMenu.gameObject.SetActive(false);
         calibrationMenu.SetActive(false);
         configurationMenu.SetActive(false);
-        //instructionsExp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
+        
         instructionsExp.SetActive(true);
-        //plane.gameObject.GetComponent<Renderer>().enabled = false;
+        marker.Write("instructions activated");
+        Debug.Log("Instructions activated");
+
         plane.SetActive(true);
         fixationCross.SetActive(false);
         cue.SetActive(false);
-        //table.gameObject.GetComponent<Renderer>().enabled = false;
         table.SetActive(true);
         DeactivateAllCubes();
         startContinue.SetActive(true);
-        //resting.gameObject.GetComponent<Renderer>().enabled = false;
         resting.SetActive(true);
-        //questionnaire.SetActive(false);
-        //end.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
         end.SetActive(false);
         //shoulder.SetActive(false);
         breakCanvasVR.SetActive(false);
@@ -1082,15 +1079,38 @@ public class GUIControl : MonoBehaviour {
         //flagStart = true;
         learningStarted = true;
         experimentEnd = false;
-        //currentBlock += 1;
         trialSeqCounter = 0;
         learningRunNo += 1;
 
         //calculate total number of trials
         nrOfTrialsTotal = trialsPerTaskLearning * tasks.Length;
 
-        //create array with tasks for all trials
-        trialTasks = CreateTrialTaskArray(nrOfTrialsTotal, taskSeq, tasks);
+        // Create array with tasks for all trials
+        //For learning we do not mix tasks between all trials. We do a sequence of trials of each task.
+        //The order of tasks will be randomed.
+        int[] tempSequence = taskSeq;
+        RandomizeArray.ShuffleArray(tempSequence);
+        trialTasks = new int[nrOfTrialsTotal];
+        int tempCounter = 0;
+
+        Debug.Log("trialTasks:");
+        for(int i=0; i<tempSequence.Length; i++)    //for every task
+        {
+            for(int j=0; j<trialsPerTaskLearning;j++)
+            {
+                trialTasks[tempCounter] = tempSequence[i];
+                //Debug.Log(tasks[tempSequence[i]]);
+
+                tempCounter++;
+            }
+        }
+        //Debug: print out the array:
+        for(int i=0; i< trialTasks.Length; i++)
+        {
+            Debug.Log(tasks[trialTasks[i]]);
+        }
+
+        //trialTasks = CreateTrialTaskArray(nrOfTrialsTotal, taskSeq, tasks);
 
         //create array with cue durations for all tasks
         cueDurations = CreateCueDurationArray(nrOfTrialsTotal, cueDurationAvg, cueDurationVariation);
@@ -1098,15 +1118,10 @@ public class GUIControl : MonoBehaviour {
         // Randomize Cube Appearance Sequence
         RandomizeArray.ShuffleArray(CubeSeq);
 
-        // Making instruction invisible in scene and start rendering table and plane
+        // activate/deactivate objects in scene
         table.gameObject.GetComponent<Renderer>().enabled = true;
         plane.gameObject.GetComponent<Renderer>().enabled = true;
-        //instructionsExp.gameObject.GetComponent<Canvas>().enabled = false;
-        //end.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
         end.SetActive(false);
-        //questionnaire.SetActive(false);
-
-        // enable collision possibility
         startContinue.SetActive(true);
         resting.gameObject.GetComponent<Renderer>().enabled = true;
 
@@ -1114,7 +1129,6 @@ public class GUIControl : MonoBehaviour {
         endTextBox.GetComponent<Text>().text = endTextLearning;
 
         //write experiment start marker
-
         tempMarkerText =
             "training1:start;" +
             "RunNo:" + learningRunNo.ToString() + ";" +
@@ -1191,7 +1205,6 @@ public class GUIControl : MonoBehaviour {
         //flagStart = true;
         trainingStarted = true;
         experimentEnd = false;
-        //currentBlock += 1;
         trialSeqCounter = 0;
         trainingRunNo += 1;
 
@@ -1207,15 +1220,10 @@ public class GUIControl : MonoBehaviour {
         // Randomize Cube Appearance Sequence
         RandomizeArray.ShuffleArray(CubeSeq);
 
-        // Making instruction invisible in scene and start rendering table and plane
+        // activate/deactivate objects in scene
         table.gameObject.GetComponent<Renderer>().enabled = true;
         plane.gameObject.GetComponent<Renderer>().enabled = true;
-        instructionsExp.SetActive(true);
-        //end.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
         end.SetActive(false);
-        //questionnaire.SetActive(false);
-
-        // enable collision possibility
         startContinue.SetActive(true);
         resting.gameObject.GetComponent<Renderer>().enabled = true;
 
