@@ -959,6 +959,8 @@ public class GUIControl : MonoBehaviour {
             }
             catch (System.FormatException e)
             {
+                marker.Write("FormatException: invalid input value for participant age. " + e.ToString());
+                Debug.Log("FormatException: invalid input value for participant age.");
                 Debug.LogException(e);
                 participantAge = 0;
                 inputParticipantAge.GetComponent<InputField>().text = "";
@@ -986,8 +988,10 @@ public class GUIControl : MonoBehaviour {
                 Debug.Log("armLength: " + armLength.ToString());
                 armLengthSet = true;
             }
-            catch (System.Exception e)
+            catch (System.FormatException e)
             {
+                marker.Write("FormatException: invalid input value for prticipant arm length. " + e.ToString());
+                Debug.Log("FormatException: invalid input value for participant arm length.");
                 Debug.LogException(e);
                 armLength = 0;
                 inputArmLength.GetComponent<InputField>().text = "";
@@ -1402,6 +1406,8 @@ public class GUIControl : MonoBehaviour {
         }
         catch (System.Exception e)
         {
+            marker.Write("Exception: Tracker not found? " + e.ToString());
+            Debug.Log("Exception: Tracker not found?");
             Debug.LogError(e);
             //textHintConfigFirst.GetComponent<Text>().text = "Error: Tracker not found";
             trackerFoundShoulderPos = false;
@@ -1438,6 +1444,8 @@ public class GUIControl : MonoBehaviour {
         }
         catch (System.Exception e)
         {
+            marker.Write("Exception: Tracker not found? " + e.ToString());
+            Debug.Log("Exception: Tracker not found?");
             Debug.LogError(e);
             textHintShoulderFirst.GetComponent<Text>().text = "Error: Tracker not found";
         }
@@ -1506,6 +1514,8 @@ public class GUIControl : MonoBehaviour {
         }
         catch (System.NullReferenceException e)
         {
+            marker.Write("Exception: Tracker not found? " + e.ToString());
+            Debug.Log("Exception: Tracker not found?");
             Debug.LogError(e);
             textHintTablePos.GetComponent<Text>().text = "Error: Tracker not found.";
             textHintTablePos.SetActive(true);
@@ -1517,104 +1527,112 @@ public class GUIControl : MonoBehaviour {
     // Update is called once per frame
     void Update ()
     {
-        switch (expControlStatus) {
-
-            case 0: //main menu
-                {
-                    //check if all inputs in Configuration have been given and alle calibration was made
-                    if (idSet && ageSet && genderSet && armLengthSet && cupPositionsSet && tablePosSet)
+        try
+        {
+            switch (expControlStatus)
+            {
+                case 0: //main menu
                     {
-                        buttonExperiment.GetComponent<Button>().interactable = true;
-                        buttonLearning.GetComponent<Button>().interactable = true;
-                        buttonTraining.GetComponent<Button>().interactable = true;
-                        textMissingInputs.SetActive(false);
-                    }
-                    else
-                    {
-                        buttonExperiment.GetComponent<Button>().interactable = false;
-                        buttonLearning.GetComponent<Button>().interactable = false;
-                        buttonTraining.GetComponent<Button>().interactable = false;
-                        textMissingInputs.SetActive(true);
-                    }
-                    break;
-                }
-
-            case 1: //configuration
-                {
-                    break;
-                }
-            case 2: //calibration
-                {
-                    //check if shoulder position has been set
-                    if (shoulderSet)
-                    {
-                        buttonMaximumReach.GetComponent<Button>().interactable = true;
-
-                        if(trackerFoundMaxReach)
-                            textHintShoulderFirst.SetActive(false);
+                        //check if all inputs in Configuration have been given and alle calibration was made
+                        if (idSet && ageSet && genderSet && armLengthSet && cupPositionsSet && tablePosSet)
+                        {
+                            buttonExperiment.GetComponent<Button>().interactable = true;
+                            buttonLearning.GetComponent<Button>().interactable = true;
+                            buttonTraining.GetComponent<Button>().interactable = true;
+                            textMissingInputs.SetActive(false);
+                        }
                         else
-                            textHintShoulderFirst.SetActive(true);                        
-                    }
-                    else
-                    {
-                        buttonMaximumReach.GetComponent<Button>().interactable = false;
-                        textHintShoulderFirst.SetActive(true);
+                        {
+                            buttonExperiment.GetComponent<Button>().interactable = false;
+                            buttonLearning.GetComponent<Button>().interactable = false;
+                            buttonTraining.GetComponent<Button>().interactable = false;
+                            textMissingInputs.SetActive(true);
+                        }
+                        break;
                     }
 
-                    //check if maximum reach has been set
-                    if(maxReachSet)
+                case 1: //configuration
                     {
-                        buttonCupPositions.GetComponent<Button>().interactable = true;
+                        break;
+                    }
+                case 2: //calibration
+                    {
+                        //check if shoulder position has been set
+                        if (shoulderSet)
+                        {
+                            buttonMaximumReach.GetComponent<Button>().interactable = true;
 
-                        if(trackerFoundCupPos)
-                            textHintCupPos.SetActive(false);
+                            if(trackerFoundMaxReach)
+                                textHintShoulderFirst.SetActive(false);
+                            else
+                                textHintShoulderFirst.SetActive(true);                        
+                        }
                         else
-                            textHintCupPos.SetActive(true);                        
+                        {
+                            buttonMaximumReach.GetComponent<Button>().interactable = false;
+                            textHintShoulderFirst.SetActive(true);
+                        }
+
+                        //check if maximum reach has been set
+                        if(maxReachSet)
+                        {
+                            buttonCupPositions.GetComponent<Button>().interactable = true;
+
+                            if(trackerFoundCupPos)
+                                textHintCupPos.SetActive(false);
+                            else
+                                textHintCupPos.SetActive(true);                        
+                        }
+                        else
+                        {
+                            buttonCupPositions.GetComponent<Button>().interactable = false;
+                            textHintCupPos.SetActive(true);
+                        }
+                        break;
                     }
-                    else
+                case 3: //learning (manual trial start and consecutive trials for each task task)
                     {
-                        buttonCupPositions.GetComponent<Button>().interactable = false;
-                        textHintCupPos.SetActive(true);
+                        if (learningStarted)
+                            ControlTrial();
+                        else
+                            InitLearning(); // run only once after
+                        break;
                     }
-                    break;
-                }
-            case 3: //learning (manual trial start and consecutive trials for each task task)
-                {
-                    if (learningStarted)
-                        ControlTrial();
-                    else
-                        InitLearning(); // run only once after
-                    break;
-                }
-            case 4: //training (like experiment but shorter)
-                {
-                    if (trainingStarted)
-                        ControlTrial();
-                    else
-                        InitTraining(); // run only once after
-                    break;
-                }
-            case 5: //experiment
-                {
-                    if (flagStart)
-                        ControlTrial();
-                    else
-                        InitExperiment(); // run only once
-                    break;
-                }
-            case 6: //break
-                {
-                    breakDurationCountdown -= Time.deltaTime;
+                case 4: //training (like experiment but shorter)
+                    {
+                        if (trainingStarted)
+                            ControlTrial();
+                        else
+                            InitTraining(); // run only once after
+                        break;
+                    }
+                case 5: //experiment
+                    {
+                        if (flagStart)
+                            ControlTrial();
+                        else
+                            InitExperiment(); // run only once
+                        break;
+                    }
+                case 6: //break
+                    {
+                        breakDurationCountdown -= Time.deltaTime;
 
-                    //check break timer
-                    if (breakDurationCountdown <= 0)
-                        //stop break and continue with experiment
-                        StopBreak();
+                        //check break timer
+                        if (breakDurationCountdown <= 0)
+                            //stop break and continue with experiment
+                            StopBreak();
 
-                    //continue experiment
-                    break;
-                }
-
+                        //continue experiment
+                        break;
+                    }
+            }//switch
+        }
+        catch (System.Exception e)  //catch errors and log them and write them to lsl stream, then throw the exception again
+        {
+            marker.Write(e.ToString());
+            Debug.LogError(e);
+            throw (e);
         }
 
     }
