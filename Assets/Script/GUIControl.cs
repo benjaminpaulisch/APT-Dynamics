@@ -28,6 +28,7 @@ public class GUIControl : MonoBehaviour {
 
     [Header("Learning specific")]
     public int trialsPerTaskLearning = 5;
+    public float cueDurationLearning = 1.5f;
 
     [Header("Training specific")]
     public int trialsPerTaskTraining = 5;
@@ -357,6 +358,9 @@ public class GUIControl : MonoBehaviour {
         marker.Write(tempMarkerText);
         Debug.Log(tempMarkerText);
 
+        marker.Write("waiting for start/continue button press");
+        Debug.Log("waiting for start/continue button press...");
+
     }
 
     
@@ -631,6 +635,14 @@ public class GUIControl : MonoBehaviour {
                 {
                     TrialStart();
                 }
+            }
+            else if (learningStarted)
+            {
+                //in learning we have manuel trial start each trial
+                experimentStarted = false;
+                startContinue.SetActive(true);
+                marker.Write("Waiting for start/continue button press");
+                Debug.Log("Waiting for start/continue button press...");
             }
             else
             {
@@ -1097,7 +1109,7 @@ public class GUIControl : MonoBehaviour {
         trialTasks = new int[nrOfTrialsTotal];
         int tempCounter = 0;
 
-        Debug.Log("trialTasks:");
+        //Debug.Log("trialTasks:");
         for(int i=0; i<tempSequence.Length; i++)    //for every task
         {
             for(int j=0; j<trialsPerTaskLearning;j++)
@@ -1111,13 +1123,20 @@ public class GUIControl : MonoBehaviour {
         //Debug: print out the array:
         for(int i=0; i< trialTasks.Length; i++)
         {
-            Debug.Log(tasks[trialTasks[i]]);
+            //Debug.Log(tasks[trialTasks[i]]);
         }
 
         //trialTasks = CreateTrialTaskArray(nrOfTrialsTotal, taskSeq, tasks);
 
         //create array with cue durations for all tasks
-        cueDurations = CreateCueDurationArray(nrOfTrialsTotal, cueDurationAvg, cueDurationVariation);
+        //cueDurations = CreateCueDurationArray(nrOfTrialsTotal, cueDurationAvg, cueDurationVariation);
+        cueDurations = new float[nrOfTrialsTotal];
+
+        for (int i=0; i<nrOfTrialsTotal; i++)
+        {
+            cueDurations[i] = cueDurationLearning;
+        }
+
 
         // Randomize Cube Appearance Sequence
         RandomizeArray.ShuffleArray(CubeSeq);
@@ -1134,8 +1153,8 @@ public class GUIControl : MonoBehaviour {
 
         //write experiment start marker
         tempMarkerText =
-            "training1:start;" +
-            "RunNo:" + learningRunNo.ToString() + ";" +
+            "learning:start;" +
+            "runNo:" + learningRunNo.ToString() + ";" +
             "trialsPerTask:" + trialsPerTaskLearning.ToString() + ";" +
             "trialsTotal:" + nrOfTrialsTotal.ToString() + ";" +
             "fixationDuration:" + fixationDuration.ToString() + ";" +
@@ -1167,6 +1186,9 @@ public class GUIControl : MonoBehaviour {
             "stimulusPositions:" + stimulusPositions.ToString();
         marker.Write(tempMarkerText);
         Debug.Log(tempMarkerText);
+
+        marker.Write("waiting for start/continue button press");
+        Debug.Log("waiting for start/continue button press...");
 
     }
 
@@ -1237,7 +1259,7 @@ public class GUIControl : MonoBehaviour {
         //write experiment start marker
         tempMarkerText =
             "training:start;" +
-            "RunNo:" + trainingRunNo.ToString() + ";" +
+            "runNo:" + trainingRunNo.ToString() + ";" +
             "trialsPerTask:" + trialsPerTaskTraining.ToString() + ";" +
             "trialsTotal:" + nrOfTrialsTotal.ToString() + ";" +
             "fixationDuration:" + fixationDuration.ToString() + ";" +
@@ -1269,7 +1291,10 @@ public class GUIControl : MonoBehaviour {
             "stimulusPositions:" + stimulusPositions.ToString();
         marker.Write(tempMarkerText);
         Debug.Log(tempMarkerText);
-        
+
+        marker.Write("waiting for start/continue button press");
+        Debug.Log("waiting for start/continue button press...");
+
     }
 
     /*
