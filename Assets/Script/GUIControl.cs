@@ -1634,7 +1634,18 @@ public class GUIControl : MonoBehaviour {
                     }
                 case 3: //learning (manual trial start and consecutive trials for each task task)
                     {
-                        if (learningStarted)
+                        //check for abort by pressing the escape key
+                        if (Input.GetKeyDown("escape"))
+                        {
+                            marker.Write("learning:abort");
+                            Debug.Log("learning:abort");
+
+                            experimentStarted = false;
+
+                            //go to main menu
+                            StartMainMenu();
+                        }
+                        else if (learningStarted)
                             ControlTrial();
                         else
                             InitLearning(); // run only once after
@@ -1642,7 +1653,18 @@ public class GUIControl : MonoBehaviour {
                     }
                 case 4: //training (like experiment but shorter)
                     {
-                        if (trainingStarted)
+                        //check for abort by pressing the escape key
+                        if (Input.GetKeyDown("escape"))
+                        {
+                            marker.Write("training:abort");
+                            Debug.Log("training:abort");
+
+                            experimentStarted = false;
+
+                            //go to main menu
+                            StartMainMenu();
+                        }
+                        else if (trainingStarted)
                             ControlTrial();
                         else
                             InitTraining(); // run only once after
@@ -1650,7 +1672,18 @@ public class GUIControl : MonoBehaviour {
                     }
                 case 5: //experiment
                     {
-                        if (flagStart)
+                        //check for abort by pressing the escape key
+                        if (Input.GetKeyDown("escape"))
+                        {
+                            marker.Write("experiment:abort");
+                            Debug.Log("experiment:abort");
+
+                            experimentStarted = false;
+
+                            //go to main menu
+                            StartMainMenu();
+                        }
+                        else if (flagStart)
                             ControlTrial();
                         else
                             InitExperiment(); // run only once
@@ -1658,6 +1691,17 @@ public class GUIControl : MonoBehaviour {
                     }
                 case 6: //break
                     {
+                        //check for abort by pressing the escape key
+                        if (Input.GetKeyDown("escape"))
+                        {
+                            marker.Write("break:abort");
+                            Debug.Log("break:abort");
+
+                            experimentStarted = false;
+
+                            //go to main menu
+                            StartMainMenu();
+                        }
                         /*
                         breakDurationCountdown -= Time.deltaTime;
 
@@ -1670,6 +1714,7 @@ public class GUIControl : MonoBehaviour {
                         break;
                     }
             }//switch
+            
         }
         catch (System.Exception e)  //catch errors and log them and write them to lsl stream, then throw the exception again
         {
