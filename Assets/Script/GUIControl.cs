@@ -112,6 +112,7 @@ public class GUIControl : MonoBehaviour {
     private float currentCueDuration;           //stores individual cue duration of the current trial
     private int experimentRunNo = 0;
     private string endTextExp = "The experiment has ended.\nThank you for your participation.";
+    private bool manualBreakTriggered = false;
 
 
     // Game objects
@@ -625,20 +626,13 @@ public class GUIControl : MonoBehaviour {
             if (!(trainingStarted || learningStarted))
             {
                 //check if start BREAK TIME or next trial
-                if (trialSeqCounter == (int)(nrOfTrialsTotal / 4))  //first break after 25% of trials
+                if (trialSeqCounter == (int)(nrOfTrialsTotal / 4) || trialSeqCounter == (int)(nrOfTrialsTotal / 2) || trialSeqCounter == (int)(nrOfTrialsTotal * 3 / 4))
                 {
-                    //StartBreak(firstBreakSeconds);
-                    StartBreak();
+                    StartBreak(false);
                 }
-                else if (trialSeqCounter == (int)(nrOfTrialsTotal / 2)) //second break after 50% trials
+                else if (manualBreakTriggered) //manual break triggered by pressing the "p" key
                 {
-                    //StartBreak(secondBreakSeconds);
-                    StartBreak();
-                }
-                else if (trialSeqCounter == (int)(nrOfTrialsTotal * 3 / 4)) //thrid break after 75% trials
-                {
-                    //StartBreak(thirdBreakSeconds);
-                    StartBreak();
+                    StartBreak(true);
                 }
                 else
                 {
@@ -1381,7 +1375,7 @@ public class GUIControl : MonoBehaviour {
 
 
     //public void StartBreak(float breakDuration)
-    public void StartBreak()
+    public void StartBreak(bool isManual)
     {
         //start break timer
         //breakDurationCountdown = breakDuration;
@@ -1400,14 +1394,19 @@ public class GUIControl : MonoBehaviour {
 
         tempMarkerText =
             "break:start;" +
-            "afterTrial:" + (trialSeqCounter-1).ToString() //+ ";" +
+            "afterTrial:" + (trialSeqCounter-1).ToString() + ";" +
             //"breakDuration:" + breakDuration.ToString()
-            ;
+            "isManual:" + BoolToString(isManual);
         marker.Write(tempMarkerText);
         Debug.Log(tempMarkerText);
 
         marker.Write("Waiting for start/continue button press");
         Debug.Log("Waiting for button press...");
+
+        if (isManual)
+        {
+            manualBreakTriggered = false;
+        }
     }
 
     public void StopBreak()
@@ -1672,6 +1671,14 @@ public class GUIControl : MonoBehaviour {
                     }
                 case 5: //experiment
                     {
+                        //check for manual break by pressing the "p" key
+                        if (Input.GetKeyDown("p"))
+                        {
+                            marker.Write("manual break button was pressed");
+                            Debug.Log("manual break button was pressed");
+                            manualBreakTriggered = true;
+                        }
+
                         //check for abort by pressing the escape key
                         if (Input.GetKeyDown("escape"))
                         {
