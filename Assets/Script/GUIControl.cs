@@ -118,7 +118,7 @@ public class GUIControl : MonoBehaviour {
     public static GameObject table, plane, leapmotion, instructionsExp, textBox, end, endTextBox, startContinue, resting, questionnaire, q, ra, la, send, fixationCross, cue, cueText,
         mainMenu, calibrationMenu, configurationMenu, inputParticipantID, inputParticipantAge, inputParticipantGender, inputArmLength, buttonExperiment,
         buttonLearning, buttonTraining, buttonShoulderPos, textHintShoulderPos, textMissingInputs, tableSetup, buttonMaximumReach, buttonCupPositions, buttonTablePosition, textHintShoulderFirst,
-        textHintCupPos, textHintTablePos, breakCanvasVR, breakCanvasDesktop;
+        textHintCupPos, textHintTablePos, breakCanvasDesktop;
     private GameObject cubeFarLeft, cubeFarMiddleLeft, cubeFarMiddle, cubeFarMiddleRight, cubeFarRight, cubeNearLeft, cubeNearMiddleLeft, cubeNearMiddle, cubeNearMiddleRight, cubeNearRight;
     private GameObject[] cubeGameObjArr = new GameObject[10];
 
@@ -164,7 +164,7 @@ public class GUIControl : MonoBehaviour {
         textHintShoulderFirst = GameObject.Find("TextHintShoulderFirst");
         textHintCupPos = GameObject.Find("TextHintCupPos");
         textHintTablePos = GameObject.Find("TextHintTablePos");
-        breakCanvasVR = GameObject.Find("BreakCanvasVR");
+        //breakCanvasVR = GameObject.Find("BreakCanvasVR");
         breakCanvasDesktop = GameObject.Find("BreakCanvasDesktop");
 
         //Stimulus
@@ -914,7 +914,7 @@ public class GUIControl : MonoBehaviour {
         //end.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
         //end.SetActive(false);      //commented out so that the text will stay after experiment ended and main menu is displayed for experimenter (but not for participant)
         //shoulder.SetActive(false);
-        breakCanvasVR.SetActive(false);
+        //breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
 
         //reset control flags:
@@ -950,7 +950,7 @@ public class GUIControl : MonoBehaviour {
         //end.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
         end.SetActive(false);
         //shoulder.SetActive(false);
-        breakCanvasVR.SetActive(false);
+        //breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
     }
 
@@ -1059,7 +1059,7 @@ public class GUIControl : MonoBehaviour {
         //end.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
         end.SetActive(false);
         //shoulder.SetActive(true);
-        breakCanvasVR.SetActive(false);
+        //breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
 
         ActivateAllCubes();
@@ -1092,7 +1092,7 @@ public class GUIControl : MonoBehaviour {
         resting.SetActive(true);
         end.SetActive(false);
         //shoulder.SetActive(false);
-        breakCanvasVR.SetActive(false);
+        //breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
 
     }
@@ -1228,7 +1228,7 @@ public class GUIControl : MonoBehaviour {
         resting.SetActive(true);
         end.SetActive(false);
         //shoulder.SetActive(false);
-        breakCanvasVR.SetActive(false);
+        //breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
 
     }
@@ -1374,7 +1374,7 @@ public class GUIControl : MonoBehaviour {
         //end.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
         end.SetActive(false);
         //shoulder.SetActive(false);
-        breakCanvasVR.SetActive(false);
+        //breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
 
     }
@@ -1392,7 +1392,7 @@ public class GUIControl : MonoBehaviour {
         experimentStarted = false;
 
         //activate break text
-        breakCanvasVR.SetActive(true);
+        //breakCanvasVR.SetActive(true);
         breakCanvasDesktop.SetActive(true);
 
         //activate startContinue so that the participant can continue with experiment
@@ -1413,7 +1413,7 @@ public class GUIControl : MonoBehaviour {
     public void StopBreak()
     {
         //deactivate break text
-        breakCanvasVR.SetActive(false);
+        //breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
 
         marker.Write("break:end;afterTrial:" + (trialSeqCounter-1).ToString());
