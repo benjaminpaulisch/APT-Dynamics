@@ -6,15 +6,23 @@ public class CubeBigLeft : MonoBehaviour {
     public GUIControl GUIC;
 
     void OnTriggerEnter(Collider other)
-    {        
-        //GUIC.StartVisualFeedback(gameObject, "grab");
-        GUIC.StartVisualFeedback(gameObject, "touch");         
+    {
+        //in Learning only start correct feedback!
+        if (GUIC.learningStarted)
+        {
+            if (GUIC.currentTask == "touch")
+            {
+                GUIC.StartVisualFeedback(gameObject, "touch");
+            }
+        }
+        else
+        {
+            GUIC.StartVisualFeedback(gameObject, "touch");
+        }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        //GUIC.StopVisualFeedback("grab");
         GUIC.StopVisualFeedback("touch");
     }
-
 }

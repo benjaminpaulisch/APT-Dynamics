@@ -36,11 +36,22 @@ public class PointingTask : MonoBehaviour {
                 //check if it's a new hit
                 if (!hitActive)
                 {
-                    hitActive = true;
-
-                    //Debug.Log(vision.collider.name);    //output the name of the object our raycast is hitting
-
-                    GUIC.StartVisualFeedback(vision.collider.gameObject, "point");
+                    //in Learning only start correct feedback!
+                    if (GUIC.learningStarted)
+                    {
+                        if (GUIC.currentTask == "point")
+                        {
+                            hitActive = true;
+                            //Debug.Log(vision.collider.name);    //output the name of the object our raycast is hitting
+                            GUIC.StartVisualFeedback(vision.collider.gameObject, "point");
+                        }
+                    }
+                    else
+                    {
+                        hitActive = true;
+                        //Debug.Log(vision.collider.name);    //output the name of the object our raycast is hitting
+                        GUIC.StartVisualFeedback(vision.collider.gameObject, "point");
+                    }
                 }
             }
             
@@ -52,7 +63,6 @@ public class PointingTask : MonoBehaviour {
             if (hitActive)
             {
                 hitActive = false;
-
                 GUIC.StopVisualFeedback("point");
             } 
         }

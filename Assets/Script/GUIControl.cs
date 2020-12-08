@@ -42,7 +42,7 @@ public class GUIControl : MonoBehaviour {
     public static string[] tasks = new string[4] { "touchFar", "touchNear", "pointFar", "pointNear" };
     private int[] taskSeq = new int[] { 0, 1, 2, 3 };
     private int[] trialTasks;
-    private string currentTask;
+    public string currentTask;
     private string currentCondition;
     private GameObject currentStimulusObj;
     private string[] stimulusPositions;
@@ -81,7 +81,7 @@ public class GUIControl : MonoBehaviour {
     private bool trackerFoundShoulderPos = true;
     private bool trackerFoundMaxReach = true;
     private bool trackerFoundCupPos = true;
-    public static bool visualFeedbackActive = false;
+    private static bool visualFeedbackActive = false;
     private int expControlStatus;
     private float breakDurationCountdown;       //break timer
 
@@ -91,18 +91,18 @@ public class GUIControl : MonoBehaviour {
     private bool cueActivated = false;
     private bool targetActivated = false;
     private bool taskSuccess = false;
-    private bool collisionActive = false;
+    public bool collisionActive = false;
     //public bool flagTouchEvent = false;
     public static bool flagStart = false;
     public static bool experimentEnd = false;
 
     // learning specific
-    private bool learningStarted = false;
+    public bool learningStarted = false;
     private int learningRunNo = 0;
     private string endTextLearning = "The learning block has ended.\nPlease contact the experimenter.";
 
     // training specific
-    private bool trainingStarted = false;
+    public bool trainingStarted = false;
     private int trainingRunNo = 0;
     private string endTextTraining = "The training block has ended.\nPlease contact the experimenter.";
 
