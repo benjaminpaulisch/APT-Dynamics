@@ -22,9 +22,9 @@ public class GUIControl : MonoBehaviour {
 
     [Header("Experiment specific")]
     public int trialsPerTask = 100;
-    public float firstBreakSeconds = 120f;
-    public float secondBreakSeconds = 180f;
-    public float thirdBreakSeconds = 120f;
+    //public float firstBreakSeconds = 120f;
+    //public float secondBreakSeconds = 180f;
+    //public float thirdBreakSeconds = 120f;
 
     [Header("Learning specific")]
     public int trialsPerTaskLearning = 5;
@@ -538,6 +538,12 @@ public class GUIControl : MonoBehaviour {
         //set experiment control status to experiment (needed here when coninuing after break)
         //expControlStatus = 5;
 
+        //if this is a continue after a break -> call stopBreak()
+        if (expControlStatus == 6)
+        {
+            StopBreak();
+        }
+
         // reset trial time
         actualTime = 0.0f;
 
@@ -621,15 +627,18 @@ public class GUIControl : MonoBehaviour {
                 //check if start BREAK TIME or next trial
                 if (trialSeqCounter == (int)(nrOfTrialsTotal / 4))  //first break after 25% of trials
                 {
-                    StartBreak(firstBreakSeconds);
+                    //StartBreak(firstBreakSeconds);
+                    StartBreak();
                 }
                 else if (trialSeqCounter == (int)(nrOfTrialsTotal / 2)) //second break after 50% trials
                 {
-                    StartBreak(secondBreakSeconds);
+                    //StartBreak(secondBreakSeconds);
+                    StartBreak();
                 }
                 else if (trialSeqCounter == (int)(nrOfTrialsTotal * 3 / 4)) //thrid break after 75% trials
                 {
-                    StartBreak(thirdBreakSeconds);
+                    //StartBreak(thirdBreakSeconds);
+                    StartBreak();
                 }
                 else
                 {
@@ -1371,10 +1380,11 @@ public class GUIControl : MonoBehaviour {
     }
 
 
-    public void StartBreak(float breakDuration)
+    //public void StartBreak(float breakDuration)
+    public void StartBreak()
     {
         //start break timer
-        breakDurationCountdown = breakDuration;
+        //breakDurationCountdown = breakDuration;
 
         //set experiment control status to "break"
         expControlStatus = 6;
@@ -1385,12 +1395,19 @@ public class GUIControl : MonoBehaviour {
         breakCanvasVR.SetActive(true);
         breakCanvasDesktop.SetActive(true);
 
+        //activate startContinue so that the participant can continue with experiment
+        startContinue.SetActive(true);
+
         tempMarkerText =
             "break:start;" +
-            "afterTrial:" + (trialSeqCounter-1).ToString() + ";" +
-            "breakDuration:" + breakDuration.ToString();
+            "afterTrial:" + (trialSeqCounter-1).ToString() //+ ";" +
+            //"breakDuration:" + breakDuration.ToString()
+            ;
         marker.Write(tempMarkerText);
         Debug.Log(tempMarkerText);
+
+        marker.Write("Waiting for start/continue button press");
+        Debug.Log("Waiting for button press...");
     }
 
     public void StopBreak()
@@ -1403,10 +1420,10 @@ public class GUIControl : MonoBehaviour {
         Debug.Log("break:end;afterTrial:" + (trialSeqCounter-1).ToString());
 
         //activate startContinue so that the participant can continue with experiment
-        startContinue.SetActive(true);
+        //startContinue.SetActive(true);
 
-        marker.Write("break over, waiting for manual continue");
-        Debug.Log("Break time is over. Waiting for participant to continue...");
+        marker.Write("break over");
+        Debug.Log("Break time is over.");
 
         expControlStatus = 5;
     }
@@ -1641,14 +1658,15 @@ public class GUIControl : MonoBehaviour {
                     }
                 case 6: //break
                     {
+                        /*
                         breakDurationCountdown -= Time.deltaTime;
 
                         //check break timer
                         if (breakDurationCountdown <= 0)
                             //stop break and continue with experiment
                             StopBreak();
-
                         //continue experiment
+                        */
                         break;
                     }
             }//switch
