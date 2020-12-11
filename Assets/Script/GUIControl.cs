@@ -45,7 +45,7 @@ public class GUIControl : MonoBehaviour {
     public string currentTask;
     private string currentCondition;
     private GameObject currentStimulusObj;
-    private string[] stimulusPositions;
+    private string stimulusPositions = "";
     private int[] CubeSeq = new int[] { 0, 1, 2, 3, 4 };   //using the same array for near and far cause it's easier
     private int[] CubePositions = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     private int cubeSeqCounter = 0;
@@ -192,9 +192,6 @@ public class GUIControl : MonoBehaviour {
         cubeGameObjArr[8] = cubeNearMiddleRight;
         cubeGameObjArr[9] = cubeNearRight;
 
-        stimulusPositions = new string[cubeGameObjArr.Length];
-
-
         //deactivate the "Start Experiment" and "Training" Buttons:
         buttonExperiment.GetComponent<Button>().interactable = false;
         buttonLearning.GetComponent<Button>().interactable = false;
@@ -242,8 +239,6 @@ public class GUIControl : MonoBehaviour {
         int[] tempTrialTasks = new int[totalTrials];
         RandomizeArray.ShuffleArray(taskSequence);
 
-        //Debug.Log("Task sequence:");
-
         while (tempTrialCounter < totalTrials)
         {
             if (tempTaskCounter >= taskSequence.Length)
@@ -261,8 +256,8 @@ public class GUIControl : MonoBehaviour {
 
         /*
         //Debug: print out the array:
-        Debug.Log("Shuffled tempTrialTasks array:");
-        for(int i=0; i< tempTrialTasks.Length; i++)
+        Debug.Log("Task sequence:");
+        for (int i=0; i< tempTrialTasks.Length; i++)
         {
             Debug.Log(taskNames[tempTrialTasks[i]]);
         }*/
@@ -344,8 +339,8 @@ public class GUIControl : MonoBehaviour {
         tempMarkerText =
             "participantID:" + participantID + ";" +
             "participantAge:" + participantAge.ToString() + ";" +
-            "participantGender" + participantGender + ";" +
-            "participantArmLength" + armLength;
+            "participantGender:" + participantGender + ";" +
+            "participantArmLength:" + armLength;
         marker.Write(tempMarkerText);
         Debug.Log(tempMarkerText);
 
@@ -355,7 +350,7 @@ public class GUIControl : MonoBehaviour {
             "posShoulder:" + shoulderPosition.ToString() + ";" +
             "posMaxReach:" + maxReachPosition.ToString() + ";" +
             "armLengthCalculated:" + armLengthCalculated.ToString() + ";" +
-            "stimulusPositions:" + stimulusPositions.ToString();
+            "stimulusPositions:" + stimulusPositions;
         marker.Write(tempMarkerText);
         Debug.Log(tempMarkerText);
 
@@ -745,7 +740,7 @@ public class GUIControl : MonoBehaviour {
 
                 tempMarkerText =
                     "initialVisualFeedbackStopped:" + collisionEvent + ";" +
-                    " color:white;" +
+                    "color:white;" +
                     "object:" + currentCollisionObj.gameObject.name;
                 marker.Write(tempMarkerText);
                 Debug.Log(tempMarkerText + " " + actualTime.ToString());
@@ -825,6 +820,7 @@ public class GUIControl : MonoBehaviour {
         int currentAngle=0;
         float currentDistance=0;
         float currentArmLength = maxReachPosition.z - rootPosition.z;
+        string[] tempArray = new string[cupObjects.Length];
 
         for (int i=0; i<cupObjects.Length; i++)
         {
@@ -870,8 +866,13 @@ public class GUIControl : MonoBehaviour {
             cupObjects[i].transform.position = CalculatePosition(cupObjects[i], newRootPosition, currentDistance, currentAngle);
 
             //save position for lsl marker
-            stimulusPositions[i] = cupObjects[i].transform.position.ToString();
+            tempArray[i] = cupObjects[i].transform.position.ToString();
         }
+
+        stimulusPositions = string.Join(" ", tempArray);
+
+        //Debug:
+        //Debug.Log("stimulusPositions array: " + stimulusPositions);
 
     }
 
@@ -1112,7 +1113,6 @@ public class GUIControl : MonoBehaviour {
         trialTasks = new int[nrOfTrialsTotal];
         int tempCounter = 0;
 
-        //Debug.Log("trialTasks:");
         for(int i=0; i<tempSequence.Length; i++)    //for every task
         {
             for(int j=0; j<trialsPerTaskLearning;j++)
@@ -1123,11 +1123,14 @@ public class GUIControl : MonoBehaviour {
                 tempCounter++;
             }
         }
+
+        /*
         //Debug: print out the array:
-        for(int i=0; i< trialTasks.Length; i++)
+        Debug.Log("trialTasks:");
+        for (int i=0; i< trialTasks.Length; i++)
         {
-            //Debug.Log(tasks[trialTasks[i]]);
-        }
+            Debug.Log(tasks[trialTasks[i]]);
+        }*/
 
         //trialTasks = CreateTrialTaskArray(nrOfTrialsTotal, taskSeq, tasks);
 
@@ -1175,8 +1178,8 @@ public class GUIControl : MonoBehaviour {
         tempMarkerText =
             "participantID:" + participantID + ";" +
             "participantAge:" + participantAge.ToString() + ";" +
-            "participantGender" + participantGender + ";" +
-            "participantArmLength" + armLength;
+            "participantGender:" + participantGender + ";" +
+            "participantArmLength:" + armLength;
         marker.Write(tempMarkerText);
         Debug.Log(tempMarkerText);
 
@@ -1280,8 +1283,8 @@ public class GUIControl : MonoBehaviour {
         tempMarkerText =
             "participantID:" + participantID + ";" +
             "participantAge:" + participantAge.ToString() + ";" +
-            "participantGender" + participantGender + ";" +
-            "participantArmLength" + armLength;
+            "participantGender:" + participantGender + ";" +
+            "participantArmLength:" + armLength;
         marker.Write(tempMarkerText);
         Debug.Log(tempMarkerText);
 
