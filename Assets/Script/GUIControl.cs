@@ -1527,7 +1527,7 @@ public class GUIControl : MonoBehaviour {
         Vector3 tableLocalPosition = table.transform.localPosition;
         Vector3 tableSize = table.GetComponent<Renderer>().bounds.size;
 
-        float trackerHeightOffset = 0.02f;       //the tracker height is measured manually cause I don't know how to get the model size. The hole Tracker is about 4cm and the object handle is about half that height.
+        float trackerHeightOffset = 0.012f;       //the tracker height is measured manually cause I don't know how to get the model size. The hole Tracker is about 4cm and the object handle is about half that height.
 
         Vector3 tableSetupPosition = tableSetup.transform.position;
 
