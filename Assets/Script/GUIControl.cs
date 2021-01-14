@@ -53,7 +53,9 @@ public class GUIControl : MonoBehaviour {
     public static string currentResponseType = "none";
     public static System.Diagnostics.Stopwatch collisionDuration = new System.Diagnostics.Stopwatch();
     private static GameObject currentCollisionObj = null;
-    private static Color32 customYellow = new Color32(255, 191, 0, 255);
+    //private static Color32 customYellow = new Color32(255, 191, 0, 255);
+    private static Color32 brightRed = new Color32(255, 160, 160, 255);
+    private static Color32 brightGreen = new Color32(160, 255, 160, 255);
     private Vector3 shoulderPosition;
     private Vector3 maxReachPosition;
     private string tempMarkerText = "";
@@ -686,6 +688,7 @@ public class GUIControl : MonoBehaviour {
             //save current time as possible reaction time
             reaction_time_temp =  actualTime - reaction_start_time;
 
+            /*
             if (collisionEvent == "point") {
                 //activate early visual feedback
                 GO.gameObject.GetComponent<Renderer>().material.color = customYellow;
@@ -708,7 +711,34 @@ public class GUIControl : MonoBehaviour {
                     "object:" + GO.gameObject.name;
                 marker.Write(tempMarkerText);
                 Debug.Log(tempMarkerText + " " + actualTime.ToString());
+            }*/
+
+            //activate early visual feedback
+            if (collisionEvent == currentTask)
+            {
+                //correct early feedback
+                GO.gameObject.GetComponent<Renderer>().material.color = brightGreen;
+
+                tempMarkerText =
+                    "initialVisualFeedbackStarted:" + collisionEvent + ";" +
+                    "color:brightGreen;" +
+                    "object:" + GO.gameObject.name;
+                marker.Write(tempMarkerText);
+                Debug.Log(tempMarkerText + " " + actualTime.ToString());
             }
+            else
+            {
+                //wrong early feedback
+                GO.gameObject.GetComponent<Renderer>().material.color = brightRed;
+
+                tempMarkerText =
+                    "initialVisualFeedbackStarted:" + collisionEvent + ";" +
+                    " color:brightRed;" +
+                    "object:" + GO.gameObject.name;
+                marker.Write(tempMarkerText);
+                Debug.Log(tempMarkerText + " " + actualTime.ToString());
+            }
+
         }
 
     }

@@ -10,7 +10,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace>
     </RootNamespace>
-    <ProjectGuid>{0D279DBA-394C-6DDC-4D67-32D5E5100014}</ProjectGuid>
+    <ProjectGuid>{5BF0D18B-BCE6-CC3E-6AA4-C2ECB21E1C44}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -138,6 +138,8 @@
     <Compile Include="Assets\LSL4Unity\Scripts\Examples\ExampleFloatInlet.cs" />
     <Compile Include="Assets\LSL4Unity\Scripts\Examples\ScaleMapping.cs" />
     <Compile Include="Assets\LSL4Unity\Scripts\Examples\TransformMapping.cs" />
+    <Compile Include="Assets\LSL4Unity\Scripts\lsl_rb_stream.cs" />
+    <Compile Include="Assets\LSL4Unity\Scripts\lsl_rb_stream_hand.cs" />
     <Compile Include="Assets\LSL4Unity\Scripts\LSLCommon.cs" />
     <Compile Include="Assets\LSL4Unity\Scripts\LSLMarkerStream.cs" />
     <Compile Include="Assets\LSL4Unity\Scripts\LSLOutlet.cs" />
@@ -150,8 +152,6 @@
     <Compile Include="Assets\Script\GUIControl.cs" />
     <Compile Include="Assets\Script\HandStyleControl.cs" />
     <Compile Include="Assets\Script\LoadXMLData.cs" />
-    <Compile Include="Assets\Script\lsl_rb_stream.cs" />
-    <Compile Include="Assets\Script\lsl_rb_stream_hand.cs" />
     <Compile Include="Assets\Script\Network\Client.cs" />
     <Compile Include="Assets\Script\Network\Message\BasicColliderMessage.cs" />
     <Compile Include="Assets\Script\Network\Message\Message.cs" />
@@ -358,10 +358,10 @@
     <None Include="Assets\SteamVR\InteractionSystem\Core\Shaders\SeeThru.shader" />
     <None Include="Assets\SteamVR\InteractionSystem\Readme_InteractionSystem.txt" />
     <Reference Include="UnityEditor.StandardEvents">
-      <HintPath>D:/Bilal/PredError2018_Bilal/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
+      <HintPath>E:/Eigene Dateien/Benjamin/TU Berlin BPN/Bilal/PredError2018/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
     </Reference>
     <Reference Include="Unity.PackageManagerUI.Editor">
-      <HintPath>D:/Bilal/PredError2018_Bilal/Library/ScriptAssemblies/Unity.PackageManagerUI.Editor.dll</HintPath>
+      <HintPath>E:/Eigene Dateien/Benjamin/TU Berlin BPN/Bilal/PredError2018/Library/ScriptAssemblies/Unity.PackageManagerUI.Editor.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AIModule">
       <HintPath>C:/Program Files/Unity/Hub/Editor/2018.1.0f2/Editor/Data/Managed/UnityEngine/UnityEngine.AIModule.dll</HintPath>
@@ -559,16 +559,16 @@
       <HintPath>C:/Program Files/Unity/Hub/Editor/2018.1.0f2/Editor/Data/UnityExtensions/Unity/UnitySpatialTracking/RuntimeEditor/UnityEngine.SpatialTracking.dll</HintPath>
     </Reference>
     <Reference Include="LeapCSharp.NET3.5">
-      <HintPath>D:/Bilal/PredError2018_Bilal/Assets/Plugins/LeapCSharp.NET3.5.dll</HintPath>
+      <HintPath>E:/Eigene Dateien/Benjamin/TU Berlin BPN/Bilal/PredError2018/Assets/Plugins/LeapCSharp.NET3.5.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.Analytics">
-      <HintPath>C:/Users/benjamin/AppData/Local/Unity/cache/packages/packages.unity.com/com.unity.analytics@2.0.16/UnityEngine.Analytics.dll</HintPath>
+      <HintPath>C:/Users/Benjamin/AppData/Local/Unity/cache/packages/packages.unity.com/com.unity.analytics@2.0.16/UnityEngine.Analytics.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.Purchasing">
-      <HintPath>C:/Users/benjamin/AppData/Local/Unity/cache/packages/packages.unity.com/com.unity.purchasing@2.0.1/UnityEngine.Purchasing.dll</HintPath>
+      <HintPath>C:/Users/Benjamin/AppData/Local/Unity/cache/packages/packages.unity.com/com.unity.purchasing@2.0.1/UnityEngine.Purchasing.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.StandardEvents">
-      <HintPath>C:/Users/benjamin/AppData/Local/Unity/cache/packages/packages.unity.com/com.unity.standardevents@1.0.13/UnityEngine.StandardEvents.dll</HintPath>
+      <HintPath>C:/Users/Benjamin/AppData/Local/Unity/cache/packages/packages.unity.com/com.unity.standardevents@1.0.13/UnityEngine.StandardEvents.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib">
       <HintPath>C:/Program Files/Unity/Hub/Editor/2018.1.0f2/Editor/Data/MonoBleedingEdge/lib/mono/2.0-api/mscorlib.dll</HintPath>
