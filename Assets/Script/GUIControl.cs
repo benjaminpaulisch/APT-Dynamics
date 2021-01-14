@@ -11,9 +11,9 @@ public class GUIControl : MonoBehaviour {
     //Inspector Interface:
     [Header("General Config")]
     public float fixationDuration = 1f;             //1s fixation cross is visible
-    public float cueDurationAvg = 1.5f;             //1.5s cue average duration
-    public float cueDurationVariation = 0.5f;       //500ms variation (so the cue duration is 1500ms +- 500ms
-    public float stimulusDurationMax = 5.0f;          //5s max target is visible
+    public float cueDurationAvg = 2f;               //2s cue average duration
+    public float cueDurationVariation = 1f;         //1s variation (so the cue duration is 2s +- 1s
+    public float stimulusDurationMax = 5.0f;        //5s max target is visible
     public float feedbackDuration = 2.0f;           //2s feedback duration
     public float minimumTaskDuration = 1.0f;        //1s minimum collision duration for a successful response
     public int[] stimulusAngles = new int[] {-40, -20, 0, 20, 40};    //the angles at which the stimulus can be positioned from the shoulder
