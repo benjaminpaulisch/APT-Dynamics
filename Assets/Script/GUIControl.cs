@@ -19,6 +19,7 @@ public class GUIControl : MonoBehaviour {
     public int[] stimulusAngles = new int[] {-40, -20, 0, 20, 40};    //the angles at which the stimulus can be positioned from the shoulder
     public int offsetNearPercent = 50;              //offset from maximum reach position
     public int offsetFarPercent = 20;               //offset from maximum reach position
+    public bool earlyFeedbackOn = true;
 
     [Header("Experiment specific")]
     public int trialsPerTask = 100;
@@ -42,6 +43,7 @@ public class GUIControl : MonoBehaviour {
     public static string[] tasks = new string[4] { "touchFar", "touchNear", "pointFar", "pointNear" };
     private int[] taskSeq = new int[] { 0, 1, 2, 3 };
     private int[] trialTasks;
+    [HideInInspector] // Hides vars from Inspector
     public string currentTask;
     private string currentCondition;
     private GameObject currentStimulusObj;
@@ -93,17 +95,20 @@ public class GUIControl : MonoBehaviour {
     private bool cueActivated = false;
     private bool targetActivated = false;
     private bool taskSuccess = false;
+    [HideInInspector] // Hides vars from Inspector
     public bool collisionActive = false;
     //public bool flagTouchEvent = false;
     public static bool flagStart = false;
     public static bool experimentEnd = false;
 
     // learning specific
+    [HideInInspector] // Hides vars from Inspector
     public bool learningStarted = false;
     private int learningRunNo = 0;
     private string endTextLearning = "The learning block has ended.\nPlease contact the experimenter.";
 
     // training specific
+    [HideInInspector] // Hides vars from Inspector
     public bool trainingStarted = false;
     private int trainingRunNo = 0;
     private string endTextTraining = "The training block has ended.\nPlease contact the experimenter.";
@@ -713,31 +718,45 @@ public class GUIControl : MonoBehaviour {
                 Debug.Log(tempMarkerText + " " + actualTime.ToString());
             }*/
 
-            //activate early visual feedback
-            if (collisionEvent == currentTask)
-            {
-                //correct early feedback
-                GO.gameObject.GetComponent<Renderer>().material.color = brightGreen;
 
-                tempMarkerText =
-                    "initialVisualFeedbackStarted:" + collisionEvent + ";" +
-                    "color:brightGreen;" +
-                    "object:" + GO.gameObject.name;
-                marker.Write(tempMarkerText);
-                Debug.Log(tempMarkerText + " " + actualTime.ToString());
+            if(earlyFeedbackOn)
+            {
+                //activate early visual feedback
+                if (collisionEvent == currentTask)
+                {
+                    //correct early feedback
+                    GO.gameObject.GetComponent<Renderer>().material.color = brightGreen;
+
+                    tempMarkerText =
+                        "initialVisualFeedbackStarted:" + collisionEvent + ";" +
+                        "color:brightGreen;" +
+                        "object:" + GO.gameObject.name;
+                    marker.Write(tempMarkerText);
+                    Debug.Log(tempMarkerText + " " + actualTime.ToString());
+                }
+                else
+                {
+                    //wrong early feedback
+                    GO.gameObject.GetComponent<Renderer>().material.color = brightRed;
+
+                    tempMarkerText =
+                        "initialVisualFeedbackStarted:" + collisionEvent + ";" +
+                        " color:brightRed;" +
+                        "object:" + GO.gameObject.name;
+                    marker.Write(tempMarkerText);
+                    Debug.Log(tempMarkerText + " " + actualTime.ToString());
+                }
             }
             else
             {
-                //wrong early feedback
-                GO.gameObject.GetComponent<Renderer>().material.color = brightRed;
-
                 tempMarkerText =
-                    "initialVisualFeedbackStarted:" + collisionEvent + ";" +
-                    " color:brightRed;" +
+                    "Collision started but early feedback is disabled:" + collisionEvent + ";" +
+                    " color:None;" +
                     "object:" + GO.gameObject.name;
                 marker.Write(tempMarkerText);
                 Debug.Log(tempMarkerText + " " + actualTime.ToString());
             }
+            
 
         }
 
@@ -768,12 +787,24 @@ public class GUIControl : MonoBehaviour {
                 //reset color of the collision object
                 currentCollisionObj.GetComponent<Renderer>().material.color = Color.white;
 
-                tempMarkerText =
-                    "initialVisualFeedbackStopped:" + collisionEvent + ";" +
-                    "color:white;" +
-                    "object:" + currentCollisionObj.gameObject.name;
-                marker.Write(tempMarkerText);
-                Debug.Log(tempMarkerText + " " + actualTime.ToString());
+                if (earlyFeedbackOn)
+                {
+                    tempMarkerText =
+                        "initialVisualFeedbackStopped:" + collisionEvent + ";" +
+                        "color:white;" +
+                        "object:" + currentCollisionObj.gameObject.name;
+                    marker.Write(tempMarkerText);
+                    Debug.Log(tempMarkerText + " " + actualTime.ToString());
+                }
+                else
+                {
+                    tempMarkerText =
+                        "Collision stopped but early feedback is disabled:" + collisionEvent + ";" +
+                        "color:None;" +
+                        "object:" + currentCollisionObj.gameObject.name;
+                    marker.Write(tempMarkerText);
+                    Debug.Log(tempMarkerText + " " + actualTime.ToString());
+                }
 
                 //reset collision object
                 currentCollisionObj = null;
