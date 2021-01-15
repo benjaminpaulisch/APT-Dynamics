@@ -10,6 +10,8 @@ public class GUIControl : MonoBehaviour {
 
     //Inspector Interface:
     [Header("General Config")]
+    public float isiDurationAvg = 1.5f;             //1.5s ISI duration on average
+    public float isiDurationVariation = 0.5f;       //0.5s variation (so the ISI duration range is betweeen 1s and 2s)
     public float fixationDuration = 1f;             //1s fixation cross is visible
     public float cueDurationAvg = 2f;               //2s cue average duration
     public float cueDurationVariation = 1f;         //1s variation (so the cue duration is 2s +- 1s
@@ -91,6 +93,7 @@ public class GUIControl : MonoBehaviour {
 
     // trial logic handler
     private bool experimentStarted = false;
+    private bool isiStarted = false;
     private bool fixationCrossActivated = false;
     private bool cueActivated = false;
     private bool targetActivated = false;
@@ -115,6 +118,8 @@ public class GUIControl : MonoBehaviour {
 
     // experiment specific
     private int nrOfTrialsTotal;
+    private float[] isiDurations;
+    private float currentIsiDuration;         //stores individual ISI duration of the current trial
     private float[] cueDurations;
     private float currentCueDuration;           //stores individual cue duration of the current trial
     private int experimentRunNo = 0;
@@ -273,19 +278,19 @@ public class GUIControl : MonoBehaviour {
     }
 
 
-    public float[] CreateCueDurationArray(int totalTrials, float durationAverage, float durationVariation)
+    public float[] CreateDurationsArray(int arraySize, float durationAverage, float durationVariation)
     {
-        //Create an array with cue times for all trials. The duration will vary in each trial and the range will be the durationAverage +- the durationVariation.
-        //The individual durations will be distributed evenly within the range.
+        //Create an array the size of arraySize with duration values which range from durationAverage-durationVariation to durationAverage+durationVariation.
+        //The individual durations will be distributed evenly within this range and the order will be shuffled at the end.
 
-        float[] tempDurations = new float[totalTrials];
+        float[] tempDurations = new float[arraySize];
 
         
-        //Debug.Log("All cue durations:");
-        for (int i = 0; i < totalTrials; i++)
+        //Debug.Log("All durations:");
+        for (int i = 0; i < arraySize; i++)
         {
-            //the goal here is to get linear distributed values in the range of cueDurationAvg-cueDuRationVariation and cueDurationAvg+cueDuRationVariation
-            tempDurations[i] = i * (durationVariation * 2 / (totalTrials - 1)) + durationAverage - durationVariation;
+            //the goal here is to get linear distributed values in the range
+            tempDurations[i] = i * (durationVariation * 2 / (arraySize - 1)) + durationAverage - durationVariation;
             //Debug.Log(tempDurations[i].ToString());
         }
         //shuffle cue duration order
@@ -309,8 +314,11 @@ public class GUIControl : MonoBehaviour {
         //create array with tasks for all trials
         trialTasks = CreateTrialTaskArray(nrOfTrialsTotal, taskSeq, tasks);
 
-        //create array with cue durations for all tasks
-        cueDurations = CreateCueDurationArray(nrOfTrialsTotal, cueDurationAvg, cueDurationVariation);
+        //create array with isi durations for all trials
+        isiDurations = CreateDurationsArray(nrOfTrialsTotal, isiDurationAvg, isiDurationVariation);
+
+        //create array with cue durations for all trials
+        cueDurations = CreateDurationsArray(nrOfTrialsTotal, cueDurationAvg, cueDurationVariation);
 
         // Randomize Cube Appearance Sequence
         RandomizeArray.ShuffleArray(CubeSeq);
@@ -331,6 +339,8 @@ public class GUIControl : MonoBehaviour {
             "runNo:" + experimentRunNo.ToString() + ";" +
             "trialsPerTask:" + trialsPerTask.ToString() + ";" +
             "trialsTotal:" + nrOfTrialsTotal.ToString() + ";" +
+            "isiDurationAvg:" + isiDurationAvg.ToString() + ";" +
+            "isiDurationVariation:" + isiDurationVariation.ToString() + ";" +
             "fixationDuration:" + fixationDuration.ToString() + ";" +
             "cueDurationAvg:" + cueDurationAvg.ToString() + ";" +
             "cueDurationVariation:" + cueDurationVariation.ToString() + ";" +
@@ -418,11 +428,28 @@ public class GUIControl : MonoBehaviour {
 
     public void RunTrial()
     {
-        //Start of trial: show fixation cross
-        if (actualTime <= fixationDuration)
+        //Start of trial: ISI
+        if (actualTime <= currentIsiDuration)
+        {
+            if(!isiStarted)
+            {
+                isiStarted = true;
+                marker.Write("ISI started");
+                Debug.Log("ISI started: " + actualTime.ToString());
+            }
+        }
+
+        //After ISI: fixation cross
+        //if (actualTime <= fixationDuration)
+        if (actualTime > currentIsiDuration && actualTime <= fixationDuration + currentIsiDuration)
         {
             if (!fixationCrossActivated)
             {
+                //ISI ended
+                isiStarted = false;
+                marker.Write("ISI ended");
+                Debug.Log("ISI ended: " + actualTime.ToString());
+
                 //enable fixation cross
                 fixationCross.SetActive(true);
                 marker.Write("Fixation cross activated");
@@ -435,7 +462,8 @@ public class GUIControl : MonoBehaviour {
         }
 
         //after fixation cross: show cue
-        if (actualTime > fixationDuration && actualTime <= fixationDuration + currentCueDuration)
+        //if (actualTime > fixationDuration && actualTime <= fixationDuration + currentCueDuration)
+        if (actualTime > fixationDuration + currentIsiDuration && actualTime <= fixationDuration + currentIsiDuration + currentCueDuration)
         {
             if (!cueActivated)
             {
@@ -456,7 +484,8 @@ public class GUIControl : MonoBehaviour {
         }
 
         //after showing cue: show stimulus
-        if (actualTime > fixationDuration + currentCueDuration)
+        //if (actualTime > fixationDuration + currentCueDuration)
+        if (actualTime > fixationDuration + currentIsiDuration + currentCueDuration)
         {
             if (!taskSuccess)    //if the current task has not been successful yet
             {
@@ -490,7 +519,8 @@ public class GUIControl : MonoBehaviour {
                     }
                 }
                 //if time for a response has run out -> go to next trial (but NOT if there is an active collision)
-                else if (actualTime > fixationDuration + currentCueDuration + stimulusDurationMax)
+                //else if (actualTime > fixationDuration + currentCueDuration + stimulusDurationMax)
+                else if (actualTime > fixationDuration + currentIsiDuration + currentCueDuration + stimulusDurationMax)
                 {
                     marker.Write("response time over");
                     Debug.Log("response time over. " + actualTime.ToString());
@@ -504,7 +534,8 @@ public class GUIControl : MonoBehaviour {
             else
             {
                 //wait for visual feedback to finish and then -> go to next trial
-                if (actualTime > fixationDuration + currentCueDuration + reaction_time + minimumTaskDuration + feedbackDuration)
+                //if (actualTime > fixationDuration + currentCueDuration + reaction_time + minimumTaskDuration + feedbackDuration)
+                if (actualTime > fixationDuration + currentIsiDuration + currentCueDuration + reaction_time + minimumTaskDuration + feedbackDuration)
                 {
                     //deactivate stimulus
                     DeactivateAllCubes();
@@ -552,7 +583,12 @@ public class GUIControl : MonoBehaviour {
 
         experimentStarted = true;   //activate flag to start the experiment
 
-        //set cure duration for current trial
+
+        //set ISI duration for current trial
+        currentIsiDuration = isiDurations[trialSeqCounter];
+        //Debug.Log("currentIsiDuration: " + currentIsiDuration.ToString());
+
+        //set cue duration for current trial
         currentCueDuration = cueDurations[trialSeqCounter];
         //Debug.Log("currentCueDuration: " + currentCueDuration.ToString());
 
@@ -584,6 +620,7 @@ public class GUIControl : MonoBehaviour {
             "trialStart:" + trialSeqCounter.ToString() + ";" +
             "task:" + currentTask + ";" +
             "condition:" + currentCondition + ";" +
+            "isiDuration:" + currentIsiDuration.ToString() + ";" +
             "cueDuration:" + currentCueDuration.ToString() + ";" +
             "stimulusPosition:" + currentStimulusObj.gameObject.name;
         marker.Write(tempMarkerText);
@@ -1195,6 +1232,10 @@ public class GUIControl : MonoBehaviour {
 
         //trialTasks = CreateTrialTaskArray(nrOfTrialsTotal, taskSeq, tasks);
 
+
+        //create array with isi durations for all trials
+        isiDurations = CreateDurationsArray(nrOfTrialsTotal, isiDurationAvg, isiDurationVariation);
+
         //create array with cue durations for all tasks
         //cueDurations = CreateCueDurationArray(nrOfTrialsTotal, cueDurationAvg, cueDurationVariation);
         cueDurations = new float[nrOfTrialsTotal];
@@ -1224,6 +1265,8 @@ public class GUIControl : MonoBehaviour {
             "runNo:" + learningRunNo.ToString() + ";" +
             "trialsPerTask:" + trialsPerTaskLearning.ToString() + ";" +
             "trialsTotal:" + nrOfTrialsTotal.ToString() + ";" +
+            "isiDurationAvg:" + isiDurationAvg.ToString() + ";" +
+            "isiDurationVariation:" + isiDurationVariation.ToString() + ";" +
             "fixationDuration:" + fixationDuration.ToString() + ";" +
             "cueDurationAvg:" + cueDurationAvg.ToString() + ";" +
             "cueDurationVariation:" + cueDurationVariation.ToString() + ";" +
@@ -1307,8 +1350,11 @@ public class GUIControl : MonoBehaviour {
         //create array with tasks for all trials
         trialTasks = CreateTrialTaskArray(nrOfTrialsTotal, taskSeq, tasks);
 
+        //create array with isi durations for all trials
+        isiDurations = CreateDurationsArray(nrOfTrialsTotal, isiDurationAvg, isiDurationVariation);
+
         //create array with cue durations for all tasks
-        cueDurations = CreateCueDurationArray(nrOfTrialsTotal, cueDurationAvg, cueDurationVariation);
+        cueDurations = CreateDurationsArray(nrOfTrialsTotal, cueDurationAvg, cueDurationVariation);
 
         // Randomize Cube Appearance Sequence
         RandomizeArray.ShuffleArray(CubeSeq);
@@ -1329,6 +1375,8 @@ public class GUIControl : MonoBehaviour {
             "runNo:" + trainingRunNo.ToString() + ";" +
             "trialsPerTask:" + trialsPerTaskTraining.ToString() + ";" +
             "trialsTotal:" + nrOfTrialsTotal.ToString() + ";" +
+            "isiDurationAvg:" + isiDurationAvg.ToString() + ";" +
+            "isiDurationVariation:" + isiDurationVariation.ToString() + ";" +
             "fixationDuration:" + fixationDuration.ToString() + ";" +
             "cueDurationAvg:" + cueDurationAvg.ToString() + ";" +
             "cueDurationVariation:" + cueDurationVariation.ToString() + ";" +
