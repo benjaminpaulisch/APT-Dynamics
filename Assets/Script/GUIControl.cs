@@ -28,6 +28,9 @@ public class GUIControl : MonoBehaviour {
     //public float firstBreakSeconds = 120f;
     //public float secondBreakSeconds = 180f;
     //public float thirdBreakSeconds = 120f;
+    public int halfTimeBreakDuration = 300;         //5 minutes
+    public int standardBrakeDuration = 10;          //10 seconds
+    public int manualBreakEveryTrials = 25;         //a manual break every 25 trials (except half time)
 
     [Header("Learning specific")]
     public int trialsPerTaskLearning = 5;
@@ -672,13 +675,18 @@ public class GUIControl : MonoBehaviour {
             if (!(trainingStarted || learningStarted))
             {
                 //check if start BREAK TIME or next trial
-                if (trialSeqCounter == (int)(nrOfTrialsTotal / 4) || trialSeqCounter == (int)(nrOfTrialsTotal / 2) || trialSeqCounter == (int)(nrOfTrialsTotal * 3 / 4))
+                //if (trialSeqCounter == (int)(nrOfTrialsTotal / 4) || trialSeqCounter == (int)(nrOfTrialsTotal / 2) || trialSeqCounter == (int)(nrOfTrialsTotal * 3 / 4))
+                if (trialSeqCounter == (int)(nrOfTrialsTotal / 2))   //half time break
                 {
-                    StartBreak(false);
+                    StartBreak(halfTimeBreakDuration, false);
+                }
+                else if (trialSeqCounter % manualBreakEveryTrials == 0)     //manual break every X trials
+                {
+                    StartBreak(standardBrakeDuration, false);
                 }
                 else if (manualBreakTriggered) //manual break triggered by pressing the "p" key
                 {
-                    StartBreak(true);
+                    StartBreak(standardBrakeDuration, true);
                 }
                 else
                 {
@@ -1521,40 +1529,46 @@ public class GUIControl : MonoBehaviour {
 
 
     //public void StartBreak(float breakDuration)
-    public void StartBreak(bool isManual)
+    public void StartBreak(float breakDuration, bool isManual)
     {
-        //start break timer
-        //breakDurationCountdown = breakDuration;
+        if (isManual)
+        {
+            manualBreakTriggered = false;
+        }
+
+        //set break timer
+        breakDurationCountdown = breakDuration;
 
         //set experiment control status to "break"
         expControlStatus = 6;
 
         experimentStarted = false;
 
+        //set break text
+        breakCanvasDesktop.GetComponentInChildren<Text>().text = "BREAK TIME: " + breakDuration + "seconds left";
+
         //activate break text
         //breakCanvasVR.SetActive(true);
         breakCanvasDesktop.SetActive(true);
 
+        /*
         //activate startContinue so that the participant can continue with experiment
         startContinue.SetActive(true);
         resting.SetActive(true);
         restingDetectionActive = true;
+        */
 
         tempMarkerText =
             "break:start;" +
             "afterTrial:" + (trialSeqCounter-1).ToString() + ";" +
-            //"breakDuration:" + breakDuration.ToString()
+            "breakDuration:" + breakDurationCountdown.ToString() + ";" +
             "isManual:" + BoolToString(isManual);
         marker.Write(tempMarkerText);
         Debug.Log(tempMarkerText);
 
-        marker.Write("Waiting for hand on resting position");
-        Debug.Log("Waiting for hand on resting position...");
-
-        if (isManual)
-        {
-            manualBreakTriggered = false;
-        }
+        //marker.Write("Waiting for hand on resting position");
+        //Debug.Log("Waiting for hand on resting position...");
+        
     }
 
     public void StopBreak()
@@ -1571,8 +1585,8 @@ public class GUIControl : MonoBehaviour {
         resting.SetActive(true);
         restingDetectionActive = true;
 
-        marker.Write("break over");
-        Debug.Log("Break time is over.");
+        marker.Write("Break is over. Waiting for hand on resting to continue.");
+        Debug.Log("Break is over. Waiting for hand on resting to continue.");
 
         expControlStatus = 5;
     }
@@ -1859,15 +1873,22 @@ public class GUIControl : MonoBehaviour {
                             //go to main menu
                             StartMainMenu();
                         }
-                        /*
-                        breakDurationCountdown -= Time.deltaTime;
+                        else
+                        {
+                            breakDurationCountdown -= Time.deltaTime;
+                            int breakDurationText = (int)breakDurationCountdown + 1;
 
-                        //check break timer
-                        if (breakDurationCountdown <= 0)
-                            //stop break and continue with experiment
-                            StopBreak();
-                        //continue experiment
-                        */
+                            //update break text
+                            breakCanvasDesktop.GetComponentInChildren<Text>().text = "BREAK TIME:\n" + breakDurationText.ToString() + " seconds left";
+
+                            //check break timer
+                            if (breakDurationCountdown <= 0)
+                            {
+                                //stop break and continue with experiment
+                                StopBreak();
+                            }
+                        }
+                        
                         break;
                     }
             }//switch
