@@ -207,6 +207,7 @@
     <Compile Include="Assets\Script\RehaStim\UpdateInfo.cs" />
     <Compile Include="Assets\Script\RehaStimPredError\ApplyValues.cs" />
     <Compile Include="Assets\Script\RehaStimPredError\Calibration.cs" />
+    <Compile Include="Assets\Script\resting_pos.cs" />
     <Compile Include="Assets\Script\SphereHand.cs" />
     <Compile Include="Assets\Script\start_pos_hand.cs" />
     <Compile Include="Assets\Script\UdpSender.cs" />

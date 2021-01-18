@@ -100,6 +100,10 @@ public class GUIControl : MonoBehaviour {
     private bool taskSuccess = false;
     [HideInInspector] // Hides vars from Inspector
     public bool collisionActive = false;
+    [HideInInspector] // Hides vars from Inspector
+    public bool restingDetectionActive = false;
+    [HideInInspector] // Hides vars from Inspector
+    //public bool handIsOnResting = false;
     //public bool flagTouchEvent = false;
     public static bool flagStart = false;
     public static bool experimentEnd = false;
@@ -329,6 +333,7 @@ public class GUIControl : MonoBehaviour {
         end.SetActive(false);
         startContinue.SetActive(true);
         resting.gameObject.GetComponent<Renderer>().enabled = true;
+        restingDetectionActive = true;
 
         //set correct end text
         endTextBox.GetComponent<Text>().text = endTextExp;
@@ -560,6 +565,8 @@ public class GUIControl : MonoBehaviour {
     {
         //deactivate start/Continue button
         startContinue.SetActive(false);
+        resting.SetActive(false);
+        restingDetectionActive = false;
 
         //deactivate instructions
         if (instructionsExp.activeSelf)
@@ -675,20 +682,43 @@ public class GUIControl : MonoBehaviour {
                 }
                 else
                 {
-                    TrialStart();
+                    //TrialStart();
+
+                    //wait for manual trial start by putting hand on resting position
+                    experimentStarted = false;
+                    startContinue.SetActive(true);
+                    resting.SetActive(true);
+                    restingDetectionActive = true;
+
+                    marker.Write("Waiting for hand on resting position");
+                    Debug.Log("Waiting for hand on resting position...");
                 }
             }
+            /*
             else if (learningStarted)
             {
                 //in learning we have manuel trial start each trial
                 experimentStarted = false;
                 startContinue.SetActive(true);
+                resting.SetActive(true);
+                restingDetectionActive = true;
+
                 marker.Write("Waiting for start/continue button press");
                 Debug.Log("Waiting for start/continue button press...");
-            }
+            }*/
             else
             {
-                TrialStart();
+                //TrialStart();
+
+                //wait for manual trial start by putting hand on resting position
+                experimentStarted = false;
+                //startContinue.SetActive(true);
+                resting.SetActive(true);
+                restingDetectionActive = true;
+
+                marker.Write("Waiting for hand on resting position");
+                Debug.Log("Waiting for hand on resting position...");
+
             }
         }
         
@@ -1254,7 +1284,9 @@ public class GUIControl : MonoBehaviour {
         plane.gameObject.GetComponent<Renderer>().enabled = true;
         end.SetActive(false);
         startContinue.SetActive(true);
-        resting.gameObject.GetComponent<Renderer>().enabled = true;
+        resting.SetActive(true);
+        //resting.gameObject.GetComponent<Renderer>().enabled = true;
+        restingDetectionActive = true;
 
         //set correct end text
         endTextBox.GetComponent<Text>().text = endTextLearning;
@@ -1364,7 +1396,9 @@ public class GUIControl : MonoBehaviour {
         plane.gameObject.GetComponent<Renderer>().enabled = true;
         end.SetActive(false);
         startContinue.SetActive(true);
-        resting.gameObject.GetComponent<Renderer>().enabled = true;
+        resting.SetActive(true);
+        //resting.gameObject.GetComponent<Renderer>().enabled = true;
+        restingDetectionActive = true;
 
         //set correct end text
         endTextBox.GetComponent<Text>().text = endTextTraining;
@@ -1503,6 +1537,8 @@ public class GUIControl : MonoBehaviour {
 
         //activate startContinue so that the participant can continue with experiment
         startContinue.SetActive(true);
+        resting.SetActive(true);
+        restingDetectionActive = true;
 
         tempMarkerText =
             "break:start;" +
@@ -1512,8 +1548,8 @@ public class GUIControl : MonoBehaviour {
         marker.Write(tempMarkerText);
         Debug.Log(tempMarkerText);
 
-        marker.Write("Waiting for start/continue button press");
-        Debug.Log("Waiting for button press...");
+        marker.Write("Waiting for hand on resting position");
+        Debug.Log("Waiting for hand on resting position...");
 
         if (isManual)
         {
@@ -1531,7 +1567,9 @@ public class GUIControl : MonoBehaviour {
         Debug.Log("break:end;afterTrial:" + (trialSeqCounter-1).ToString());
 
         //activate startContinue so that the participant can continue with experiment
-        //startContinue.SetActive(true);
+        startContinue.SetActive(true);
+        resting.SetActive(true);
+        restingDetectionActive = true;
 
         marker.Write("break over");
         Debug.Log("Break time is over.");
