@@ -22,6 +22,8 @@ public class GUIControl : MonoBehaviour {
     public int offsetNearPercent = 50;              //offset from maximum reach position
     public int offsetFarPercent = 20;               //offset from maximum reach position
     public bool earlyFeedbackOn = true;
+    public bool handMovementThresholdOn = false;
+    public float handMovementThreshold = 0.003f;    //this is a distance value. It's the distance the hand moved between two frames.
 
     [Header("Experiment specific")]
     public int trialsPerTask = 100;
@@ -59,6 +61,7 @@ public class GUIControl : MonoBehaviour {
     public static int trialSeqCounter;
     public static string currentResponseType = "none";
     public static System.Diagnostics.Stopwatch collisionDuration = new System.Diagnostics.Stopwatch();
+    public static float collisionStartTime = 0;
     private static GameObject currentCollisionObj = null;
     //private static Color32 customYellow = new Color32(255, 191, 0, 255);
     private static Color32 brightRed = new Color32(255, 160, 160, 255);
@@ -110,6 +113,13 @@ public class GUIControl : MonoBehaviour {
     //public bool flagTouchEvent = false;
     public static bool flagStart = false;
     public static bool experimentEnd = false;
+    [HideInInspector] // Hides vars from Inspector
+    public bool activateRaycast = false;
+
+    [HideInInspector] // Hides vars from Inspector
+    public bool handIsMoving = true;
+    //private float currentHandVelocity = 0f;
+    private Vector3 handPosition_old = Vector3.zero;
 
     // learning specific
     [HideInInspector] // Hides vars from Inspector
@@ -135,13 +145,14 @@ public class GUIControl : MonoBehaviour {
 
 
     // Game objects
-    public static GameObject table, plane, leapmotion, instructionsExp, textBox, end, endTextBox, startContinue, resting, questionnaire, q, ra, la, send, fixationCross, cue, cueText,
+    public static GameObject table, plane, instructionsExp, textBox, end, endTextBox, startContinue, resting, questionnaire, q, ra, la, send, fixationCross, cue, cueText,
         mainMenu, calibrationMenu, configurationMenu, inputParticipantID, inputParticipantAge, inputParticipantGender, inputArmLength, buttonExperiment,
         buttonLearning, buttonTraining, buttonShoulderPos, textHintShoulderPos, textMissingInputs, tableSetup, buttonMaximumReach, buttonCupPositions, buttonTablePosition, textHintShoulderFirst,
-        textHintCupPos, textHintTablePos, breakCanvasDesktop;
+        textHintCupPos, textHintTablePos, breakCanvasDesktop, vr_hand_R;
     private GameObject cubeFarLeft, cubeFarMiddleLeft, cubeFarMiddle, cubeFarMiddleRight, cubeFarRight, cubeNearLeft, cubeNearMiddleLeft, cubeNearMiddle, cubeNearMiddleRight, cubeNearRight;
     private GameObject[] cubeGameObjArr = new GameObject[10];
 
+    //private Rigidbody vr_hand_RigidBody;
 
 
     // Use this for initialization
@@ -153,7 +164,7 @@ public class GUIControl : MonoBehaviour {
         // Finding the game object 
         table = GameObject.Find("Table");
         plane = GameObject.Find("Plane");
-        leapmotion = GameObject.Find("LeapHandController");
+        //leapmotion = GameObject.Find("LeapHandController");
         instructionsExp = GameObject.Find("InstructionsExp");
         textBox = GameObject.Find("TextBox");
         end = GameObject.Find("End");
@@ -163,7 +174,6 @@ public class GUIControl : MonoBehaviour {
         fixationCross = GameObject.Find("FixationCross");
         cue = GameObject.Find("Cue");
         cueText = GameObject.Find("CueText");
-        //shoulder = GameObject.Find("Shoulder");
         mainMenu = GameObject.Find("MainMenu");
         calibrationMenu = GameObject.Find("CalibrationMenu");
         configurationMenu = GameObject.Find("ConfigurationMenu");
@@ -186,6 +196,13 @@ public class GUIControl : MonoBehaviour {
         textHintTablePos = GameObject.Find("TextHintTablePos");
         //breakCanvasVR = GameObject.Find("BreakCanvasVR");
         breakCanvasDesktop = GameObject.Find("BreakCanvasDesktop");
+        //vr_hand_R = GameObject.Find("vr_hand_R");
+        //Debug.Log("vr_hand_R: " + vr_hand_R.name);
+        //vr_hand_RigidBody = vr_hand_R.GetComponent<Rigidbody>();
+
+        //GameObject controllerRight = GameObject.Find("Controller (right)");
+        //vr_hand_RigidBody = controllerRight.GetComponent<Rigidbody>();
+
 
         //Stimulus
         cubeFarLeft = GameObject.Find("CubeFarLeft");
@@ -497,8 +514,27 @@ public class GUIControl : MonoBehaviour {
         {
             if (!taskSuccess)    //if the current task has not been successful yet
             {
+                //activate raycast for pointing detection
+                if (handMovementThresholdOn)
+                {
+                    if (handIsMoving)
+                    {
+                        activateRaycast = false;
+                    }
+                    else
+                    {
+                        activateRaycast = true;
+                    }
+                }
+                else
+                {
+                    activateRaycast = true;
+                }
+
+
                 if (!targetActivated)
                 {
+
                     //deactivate cue
                     cue.SetActive(false);
                     marker.Write("cue text deactivated");
@@ -516,10 +552,14 @@ public class GUIControl : MonoBehaviour {
 
                 }
 
+
                 //check for successful response (if the collision has reached the minimum duration)
                 if (collisionActive)
                 {
-                    if ((float)collisionDuration.ElapsedMilliseconds / 1000 >= minimumTaskDuration)
+                    Debug.Log("colision active: " + ((float)collisionDuration.ElapsedMilliseconds / 10000).ToString() + " " + actualTime.ToString());
+
+                    //if ((float)collisionDuration.ElapsedMilliseconds / 10000 >= minimumTaskDuration)
+                    if (actualTime - collisionStartTime >= minimumTaskDuration)
                     {
                         //activate correct/incorrect visual feedback
                         visualFeedbackActive = true;
@@ -530,6 +570,9 @@ public class GUIControl : MonoBehaviour {
                 //else if (actualTime > fixationDuration + currentCueDuration + stimulusDurationMax)
                 else if (actualTime > fixationDuration + currentIsiDuration + currentCueDuration + stimulusDurationMax)
                 {
+                    //deactivate raycast
+                    activateRaycast = false;
+
                     marker.Write("response time over");
                     Debug.Log("response time over. " + actualTime.ToString());
 
@@ -541,6 +584,9 @@ public class GUIControl : MonoBehaviour {
             //if the current task has been successful
             else
             {
+                //deactivate raycast
+                activateRaycast = false;
+
                 //wait for visual feedback to finish and then -> go to next trial
                 //if (actualTime > fixationDuration + currentCueDuration + reaction_time + minimumTaskDuration + feedbackDuration)
                 if (actualTime > fixationDuration + currentIsiDuration + currentCueDuration + reaction_time + minimumTaskDuration + feedbackDuration)
@@ -660,7 +706,8 @@ public class GUIControl : MonoBehaviour {
 
         collisionActive = false;
         visualFeedbackActive = false;
-        collisionDuration.Reset();
+        //collisionDuration.Reset();
+        collisionStartTime = 0;
 
 
         //check if all trials have been run
@@ -757,7 +804,8 @@ public class GUIControl : MonoBehaviour {
             currentCollisionObj = GO;
 
             //start the hit duration
-            collisionDuration.Start();
+            //collisionDuration.Start();
+            collisionStartTime = actualTime;
 
             //set hit flag
             collisionActive = true;
@@ -848,7 +896,8 @@ public class GUIControl : MonoBehaviour {
             if(currentResponseType == collisionEvent)
             {
                 //reset the hit duration
-                collisionDuration.Reset();
+                //collisionDuration.Reset();
+                collisionStartTime = 0;
 
                 //reset hit flag
                 collisionActive = false;
@@ -1734,6 +1783,10 @@ public class GUIControl : MonoBehaviour {
     {
         try
         {
+            //measure hand movement for detecting if the participant moved his hand
+
+
+
             switch (expControlStatus)
             {
                 case 0: //main menu
@@ -1901,6 +1954,68 @@ public class GUIControl : MonoBehaviour {
             throw (e);
         }
 
-    }
+    }//update()
+
+
+    private void FixedUpdate()
+    {
+        //check if hand is moving or not
+        if (handMovementThresholdOn)
+        {
+            //check current velocity of the hand
+            /*
+            //Rigidbody rb = vr_hand_R.GetComponent<Rigidbody>();
+            GameObject controllerRight = GameObject.Find("vr_hand_R");
+            vr_hand_RigidBody = controllerRight.GetComponent<Rigidbody>();
+            Vector3 currentHandVelocityVector = vr_hand_RigidBody.velocity;
+            currentHandVelocity = vr_hand_RigidBody.velocity.magnitude;
+
+            Debug.Log("currentHandVelocityVector: " + currentHandVelocityVector.ToString());
+            Debug.Log("currentHandVelocity: " + currentHandVelocity.ToString());
+            */
+
+            //calculate distance between old and current hand position
+
+            try
+            {
+                if (vr_hand_R == null)
+                {
+                    vr_hand_R = GameObject.Find("vr_hand_R");
+                    //Debug.Log("vr_hand_R is null");
+                }
+
+                if (handPosition_old != Vector3.zero)
+                {
+                    float distance = (Vector3.Distance(handPosition_old, vr_hand_R.transform.position));
+                    //Debug.Log("distance: " + distance.ToString() + " threshold: " + handMovementThreshold.ToString());
+
+                    if (distance > handMovementThreshold)
+                    {
+                        handIsMoving = true;
+                        //Debug.Log("distance: " + distance.ToString() + " threshold: " + handMovementThreshold.ToString());
+                    }
+                    else
+                    {
+                        handIsMoving = false;
+                    }
+                }
+                else
+                {
+                    handIsMoving = false;
+                }
+
+                //Debug.Log("handIsMoving: " + BoolToString(handIsMoving));
+
+                //update old hand position
+                handPosition_old = vr_hand_R.transform.position;
+            }
+            catch(System.NullReferenceException e)
+            {
+                Debug.Log("ERROR: could not get vr_hand_R.transform.position");
+            }
+
+        }
+
+    }//FixedUpdate()
 
 }

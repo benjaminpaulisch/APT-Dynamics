@@ -23,40 +23,55 @@ public class PointingTask : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        //This will constantly draw the ray in our scene view so we can see where the ray is going
-        Debug.DrawRay(gameObject.transform.position, gameObject.transform.up * rayLength, Color.blue, 0.2f);
 
-        //This statement is called when the raycast is hitting a collider in the scene
-        if (Physics.Raycast(gameObject.transform.position, gameObject.transform.up, out vision, rayLength))
+        //only when raycast is set to active
+        if (GUIC.activateRaycast)
         {
+            //This will constantly draw the ray in our scene view so we can see where the ray is going
+            Debug.DrawRay(gameObject.transform.position, gameObject.transform.up * rayLength, Color.blue, 0.2f);
 
-            //determine if the object our raycast is hitting has the "pointable" tag
-            if (vision.collider.tag == "pointable") {
+            //This statement is called when the raycast is hitting a collider in the scene
+            if (Physics.Raycast(gameObject.transform.position, gameObject.transform.up, out vision, rayLength))
+            {
 
-                //check if it's a new hit
-                if (!hitActive)
-                {
-                    //in Learning only start correct feedback!
-                    if (GUIC.learningStarted)
+                //determine if the object our raycast is hitting has the "pointable" tag
+                if (vision.collider.tag == "pointable") {
+
+                    //check if it's a new hit
+                    if (!hitActive)
                     {
-                        if (GUIC.currentTask == "point")
+                        //in Learning only start correct feedback!
+                        if (GUIC.learningStarted)
+                        {
+                            if (GUIC.currentTask == "point")
+                            {
+                                hitActive = true;
+                                //Debug.Log(vision.collider.name);    //output the name of the object our raycast is hitting
+                                GUIC.StartVisualFeedback(vision.collider.gameObject, "point");
+                            }
+                        }
+                        else
                         {
                             hitActive = true;
                             //Debug.Log(vision.collider.name);    //output the name of the object our raycast is hitting
                             GUIC.StartVisualFeedback(vision.collider.gameObject, "point");
                         }
                     }
-                    else
-                    {
-                        hitActive = true;
-                        //Debug.Log(vision.collider.name);    //output the name of the object our raycast is hitting
-                        GUIC.StartVisualFeedback(vision.collider.gameObject, "point");
-                    }
+                }
+            
+            }
+            //no hit
+            else
+            {
+                //check if was a hit before
+                if (hitActive)
+                {
+                    hitActive = false;
+                    GUIC.StopVisualFeedback("point");
                 }
             }
-            
         }
-        //no hit
+        //hand is moving
         else
         {
             //check if was a hit before
