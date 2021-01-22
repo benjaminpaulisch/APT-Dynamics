@@ -147,10 +147,10 @@ public class GUIControl : MonoBehaviour {
 
 
     // Game objects
-    public static GameObject table, plane, instructionsExp, textBox, end, endTextBox, startContinue, resting, questionnaire, q, ra, la, send, fixationCross, cue, cueText,
+    public static GameObject table, plane, instructionsExp, textBox, end, endTextBox, startTrialCanvas, resting, questionnaire, q, ra, la, send, fixationCross, cue, cueText,
         mainMenu, calibrationMenu, configurationMenu, inputParticipantID, inputParticipantAge, inputParticipantGender, inputArmLength, buttonExperiment,
         buttonLearning, buttonTraining, buttonShoulderPos, textHintShoulderPos, textMissingInputs, tableSetup, buttonMaximumReach, buttonCupPositions, buttonTablePosition, textHintShoulderFirst,
-        textHintCupPos, textHintTablePos, breakCanvasDesktop, vr_hand_R;
+        textHintCupPos, textHintTablePos, breakCanvasDesktop, vr_hand_R, continueCanvas, continueButton;
     private GameObject cubeFarLeft, cubeFarMiddleLeft, cubeFarMiddle, cubeFarMiddleRight, cubeFarRight, cubeNearLeft, cubeNearMiddleLeft, cubeNearMiddle, cubeNearMiddleRight, cubeNearRight;
     private GameObject[] cubeGameObjArr = new GameObject[10];
 
@@ -171,7 +171,9 @@ public class GUIControl : MonoBehaviour {
         textBox = GameObject.Find("TextBox");
         end = GameObject.Find("End");
         endTextBox = GameObject.Find("EndTextBox");
-        startContinue = GameObject.Find("StartContinue");
+        startTrialCanvas = GameObject.Find("startTrialCanvas");
+        continueCanvas = GameObject.Find("continueCanvas");
+        continueButton = GameObject.Find("continue");
         resting = GameObject.Find("resting");
         fixationCross = GameObject.Find("FixationCross");
         cue = GameObject.Find("Cue");
@@ -354,7 +356,9 @@ public class GUIControl : MonoBehaviour {
         table.gameObject.GetComponent<Renderer>().enabled = true;
         plane.gameObject.GetComponent<Renderer>().enabled = true;
         end.SetActive(false);
-        startContinue.SetActive(true);
+        startTrialCanvas.SetActive(true);
+        continueCanvas.SetActive(false);
+        continueButton.SetActive(false);
         //tableTextBackground.SetActive(true);
         resting.gameObject.GetComponent<Renderer>().enabled = true;
         restingDetectionActive = true;
@@ -400,8 +404,8 @@ public class GUIControl : MonoBehaviour {
         marker.Write(tempMarkerText);
         Debug.Log(tempMarkerText);
 
-        marker.Write("waiting for start/continue button press");
-        Debug.Log("waiting for start/continue button press...");
+        marker.Write("Waiting for hand on resting position");
+        Debug.Log("Waiting for hand on resting position...");
 
     }
 
@@ -620,7 +624,9 @@ public class GUIControl : MonoBehaviour {
     public void TrialStart()
     {
         //deactivate start/Continue button
-        startContinue.SetActive(false);
+        startTrialCanvas.SetActive(false);
+        continueCanvas.SetActive(false);
+        continueButton.SetActive(false);
         resting.SetActive(false);
         restingDetectionActive = false;
         //tableTextBackground.SetActive(true);
@@ -753,7 +759,7 @@ public class GUIControl : MonoBehaviour {
 
                     //wait for manual trial start by putting hand on resting position
                     experimentStarted = false;
-                    startContinue.SetActive(true);
+                    startTrialCanvas.SetActive(true);
                     resting.SetActive(true);
                     restingDetectionActive = true;
                     //tableTextBackground.SetActive(true);
@@ -1100,7 +1106,9 @@ public class GUIControl : MonoBehaviour {
         //table.gameObject.GetComponent<Renderer>().enabled = false;
         table.SetActive(false);
         DeactivateAllCubes();
-        startContinue.SetActive(false);
+        startTrialCanvas.SetActive(false);
+        continueCanvas.SetActive(false);
+        continueButton.SetActive(false);
         //resting.gameObject.GetComponent<Renderer>().enabled = false;
         resting.SetActive(false);
         //questionnaire.SetActive(false);
@@ -1137,7 +1145,9 @@ public class GUIControl : MonoBehaviour {
         //table.gameObject.GetComponent<Renderer>().enabled = false;
         table.SetActive(false);
         DeactivateAllCubes();
-        startContinue.SetActive(false);
+        startTrialCanvas.SetActive(false);
+        continueCanvas.SetActive(false);
+        continueButton.SetActive(false);
         //resting.gameObject.GetComponent<Renderer>().enabled = false;
         resting.SetActive(false);
         //questionnaire.SetActive(false);
@@ -1247,7 +1257,9 @@ public class GUIControl : MonoBehaviour {
         //table.gameObject.GetComponent<Renderer>().enabled = false;
         table.SetActive(true);
         DeactivateAllCubes();
-        startContinue.SetActive(false);
+        startTrialCanvas.SetActive(false);
+        continueCanvas.SetActive(false);
+        continueButton.SetActive(false);
         //resting.gameObject.GetComponent<Renderer>().enabled = false;
         resting.SetActive(true);
         //questionnaire.SetActive(false);
@@ -1284,7 +1296,9 @@ public class GUIControl : MonoBehaviour {
         cue.SetActive(false);
         table.SetActive(true);
         DeactivateAllCubes();
-        startContinue.SetActive(true);
+        startTrialCanvas.SetActive(true);
+        continueCanvas.SetActive(false);
+        continueButton.SetActive(false);
         resting.SetActive(true);
         end.SetActive(false);
         //shoulder.SetActive(false);
@@ -1357,7 +1371,7 @@ public class GUIControl : MonoBehaviour {
         table.gameObject.GetComponent<Renderer>().enabled = true;
         plane.gameObject.GetComponent<Renderer>().enabled = true;
         end.SetActive(false);
-        startContinue.SetActive(true);
+        startTrialCanvas.SetActive(true);
         resting.SetActive(true);
         //resting.gameObject.GetComponent<Renderer>().enabled = true;
         restingDetectionActive = true;
@@ -1403,8 +1417,8 @@ public class GUIControl : MonoBehaviour {
         marker.Write(tempMarkerText);
         Debug.Log(tempMarkerText);
 
-        marker.Write("waiting for start/continue button press");
-        Debug.Log("waiting for start/continue button press...");
+        marker.Write("Waiting for hand on resting position");
+        Debug.Log("Waiting for hand on resting position...");
 
     }
 
@@ -1431,7 +1445,9 @@ public class GUIControl : MonoBehaviour {
         cue.SetActive(false);
         table.SetActive(true);
         DeactivateAllCubes();
-        startContinue.SetActive(true);
+        startTrialCanvas.SetActive(true);
+        continueCanvas.SetActive(false);
+        continueButton.SetActive(false);
         resting.SetActive(true);
         end.SetActive(false);
         //shoulder.SetActive(false);
@@ -1470,7 +1486,7 @@ public class GUIControl : MonoBehaviour {
         table.gameObject.GetComponent<Renderer>().enabled = true;
         plane.gameObject.GetComponent<Renderer>().enabled = true;
         end.SetActive(false);
-        startContinue.SetActive(true);
+        startTrialCanvas.SetActive(true);
         resting.SetActive(true);
         //resting.gameObject.GetComponent<Renderer>().enabled = true;
         restingDetectionActive = true;
@@ -1516,8 +1532,8 @@ public class GUIControl : MonoBehaviour {
         marker.Write(tempMarkerText);
         Debug.Log(tempMarkerText);
 
-        marker.Write("waiting for start/continue button press");
-        Debug.Log("waiting for start/continue button press...");
+        marker.Write("Waiting for hand on resting position");
+        Debug.Log("Waiting for hand on resting position...");
 
     }
 
@@ -1582,7 +1598,9 @@ public class GUIControl : MonoBehaviour {
         //table.gameObject.GetComponent<Renderer>().enabled = false;
         table.SetActive(true);
         DeactivateAllCubes();
-        startContinue.SetActive(true);
+        startTrialCanvas.SetActive(true);
+        continueCanvas.SetActive(false);
+        continueButton.SetActive(false);
         //resting.gameObject.GetComponent<Renderer>().enabled = false;
         resting.SetActive(true);
         //questionnaire.SetActive(false);
@@ -1649,15 +1667,33 @@ public class GUIControl : MonoBehaviour {
         marker.Write("break:end;afterTrial:" + (trialSeqCounter-1).ToString());
         Debug.Log("break:end;afterTrial:" + (trialSeqCounter-1).ToString());
 
-        //activate startContinue so that the participant can continue with experiment
-        startContinue.SetActive(true);
+        //activate continue button so that the participant can continue with experiment
+        //startTrialCanvas.SetActive(true);
+        continueCanvas.SetActive(true);
+        continueButton.SetActive(true);
+        //resting.SetActive(true);
+        //restingDetectionActive = true;
+
+        marker.Write("Break is over. Waiting for continue button press.");
+        Debug.Log("Break is over. Waiting for continue button press.");
+
+        expControlStatus = 5;
+    }
+
+
+    public void ContinueAfterBreak()
+    {
+        //deactivate continueButton and text
+        continueCanvas.SetActive(false);
+        continueButton.SetActive(false);
+
+        //wait for manual trial start by putting hand on resting position
+        startTrialCanvas.SetActive(true);
         resting.SetActive(true);
         restingDetectionActive = true;
 
-        marker.Write("Break is over. Waiting for hand on resting to continue.");
-        Debug.Log("Break is over. Waiting for hand on resting to continue.");
-
-        expControlStatus = 5;
+        marker.Write("Waiting for hand on resting position");
+        Debug.Log("Waiting for hand on resting position...");
     }
 
 
