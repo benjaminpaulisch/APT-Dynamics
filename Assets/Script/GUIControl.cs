@@ -10,8 +10,8 @@ public class GUIControl : MonoBehaviour {
 
     //Inspector Interface:
     [Header("General Config")]
-    public float isiDurationAvg = 1.5f;             //1.5s ISI duration on average
-    public float isiDurationVariation = 0.5f;       //0.5s variation (so the ISI duration range is betweeen 1s and 2s)
+    public float isiDurationAvg = 2;                //1.5s ISI duration on average
+    public float isiDurationVariation = 1;          //0.5s variation (so the ISI duration range is betweeen 1s and 2s)
     public float fixationDuration = 1f;             //1s fixation cross is visible
     public float cueDurationAvg = 2f;               //2s cue average duration
     public float cueDurationVariation = 1f;         //1s variation (so the cue duration is 2s +- 1s
@@ -148,7 +148,7 @@ public class GUIControl : MonoBehaviour {
     public static GameObject table, plane, instructionsExp, textBox, end, endTextBox, startContinue, resting, questionnaire, q, ra, la, send, fixationCross, cue, cueText,
         mainMenu, calibrationMenu, configurationMenu, inputParticipantID, inputParticipantAge, inputParticipantGender, inputArmLength, buttonExperiment,
         buttonLearning, buttonTraining, buttonShoulderPos, textHintShoulderPos, textMissingInputs, tableSetup, buttonMaximumReach, buttonCupPositions, buttonTablePosition, textHintShoulderFirst,
-        textHintCupPos, textHintTablePos, breakCanvasDesktop, vr_hand_R, tableTextBackground;
+        textHintCupPos, textHintTablePos, breakCanvasDesktop, vr_hand_R;
     private GameObject cubeFarLeft, cubeFarMiddleLeft, cubeFarMiddle, cubeFarMiddleRight, cubeFarRight, cubeNearLeft, cubeNearMiddleLeft, cubeNearMiddle, cubeNearMiddleRight, cubeNearRight;
     private GameObject[] cubeGameObjArr = new GameObject[10];
 
@@ -196,7 +196,7 @@ public class GUIControl : MonoBehaviour {
         textHintTablePos = GameObject.Find("TextHintTablePos");
         //breakCanvasVR = GameObject.Find("BreakCanvasVR");
         breakCanvasDesktop = GameObject.Find("BreakCanvasDesktop");
-        tableTextBackground = GameObject.Find("TableTextBackground");
+        //tableTextBackground = GameObject.Find("TableTextBackground");
         //vr_hand_R = GameObject.Find("vr_hand_R");
         //Debug.Log("vr_hand_R: " + vr_hand_R.name);
         //vr_hand_RigidBody = vr_hand_R.GetComponent<Rigidbody>();
@@ -353,7 +353,7 @@ public class GUIControl : MonoBehaviour {
         plane.gameObject.GetComponent<Renderer>().enabled = true;
         end.SetActive(false);
         startContinue.SetActive(true);
-        tableTextBackground.SetActive(true);
+        //tableTextBackground.SetActive(true);
         resting.gameObject.GetComponent<Renderer>().enabled = true;
         restingDetectionActive = true;
 
@@ -441,7 +441,7 @@ public class GUIControl : MonoBehaviour {
 
                 //activate experiment end text
                 end.SetActive(true);
-                tableTextBackground.SetActive(true);
+                //tableTextBackground.SetActive(true);
 
                 experimentStarted = false;
 
@@ -540,7 +540,7 @@ public class GUIControl : MonoBehaviour {
 
                     //deactivate cue
                     cue.SetActive(false);
-                    tableTextBackground.SetActive(false);
+                    //tableTextBackground.SetActive(false);
 
                     marker.Write("cue text deactivated");
                     Debug.Log("Cue deactivated: " + actualTime.ToString());
@@ -621,7 +621,7 @@ public class GUIControl : MonoBehaviour {
         startContinue.SetActive(false);
         resting.SetActive(false);
         restingDetectionActive = false;
-        tableTextBackground.SetActive(true);
+        //tableTextBackground.SetActive(true);
 
         //deactivate instructions
         if (instructionsExp.activeSelf)
@@ -750,7 +750,7 @@ public class GUIControl : MonoBehaviour {
                     startContinue.SetActive(true);
                     resting.SetActive(true);
                     restingDetectionActive = true;
-                    tableTextBackground.SetActive(true);
+                    //tableTextBackground.SetActive(true);
 
                     marker.Write("Waiting for hand on resting position");
                     Debug.Log("Waiting for hand on resting position...");
@@ -1103,7 +1103,7 @@ public class GUIControl : MonoBehaviour {
         //shoulder.SetActive(false);
         //breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
-        tableTextBackground.SetActive(false);
+        //tableTextBackground.SetActive(false);
 
         //reset control flags:
         flagStart = false;
@@ -1140,7 +1140,7 @@ public class GUIControl : MonoBehaviour {
         //shoulder.SetActive(false);
         //breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
-        tableTextBackground.SetActive(false);
+        //tableTextBackground.SetActive(false);
     }
 
 
@@ -1250,7 +1250,7 @@ public class GUIControl : MonoBehaviour {
         //shoulder.SetActive(true);
         //breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
-        tableTextBackground.SetActive(false);
+        //tableTextBackground.SetActive(false);
 
         ActivateAllCubes();
     }
@@ -1284,7 +1284,7 @@ public class GUIControl : MonoBehaviour {
         //shoulder.SetActive(false);
         //breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
-        tableTextBackground.SetActive(true);
+        //tableTextBackground.SetActive(true);
 
     }
 
@@ -1431,7 +1431,7 @@ public class GUIControl : MonoBehaviour {
         //shoulder.SetActive(false);
         //breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
-        tableTextBackground.SetActive(true);
+        //tableTextBackground.SetActive(true);
 
     }
 
@@ -1585,7 +1585,7 @@ public class GUIControl : MonoBehaviour {
         //shoulder.SetActive(false);
         //breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
-        tableTextBackground.SetActive(true);
+        //tableTextBackground.SetActive(true);
 
     }
 
@@ -1612,7 +1612,7 @@ public class GUIControl : MonoBehaviour {
         //activate break text
         //breakCanvasVR.SetActive(true);
         breakCanvasDesktop.SetActive(true);
-        tableTextBackground.SetActive(true);
+        //tableTextBackground.SetActive(true);
 
         /*
         //activate startContinue so that the participant can continue with experiment
