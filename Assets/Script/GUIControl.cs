@@ -1100,11 +1100,11 @@ public class GUIControl : MonoBehaviour {
         //instructionsExp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
         instructionsExp.SetActive(false);
         //plane.gameObject.GetComponent<Renderer>().enabled = false;
-        plane.SetActive(false);
+        //plane.SetActive(false);
         fixationCross.SetActive(false);
         cue.SetActive(false);
         //table.gameObject.GetComponent<Renderer>().enabled = false;
-        table.SetActive(false);
+        //table.SetActive(false);
         DeactivateAllCubes();
         startTrialCanvas.SetActive(false);
         continueCanvas.SetActive(false);
@@ -1139,11 +1139,11 @@ public class GUIControl : MonoBehaviour {
         //instructionsExp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
         instructionsExp.SetActive(false);
         //plane.gameObject.GetComponent<Renderer>().enabled = false;
-        plane.SetActive(false);
+        //plane.SetActive(false);
         fixationCross.SetActive(false);
         cue.SetActive(false);
         //table.gameObject.GetComponent<Renderer>().enabled = false;
-        table.SetActive(false);
+        //table.SetActive(false);
         DeactivateAllCubes();
         startTrialCanvas.SetActive(false);
         continueCanvas.SetActive(false);
@@ -1251,11 +1251,11 @@ public class GUIControl : MonoBehaviour {
         //instructionsExp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
         instructionsExp.SetActive(false);
         //plane.gameObject.GetComponent<Renderer>().enabled = false;
-        plane.SetActive(true);
+        //plane.SetActive(true);
         fixationCross.SetActive(false);
         cue.SetActive(false);
         //table.gameObject.GetComponent<Renderer>().enabled = false;
-        table.SetActive(true);
+        //table.SetActive(true);
         DeactivateAllCubes();
         startTrialCanvas.SetActive(false);
         continueCanvas.SetActive(false);
@@ -1291,10 +1291,10 @@ public class GUIControl : MonoBehaviour {
         marker.Write("instructions activated");
         Debug.Log("Instructions activated");
 
-        plane.SetActive(true);
+        //plane.SetActive(true);
         fixationCross.SetActive(false);
         cue.SetActive(false);
-        table.SetActive(true);
+        //table.SetActive(true);
         DeactivateAllCubes();
         startTrialCanvas.SetActive(true);
         continueCanvas.SetActive(false);
@@ -1440,10 +1440,10 @@ public class GUIControl : MonoBehaviour {
         marker.Write("instructions activated");
         Debug.Log("Instructions activated");
 
-        plane.SetActive(true);
+        //plane.SetActive(true);
         fixationCross.SetActive(false);
         cue.SetActive(false);
-        table.SetActive(true);
+        //table.SetActive(true);
         DeactivateAllCubes();
         startTrialCanvas.SetActive(true);
         continueCanvas.SetActive(false);
@@ -1592,11 +1592,11 @@ public class GUIControl : MonoBehaviour {
         Debug.Log("Instructions activated");
 
         //plane.gameObject.GetComponent<Renderer>().enabled = false;
-        plane.SetActive(true);
+        //plane.SetActive(true);
         fixationCross.SetActive(false);
         cue.SetActive(false);
         //table.gameObject.GetComponent<Renderer>().enabled = false;
-        table.SetActive(true);
+        //table.SetActive(true);
         DeactivateAllCubes();
         startTrialCanvas.SetActive(true);
         continueCanvas.SetActive(false);
