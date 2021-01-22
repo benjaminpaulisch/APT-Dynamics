@@ -8,7 +8,7 @@ public class resting_pos : MonoBehaviour {
 
     void OnTriggerEnter(Collider other) // in case of collision with leap motion tracked hand and cube gameObject
     {
-        //check if it's the collider from the hand
+        //check if it's the collider from the center of the hand
         if (other.name == "vr_hand_R")
         {
             GUIC.marker.Write("hand entered resting position");
