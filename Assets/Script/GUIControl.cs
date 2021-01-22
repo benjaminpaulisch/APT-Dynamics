@@ -30,8 +30,10 @@ public class GUIControl : MonoBehaviour {
     //public float firstBreakSeconds = 120f;
     //public float secondBreakSeconds = 180f;
     //public float thirdBreakSeconds = 120f;
+    public int standardBreakDuration = 120;         //2 minutes
+    public int standardBreakEveryTrials = 100;
     public int halfTimeBreakDuration = 300;         //5 minutes
-    public int standardBrakeDuration = 10;          //10 seconds
+    public int manualBrakeDuration = 10;            //10 seconds
     public int manualBreakEveryTrials = 25;         //a manual break every 25 trials (except half time)
 
     [Header("Learning specific")]
@@ -733,13 +735,17 @@ public class GUIControl : MonoBehaviour {
                 {
                     StartBreak(halfTimeBreakDuration, false);
                 }
+                else if (trialSeqCounter % standardBreakEveryTrials == 0)
+                {
+                    StartBreak(standardBreakDuration, false);
+                }
                 else if (trialSeqCounter % manualBreakEveryTrials == 0)     //manual break every X trials
                 {
-                    StartBreak(standardBrakeDuration, false);
+                    StartBreak(manualBrakeDuration, false);
                 }
                 else if (manualBreakTriggered) //manual break triggered by pressing the "p" key
                 {
-                    StartBreak(standardBrakeDuration, true);
+                    StartBreak(manualBrakeDuration, true);
                 }
                 else
                 {
