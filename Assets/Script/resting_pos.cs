@@ -15,12 +15,32 @@ public class resting_pos : MonoBehaviour {
             Debug.Log("hand entered resting position");
 
             //if detection is active -> start trial
-            if(GUIC.restingDetectionActive)
+            if (GUIC.restingDetectionActive)
             {
-                GUIC.marker.Write("Trial start invoked by hand on resting position");
-                Debug.Log("Trial start invoked by hand on resting position");
 
-                GUIC.TrialStart();
+                if (GUIC.expControlStatus == 7) //baseline closed
+                {
+                    GUIC.marker.Write("Baseline Closed start invoked by hand on resting position");
+                    Debug.Log("Baseline Closed start invoked by hand on resting position");
+
+                    GUIC.InitBaselineClosed();
+                }
+                else if (GUIC.expControlStatus == 8) //baseline open
+                {
+                    GUIC.marker.Write("Baseline Open start invoked by hand on resting position");
+                    Debug.Log("Baseline Open start invoked by hand on resting position");
+
+                    GUIC.InitBaselineOpen();
+                }
+                else
+                {
+                    GUIC.marker.Write("Trial start invoked by hand on resting position");
+                    Debug.Log("Trial start invoked by hand on resting position");
+
+                    GUIC.TrialStart();
+                }
+
+
             }
 
             //GUIC.handIsOnResting = true;

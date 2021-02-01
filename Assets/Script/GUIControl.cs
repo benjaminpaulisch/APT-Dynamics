@@ -43,6 +43,9 @@ public class GUIControl : MonoBehaviour {
     [Header("Training specific")]
     public int trialsPerTaskTraining = 5;
 
+    [Header("Baseline specific")]
+    public int baselineDuration = 120;              //2 minutes
+
     [Header("Misc")]
     public LSLMarkerStream marker;
 
@@ -96,7 +99,8 @@ public class GUIControl : MonoBehaviour {
     private bool trackerFoundMaxReach = true;
     private bool trackerFoundCupPos = true;
     private static bool visualFeedbackActive = false;
-    private int expControlStatus;
+    [HideInInspector] // Hides vars from Inspector
+    public int expControlStatus;
     private float breakDurationCountdown;       //break timer
 
     // trial logic handler
@@ -144,13 +148,22 @@ public class GUIControl : MonoBehaviour {
     private int experimentRunNo = 0;
     private string endTextExp = "The experiment has ended.\nThank you for your participation.";
     private bool manualBreakTriggered = false;
+    private string startNextTrialText = "Put your hand on the resting position to start the next trial";
+
+    //baseline specific
+    [HideInInspector] // Hides vars from Inspector
+    public bool baselineRunning = false;
+    private string endTextBaseline = "The baseline has ended.\nPlease contact the experimenter.";
+    private int baselineClosedRunNo = 0;
+    private int baselineOpenRunNo = 0;
+    private string startBaselineText = "Put your hand on the resting position to start the baseline";
 
 
     // Game objects
     public static GameObject table, plane, instructionsExp, textBox, end, endTextBox, startTrialCanvas, resting, questionnaire, q, ra, la, send, fixationCross, cue, cueText,
-        mainMenu, calibrationMenu, configurationMenu, inputParticipantID, inputParticipantAge, inputParticipantGender, inputArmLength, buttonExperiment,
+        mainMenu, calibrationMenu, configurationMenu, inputParticipantID, inputParticipantAge, inputParticipantGender, inputArmLength, buttonExperiment, startTrialText,
         buttonLearning, buttonTraining, buttonShoulderPos, textHintShoulderPos, textMissingInputs, tableSetup, buttonMaximumReach, buttonCupPositions, buttonTablePosition, textHintShoulderFirst,
-        textHintCupPos, textHintTablePos, breakCanvasDesktop, vr_hand_R, continueCanvas, continueButton;
+        textHintCupPos, textHintTablePos, breakCanvasDesktop, vr_hand_R, continueCanvas, continueButton, baselineClosedCanvas, buttonBaselineClosed, buttonBaselineOpen;
     private GameObject cubeFarLeft, cubeFarMiddleLeft, cubeFarMiddle, cubeFarMiddleRight, cubeFarRight, cubeNearLeft, cubeNearMiddleLeft, cubeNearMiddle, cubeNearMiddleRight, cubeNearRight;
     private GameObject[] cubeGameObjArr = new GameObject[10];
 
@@ -172,6 +185,7 @@ public class GUIControl : MonoBehaviour {
         end = GameObject.Find("End");
         endTextBox = GameObject.Find("EndTextBox");
         startTrialCanvas = GameObject.Find("startTrialCanvas");
+        startTrialText = GameObject.Find("startTrialText");
         continueCanvas = GameObject.Find("continueCanvas");
         continueButton = GameObject.Find("continue");
         resting = GameObject.Find("resting");
@@ -207,6 +221,9 @@ public class GUIControl : MonoBehaviour {
 
         //GameObject controllerRight = GameObject.Find("Controller (right)");
         //vr_hand_RigidBody = controllerRight.GetComponent<Rigidbody>();
+        buttonBaselineClosed = GameObject.Find("ButtonBaselineClosed");
+        buttonBaselineOpen = GameObject.Find("ButtonBaselineOpen");
+        baselineClosedCanvas = GameObject.Find("BaselineClosedCanvas");
 
 
         //Stimulus
@@ -240,6 +257,7 @@ public class GUIControl : MonoBehaviour {
         textHintTablePos.SetActive(false);
         textHintShoulderPos.SetActive(false);
         end.SetActive(false);
+        baselineClosedCanvas.SetActive(false);
 
         //start the Main Menu:
         StartMainMenu();
@@ -357,6 +375,7 @@ public class GUIControl : MonoBehaviour {
         plane.gameObject.GetComponent<Renderer>().enabled = true;
         end.SetActive(false);
         startTrialCanvas.SetActive(true);
+        startTrialText.GetComponent<Text>().text = startNextTrialText;
         continueCanvas.SetActive(false);
         continueButton.SetActive(false);
         //tableTextBackground.SetActive(true);
@@ -528,10 +547,22 @@ public class GUIControl : MonoBehaviour {
                 {
                     if (handIsMoving)
                     {
+                        if (activateRaycast)
+                        {
+                            //if raycast was activated before -> write marker
+                            marker.Write("Hand is moving -> deactivating pointing detection");
+                            Debug.Log("Hand is moving -> deactivating pointing detection " + actualTime.ToString());
+                        }
                         activateRaycast = false;
                     }
                     else
                     {
+                        if (!activateRaycast)
+                        {
+                            //if raycast was deactivated before -> write marker
+                            marker.Write("Hand stopped moving -> activating pointing detection");
+                            Debug.Log("Hand stopped moving -> activating pointing detection " + actualTime.ToString());
+                        }
                         activateRaycast = true;
                     }
                 }
@@ -1094,6 +1125,8 @@ public class GUIControl : MonoBehaviour {
         expControlStatus = 0;
 
         //activate and deactivate objects:
+        plane.gameObject.SetActive(true);
+        table.gameObject.SetActive(true);
         mainMenu.gameObject.SetActive(true);
         calibrationMenu.SetActive(false);
         configurationMenu.SetActive(false);
@@ -1274,6 +1307,146 @@ public class GUIControl : MonoBehaviour {
     }
 
 
+    public void StartBaselineClosed()
+    {
+        //This method is used for the "Start Baseline Closed" button on the main menu. When the button is pressed this method is executed.
+        marker.Write("Main menu: Start Baseline Closed button pressed");
+        Debug.Log("Starting Baseline Closed");
+
+        expControlStatus = 7;
+
+        //activate and deactivate objects:
+        mainMenu.gameObject.SetActive(false);
+        calibrationMenu.SetActive(false);
+        configurationMenu.SetActive(false);
+
+        instructionsExp.SetActive(true);
+        marker.Write("instructions activated");
+        Debug.Log("Instructions activated");
+
+        //plane.SetActive(true);
+        fixationCross.SetActive(false);
+        cue.SetActive(false);
+        //table.SetActive(true);
+        DeactivateAllCubes();
+        startTrialCanvas.SetActive(true);
+        startTrialText.GetComponent<Text>().text = startBaselineText;
+        continueCanvas.SetActive(false);
+        continueButton.SetActive(false);
+        resting.SetActive(true);
+        end.SetActive(false);
+        //shoulder.SetActive(false);
+        //breakCanvasVR.SetActive(false);
+        breakCanvasDesktop.SetActive(false);
+        //tableTextBackground.SetActive(true);
+
+        restingDetectionActive = true;
+
+        marker.Write("Waiting for hand on resting position");
+        Debug.Log("Waiting for hand on resting position");
+
+    }
+
+    public void InitBaselineClosed()
+    {
+        baselineClosedRunNo += 1;
+
+        //deactivate all visuals
+        instructionsExp.SetActive(false);
+        startTrialCanvas.SetActive(false);
+        resting.SetActive(false);
+
+        //activate special canvas to black out the hmd
+        baselineClosedCanvas.SetActive(true);
+        marker.Write("Activated Black canvas");
+        Debug.Log("Activated Black canvas");
+
+        restingDetectionActive = false;
+
+        //start timer
+        actualTime = 0;
+
+        //activate flag
+        baselineRunning = true;
+
+        //write experiment start marker
+        tempMarkerText =
+            "baselineClosed:start;" +
+            "runNo:" + baselineClosedRunNo.ToString() + ";" +
+            "duration:" + baselineDuration.ToString();
+        marker.Write(tempMarkerText);
+        Debug.Log(tempMarkerText);
+
+    }
+
+
+    public void StartBaselineOpen()
+    {
+        //This method is used for the "Start Baseline Open" button on the main menu. When the button is pressed this method is executed.
+        marker.Write("Main menu: Start Baseline Open button pressed");
+        Debug.Log("Starting Baseline Open");
+
+        expControlStatus = 8;
+
+        //activate and deactivate objects:
+        mainMenu.gameObject.SetActive(false);
+        calibrationMenu.SetActive(false);
+        configurationMenu.SetActive(false);
+
+        instructionsExp.SetActive(true);
+        marker.Write("instructions activated");
+        Debug.Log("Instructions activated");
+
+        //plane.SetActive(true);
+        fixationCross.SetActive(false);
+        cue.SetActive(false);
+        //table.SetActive(true);
+        DeactivateAllCubes();
+        startTrialCanvas.SetActive(true);
+        startTrialText.GetComponent<Text>().text = startBaselineText;
+        continueCanvas.SetActive(false);
+        continueButton.SetActive(false);
+        resting.SetActive(true);
+        end.SetActive(false);
+        //shoulder.SetActive(false);
+        //breakCanvasVR.SetActive(false);
+        breakCanvasDesktop.SetActive(false);
+        //tableTextBackground.SetActive(true);
+
+        restingDetectionActive = true;
+
+        marker.Write("Waiting for hand on resting position");
+        Debug.Log("Waiting for hand on resting position");
+
+    }
+
+    public void InitBaselineOpen()
+    {
+        baselineOpenRunNo += 1;
+
+        //deactivate all visuals
+        instructionsExp.SetActive(false);
+        startTrialCanvas.SetActive(false);
+        resting.SetActive(false);
+        restingDetectionActive = false;
+
+        //start timer
+        actualTime = 0;
+
+        //activate flag
+        baselineRunning = true;
+
+        //write experiment start marker
+        tempMarkerText =
+            "baselineOpen:start;" +
+            "runNo:" + baselineOpenRunNo.ToString() + ";" +
+            "duration:" + baselineDuration.ToString();
+        marker.Write(tempMarkerText);
+        Debug.Log(tempMarkerText);
+
+    }
+
+
     public void StartLearning()
     {
         //This method is used for the "Start Learning" button on the main menu. When the button is pressed this method is executed.
@@ -1297,6 +1470,7 @@ public class GUIControl : MonoBehaviour {
         //table.SetActive(true);
         DeactivateAllCubes();
         startTrialCanvas.SetActive(true);
+        startTrialText.GetComponent<Text>().text = startNextTrialText;
         continueCanvas.SetActive(false);
         continueButton.SetActive(false);
         resting.SetActive(true);
@@ -1372,6 +1546,7 @@ public class GUIControl : MonoBehaviour {
         plane.gameObject.GetComponent<Renderer>().enabled = true;
         end.SetActive(false);
         startTrialCanvas.SetActive(true);
+        startTrialText.GetComponent<Text>().text = startNextTrialText;
         resting.SetActive(true);
         //resting.gameObject.GetComponent<Renderer>().enabled = true;
         restingDetectionActive = true;
@@ -1446,6 +1621,7 @@ public class GUIControl : MonoBehaviour {
         //table.SetActive(true);
         DeactivateAllCubes();
         startTrialCanvas.SetActive(true);
+        startTrialText.GetComponent<Text>().text = startNextTrialText;
         continueCanvas.SetActive(false);
         continueButton.SetActive(false);
         resting.SetActive(true);
@@ -1487,6 +1663,7 @@ public class GUIControl : MonoBehaviour {
         plane.gameObject.GetComponent<Renderer>().enabled = true;
         end.SetActive(false);
         startTrialCanvas.SetActive(true);
+        startTrialText.GetComponent<Text>().text = startNextTrialText;
         resting.SetActive(true);
         //resting.gameObject.GetComponent<Renderer>().enabled = true;
         restingDetectionActive = true;
@@ -1599,6 +1776,7 @@ public class GUIControl : MonoBehaviour {
         //table.SetActive(true);
         DeactivateAllCubes();
         startTrialCanvas.SetActive(true);
+        startTrialText.GetComponent<Text>().text = startNextTrialText;
         continueCanvas.SetActive(false);
         continueButton.SetActive(false);
         //resting.gameObject.GetComponent<Renderer>().enabled = false;
@@ -1839,10 +2017,6 @@ public class GUIControl : MonoBehaviour {
     {
         try
         {
-            //measure hand movement for detecting if the participant moved his hand
-
-
-
             switch (expControlStatus)
             {
                 case 0: //main menu
@@ -1853,6 +2027,8 @@ public class GUIControl : MonoBehaviour {
                             buttonExperiment.GetComponent<Button>().interactable = true;
                             buttonLearning.GetComponent<Button>().interactable = true;
                             buttonTraining.GetComponent<Button>().interactable = true;
+                            buttonBaselineClosed.GetComponent<Button>().interactable = true;
+                            buttonBaselineOpen.GetComponent<Button>().interactable = true;
                             textMissingInputs.SetActive(false);
                         }
                         else
@@ -1860,6 +2036,8 @@ public class GUIControl : MonoBehaviour {
                             buttonExperiment.GetComponent<Button>().interactable = false;
                             buttonLearning.GetComponent<Button>().interactable = false;
                             buttonTraining.GetComponent<Button>().interactable = false;
+                            buttonBaselineClosed.GetComponent<Button>().interactable = false;
+                            buttonBaselineOpen.GetComponent<Button>().interactable = false;
                             textMissingInputs.SetActive(true);
                         }
                         break;
@@ -1998,6 +2176,86 @@ public class GUIControl : MonoBehaviour {
                             }
                         }
                         
+                        break;
+                    }
+                case 7: //baseline with eyes closed
+                    {
+                        //check for abort by pressing the escape key
+                        if (Input.GetKeyDown("escape"))
+                        {
+                            marker.Write("baselineClosed:abort");
+                            Debug.Log("baselineClosed:abort");
+
+                            //deactivate special canvas
+                            baselineClosedCanvas.SetActive(false);
+
+                            baselineRunning = false;
+
+                            //go to main menu
+                            StartMainMenu();
+                        }
+                        else if (baselineRunning)
+                        {
+                            actualTime += Time.deltaTime;
+
+                            if (actualTime >= baselineDuration)
+                            {
+                                //end baseline
+                                baselineRunning = false;
+
+                                //display end text on table
+                                endTextBox.GetComponent<Text>().text = endTextBaseline;
+                                end.SetActive(true);
+
+                                //deactivate special canvas
+                                baselineClosedCanvas.SetActive(false);
+                                marker.Write("Deactivated Black canvas");
+                                Debug.Log("Deactivated Black canvas");
+
+                                //lsl marker
+                                marker.Write("baselineClosed:end");
+                                Debug.Log("baselineClosed:end");
+
+                                StartMainMenu();
+                            }
+                        }
+
+                        break;
+                    }
+                case 8: //baseline with eyes open
+                    {
+                        //check for abort by pressing the escape key
+                        if (Input.GetKeyDown("escape"))
+                        {
+                            marker.Write("baselineOpen:abort");
+                            Debug.Log("baselineOpen:abort");
+
+                            baselineRunning = false;
+
+                            //go to main menu
+                            StartMainMenu();
+                        }
+                        else if (baselineRunning)
+                        {
+                            actualTime += Time.deltaTime;
+
+                            if (actualTime >= baselineDuration)
+                            {
+                                //end baseline
+                                baselineRunning = false;
+
+                                //display end text on table
+                                endTextBox.GetComponent<Text>().text = endTextBaseline;
+                                end.SetActive(true);
+
+                                //lsl marker
+                                marker.Write("baselineOpen:end");
+                                Debug.Log("baselineOpen:end");
+
+                                StartMainMenu();
+                            }
+                        }
+
                         break;
                     }
             }//switch
