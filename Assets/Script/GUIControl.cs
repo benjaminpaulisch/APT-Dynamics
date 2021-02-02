@@ -15,7 +15,7 @@ public class GUIControl : MonoBehaviour {
     public float fixationDuration = 1f;             //1s fixation cross is visible
     public float cueDurationAvg = 2f;               //2s cue average duration
     public float cueDurationVariation = 1f;         //1s variation (so the cue duration is 2s +- 1s
-    public float stimulusDurationMax = 5.0f;        //5s max target is visible
+    public float responseTimeMax = 5.0f;        //5s max target is visible
     public float feedbackDuration = 2.0f;           //2s feedback duration
     public float minimumTaskDuration = 1.0f;        //1s minimum collision duration for a successful response
     public int[] stimulusAngles = new int[] {-40, -20, 0, 20, 40};    //the angles at which the stimulus can be positioned from the shoulder
@@ -396,11 +396,12 @@ public class GUIControl : MonoBehaviour {
             "fixationDuration:" + fixationDuration.ToString() + ";" +
             "cueDurationAvg:" + cueDurationAvg.ToString() + ";" +
             "cueDurationVariation:" + cueDurationVariation.ToString() + ";" +
-            "stimulusDurationMax:" + stimulusDurationMax.ToString() + ";" +
+            "stimulusDurationMax:" + responseTimeMax.ToString() + ";" +
             "feedbackDuration:" + feedbackDuration.ToString() + ";" +
             "minTaskDuration:" + minimumTaskDuration.ToString() + ";" +
             "offsetNearPercent:" + offsetNearPercent.ToString() + ";" +
-            "offsetFarPercent:" + offsetFarPercent.ToString();
+            "offsetFarPercent:" + offsetFarPercent.ToString() + ";" +
+            "handMovementThreshold:" + handMovementThreshold.ToString();
         marker.Write(tempMarkerText);
         Debug.Log(tempMarkerText);
 
@@ -501,7 +502,7 @@ public class GUIControl : MonoBehaviour {
                 //ISI ended
                 isiStarted = false;
                 marker.Write("ISI ended");
-                Debug.Log("ISI ended: " + actualTime.ToString());
+                //Debug.Log("ISI ended: " + actualTime.ToString());
 
                 //enable fixation cross
                 fixationCross.SetActive(true);
@@ -523,7 +524,7 @@ public class GUIControl : MonoBehaviour {
                 //deactivate fixation cross
                 fixationCross.SetActive(false);
                 marker.Write("Fixation cross deactivated");
-                Debug.Log("Fixation Cross deactivated: " + actualTime.ToString());
+                //Debug.Log("Fixation Cross deactivated: " + actualTime.ToString());
                 fixationCrossActivated = false;
 
                 //activate cue and set correct cue text
@@ -542,6 +543,29 @@ public class GUIControl : MonoBehaviour {
         {
             if (!taskSuccess)    //if the current task has not been successful yet
             {
+                //show stimulus
+                if (!targetActivated)
+                {
+                    //deactivate cue
+                    cue.SetActive(false);
+                    //tableTextBackground.SetActive(false);
+
+                    marker.Write("cue text deactivated");
+                    //Debug.Log("Cue deactivated: " + actualTime.ToString());
+                    cueActivated = false;
+
+
+                    //activate stimulus
+                    CubeVisible(currentStimulusObj);
+                    Debug.Log("Stimulus activated: " + currentStimulusObj.name + " " + actualTime.ToString());
+
+                    //set reaction start time
+                    reaction_start_time = actualTime;
+
+                    targetActivated = true;
+                }
+
+
                 //activate raycast for pointing detection
                 if (handMovementThresholdOn)
                 {
@@ -551,7 +575,7 @@ public class GUIControl : MonoBehaviour {
                         {
                             //if raycast was activated before -> write marker
                             marker.Write("Hand is moving -> deactivating pointing detection");
-                            Debug.Log("Hand is moving -> deactivating pointing detection " + actualTime.ToString());
+                            //Debug.Log("Hand is moving -> deactivating pointing detection " + actualTime.ToString());
                         }
                         activateRaycast = false;
                     }
@@ -561,7 +585,7 @@ public class GUIControl : MonoBehaviour {
                         {
                             //if raycast was deactivated before -> write marker
                             marker.Write("Hand stopped moving -> activating pointing detection");
-                            Debug.Log("Hand stopped moving -> activating pointing detection " + actualTime.ToString());
+                            //Debug.Log("Hand stopped moving -> activating pointing detection " + actualTime.ToString());
                         }
                         activateRaycast = true;
                     }
@@ -569,29 +593,6 @@ public class GUIControl : MonoBehaviour {
                 else
                 {
                     activateRaycast = true;
-                }
-
-
-                if (!targetActivated)
-                {
-
-                    //deactivate cue
-                    cue.SetActive(false);
-                    //tableTextBackground.SetActive(false);
-
-                    marker.Write("cue text deactivated");
-                    Debug.Log("Cue deactivated: " + actualTime.ToString());
-                    cueActivated = false;
-
-                    //activate stimulus
-                    CubeVisible(currentStimulusObj);
-                    Debug.Log("Stimulus activated: " + actualTime.ToString());
-
-                    //set reaction start time
-                    reaction_start_time = actualTime;
-
-                    targetActivated = true;
-
                 }
 
 
@@ -609,8 +610,8 @@ public class GUIControl : MonoBehaviour {
                     }
                 }
                 //if time for a response has run out -> go to next trial (but NOT if there is an active collision)
-                //else if (actualTime > fixationDuration + currentCueDuration + stimulusDurationMax)
-                else if (actualTime > fixationDuration + currentIsiDuration + currentCueDuration + stimulusDurationMax)
+                //else if (actualTime > fixationDuration + currentCueDuration + responseTimeMax)
+                else if (actualTime > fixationDuration + currentIsiDuration + currentCueDuration + responseTimeMax)
                 {
                     //deactivate raycast
                     activateRaycast = false;
@@ -637,10 +638,10 @@ public class GUIControl : MonoBehaviour {
                     DeactivateAllCubes();
 
                     marker.Write("visual feeback duration over");
-                    Debug.Log("visual feeback duration over");
+                    Debug.Log("visual feeback duration over " + actualTime.ToString());
 
-                    marker.Write("visualFeedback:off");
-                    Debug.Log("visualFeedback:off " + actualTime.ToString());
+                    //marker.Write("visualFeedback:off");
+                    //Debug.Log("visualFeedback:off " + actualTime.ToString());
 
                     //transition to next trial
                     NextTrial();
@@ -837,7 +838,7 @@ public class GUIControl : MonoBehaviour {
         
         GO.SetActive(true);
         marker.Write("activateStimulus:" + GO.name);
-        Debug.Log("activateStimulus:" + GO.name);
+        //Debug.Log("activateStimulus:" + GO.name);
 
         //added this here to activate the collider (cause may have been disabled after touch in earlier trial)
         GO.GetComponent<SphereCollider>().enabled = true;
@@ -1243,8 +1244,8 @@ public class GUIControl : MonoBehaviour {
         {
             try
             {
-                armLength = (int.Parse(inputArmLength.GetComponent<InputField>().text)/10); //mm -> cm
-                Debug.Log("armLength: " + armLength.ToString());
+                armLength = (float.Parse(inputArmLength.GetComponent<InputField>().text))/10;     //mm -> cm
+                //Debug.Log("armLength: " + armLength.ToString());
                 armLengthSet = true;
             }
             catch (System.FormatException e)
@@ -1563,13 +1564,13 @@ public class GUIControl : MonoBehaviour {
             "isiDurationAvg:" + isiDurationAvg.ToString() + ";" +
             "isiDurationVariation:" + isiDurationVariation.ToString() + ";" +
             "fixationDuration:" + fixationDuration.ToString() + ";" +
-            "cueDurationAvg:" + cueDurationAvg.ToString() + ";" +
-            "cueDurationVariation:" + cueDurationVariation.ToString() + ";" +
-            "stimulusDurationMax:" + stimulusDurationMax.ToString() + ";" +
+            "cueDuration:" + cueDurationLearning.ToString() + ";" +
+            "stimulusDurationMax:" + responseTimeMax.ToString() + ";" +
             "feedbackDuration:" + feedbackDuration.ToString() + ";" +
             "minTaskDuration:" + minimumTaskDuration.ToString() + ";" +
             "offsetNearPercent:" + offsetNearPercent.ToString() + ";" +
-            "offsetFarPercent:" + offsetFarPercent.ToString();
+            "offsetFarPercent:" + offsetFarPercent.ToString() + ";" +
+            "handMovementThreshold:" + handMovementThreshold.ToString();
         marker.Write(tempMarkerText);
         Debug.Log(tempMarkerText);
 
@@ -1682,11 +1683,12 @@ public class GUIControl : MonoBehaviour {
             "fixationDuration:" + fixationDuration.ToString() + ";" +
             "cueDurationAvg:" + cueDurationAvg.ToString() + ";" +
             "cueDurationVariation:" + cueDurationVariation.ToString() + ";" +
-            "stimulusDurationMax:" + stimulusDurationMax.ToString() + ";" +
+            "stimulusDurationMax:" + responseTimeMax.ToString() + ";" +
             "feedbackDuration:" + feedbackDuration.ToString() + ";" +
             "minTaskDuration:" + minimumTaskDuration.ToString() + ";" +
             "offsetNearPercent:" + offsetNearPercent.ToString() + ";" +
-            "offsetFarPercent:" + offsetFarPercent.ToString();
+            "offsetFarPercent:" + offsetFarPercent.ToString() + ";" +
+            "handMovementThreshold:" + handMovementThreshold.ToString();
         marker.Write(tempMarkerText);
         Debug.Log(tempMarkerText);
         
@@ -1926,7 +1928,7 @@ public class GUIControl : MonoBehaviour {
             //a: height difference between shoulder and table
             //b: forward position difference between shoulder and maxReach position
             //c=sqrt(a²+b²)
-            armLengthCalculated = Mathf.Sqrt( Mathf.Pow(shoulderPosition.y-maxReachPosition.y, 2) + Mathf.Pow(shoulderPosition.z-maxReachPosition.z, 2));
+            armLengthCalculated = (Mathf.Sqrt( Mathf.Pow(shoulderPosition.y-maxReachPosition.y, 2) + Mathf.Pow(shoulderPosition.z-maxReachPosition.z, 2))) * 100;   //m -> cm
             //Debug.Log("armLengthCalculated: " + armLengthCalculated.ToString());
 
         }

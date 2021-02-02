@@ -7,20 +7,23 @@ public class CubeBigLeft : MonoBehaviour {
 
     void OnTriggerEnter(Collider other)
     {
-        //check if it's the collider from the fingertip
-        if (other.name == "f_index.03_end")
+        if(GUIC.expControlStatus > 2)   //not in main menu, configuration & calibration
         {
-            //in Learning only start correct feedback!
-            if (GUIC.learningStarted)
+            //check if it's the collider from the fingertip
+            if (other.name == "f_index.03_end")
             {
-                if (GUIC.currentTask == "touch")
+                //in Learning only start correct feedback!
+                if (GUIC.learningStarted)
+                {
+                    if (GUIC.currentTask == "touch")
+                    {
+                        GUIC.StartVisualFeedback(gameObject, "touch");
+                    }
+                }
+                else
                 {
                     GUIC.StartVisualFeedback(gameObject, "touch");
                 }
-            }
-            else
-            {
-                GUIC.StartVisualFeedback(gameObject, "touch");
             }
         }
         
@@ -28,10 +31,15 @@ public class CubeBigLeft : MonoBehaviour {
 
     private void OnTriggerExit(Collider other)
     {
-        //check if it's the collider from the fingertip
-        if (other.name == "f_index.03_end")
+        if (GUIC.expControlStatus > 2)   //not in main menu, configuration & calibration
         {
-            GUIC.StopVisualFeedback("touch");
+            //check if it's the collider from the fingertip
+            if (other.name == "f_index.03_end")
+            {
+                GUIC.StopVisualFeedback("touch");
+            }
         }
+
     }
+
 }
