@@ -156,7 +156,7 @@ public class GUIControl : MonoBehaviour {
     private string endTextBaseline = "The baseline has ended.\nPlease contact the experimenter.";
     private int baselineClosedRunNo = 0;
     private int baselineOpenRunNo = 0;
-    private string startBaselineText = "Put your hand on the resting position to start the baseline";
+    private string startBaselineText = "Put your hand on the resting position to start the baseline.";
 
 
     // Game objects
@@ -1113,7 +1113,7 @@ public class GUIControl : MonoBehaviour {
     }
 
 
-     static string BoolToString(bool b)
+    static string BoolToString(bool b)
     {
         return b ? "true":"false";
     }
@@ -1121,7 +1121,7 @@ public class GUIControl : MonoBehaviour {
     
     public void StartMainMenu()
     {
-        //This method is used for the "Configuration" button on the main menu. WHen the button is pressed this method is executed.
+        //This method is used for starting the main menu.
         Debug.Log("Starting Main Menu");
         expControlStatus = 0;
 
