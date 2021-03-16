@@ -27,9 +27,6 @@ public class GUIControl : MonoBehaviour {
 
     [Header("Experiment specific")]
     public int trialsPerTask = 100;
-    //public float firstBreakSeconds = 120f;
-    //public float secondBreakSeconds = 180f;
-    //public float thirdBreakSeconds = 120f;
     public int standardBreakDuration = 120;         //2 minutes
     public int standardBreakEveryTrials = 100;
     public int halfTimeBreakDuration = 300;         //5 minutes
@@ -68,7 +65,6 @@ public class GUIControl : MonoBehaviour {
     public static System.Diagnostics.Stopwatch collisionDuration = new System.Diagnostics.Stopwatch();
     public static float collisionStartTime = 0;
     private static GameObject currentCollisionObj = null;
-    //private static Color32 customYellow = new Color32(255, 191, 0, 255);
     private static Color32 brightRed = new Color32(255, 160, 160, 255);
     private static Color32 brightGreen = new Color32(160, 255, 160, 255);
     private Vector3 shoulderPosition;
@@ -114,9 +110,6 @@ public class GUIControl : MonoBehaviour {
     public bool collisionActive = false;
     [HideInInspector] // Hides vars from Inspector
     public bool restingDetectionActive = false;
-    [HideInInspector] // Hides vars from Inspector
-    //public bool handIsOnResting = false;
-    //public bool flagTouchEvent = false;
     public static bool flagStart = false;
     public static bool experimentEnd = false;
     [HideInInspector] // Hides vars from Inspector
@@ -124,7 +117,6 @@ public class GUIControl : MonoBehaviour {
 
     [HideInInspector] // Hides vars from Inspector
     public bool handIsMoving = true;
-    //private float currentHandVelocity = 0f;
     private Vector3 handPosition_old = Vector3.zero;
 
     // learning specific
@@ -167,8 +159,6 @@ public class GUIControl : MonoBehaviour {
     private GameObject cubeFarLeft, cubeFarMiddleLeft, cubeFarMiddle, cubeFarMiddleRight, cubeFarRight, cubeNearLeft, cubeNearMiddleLeft, cubeNearMiddle, cubeNearMiddleRight, cubeNearRight;
     private GameObject[] cubeGameObjArr = new GameObject[10];
 
-    //private Rigidbody vr_hand_RigidBody;
-
 
     // Use this for initialization
     void Start()
@@ -179,7 +169,6 @@ public class GUIControl : MonoBehaviour {
         // Finding the game object 
         table = GameObject.Find("Table");
         plane = GameObject.Find("Plane");
-        //leapmotion = GameObject.Find("LeapHandController");
         instructionsExperiment = GameObject.Find("InstructionsExperiment");
         instructionsLearning = GameObject.Find("InstructionsLearning");
         instructionsTraining = GameObject.Find("InstructionsTraining");
@@ -216,19 +205,10 @@ public class GUIControl : MonoBehaviour {
         textHintShoulderFirst = GameObject.Find("TextHintShoulderFirst");
         textHintCupPos = GameObject.Find("TextHintCupPos");
         textHintTablePos = GameObject.Find("TextHintTablePos");
-        //breakCanvasVR = GameObject.Find("BreakCanvasVR");
         breakCanvasDesktop = GameObject.Find("BreakCanvasDesktop");
-        //tableTextBackground = GameObject.Find("TableTextBackground");
-        //vr_hand_R = GameObject.Find("vr_hand_R");
-        //Debug.Log("vr_hand_R: " + vr_hand_R.name);
-        //vr_hand_RigidBody = vr_hand_R.GetComponent<Rigidbody>();
-
-        //GameObject controllerRight = GameObject.Find("Controller (right)");
-        //vr_hand_RigidBody = controllerRight.GetComponent<Rigidbody>();
         buttonBaselineClosed = GameObject.Find("ButtonBaselineClosed");
         buttonBaselineOpen = GameObject.Find("ButtonBaselineOpen");
         baselineClosedCanvas = GameObject.Find("BaselineClosedCanvas");
-
 
         //Stimulus
         cubeFarLeft = GameObject.Find("CubeFarLeft");
@@ -471,7 +451,6 @@ public class GUIControl : MonoBehaviour {
 
                 //activate experiment end text
                 end.SetActive(true);
-                //tableTextBackground.SetActive(true);
 
                 experimentStarted = false;
 
@@ -513,9 +492,6 @@ public class GUIControl : MonoBehaviour {
                 marker.Write("Fixation cross activated");
                 Debug.Log("Fixation Cross activated: " + actualTime.ToString());
                 fixationCrossActivated = true;
-
-                // Enable flag to detect events of GameObject Cube
-                //flagTouchEvent = true;  //[ToDo: is this still used anywhere?]
             }
         }
 
@@ -552,7 +528,6 @@ public class GUIControl : MonoBehaviour {
                 {
                     //deactivate cue
                     cue.SetActive(false);
-                    //tableTextBackground.SetActive(false);
 
                     marker.Write("cue text deactivated");
                     //Debug.Log("Cue deactivated: " + actualTime.ToString());
@@ -678,9 +653,6 @@ public class GUIControl : MonoBehaviour {
             marker.Write("instructions deactivated");
             Debug.Log("instructions deactivated");
         }
-        
-        //set experiment control status to experiment (needed here when coninuing after break)
-        //expControlStatus = 5;
 
         //if this is a continue after a break -> call stopBreak()
         if (expControlStatus == 6)
@@ -760,7 +732,6 @@ public class GUIControl : MonoBehaviour {
 
         collisionActive = false;
         visualFeedbackActive = false;
-        //collisionDuration.Reset();
         collisionStartTime = 0;
 
 
@@ -776,7 +747,6 @@ public class GUIControl : MonoBehaviour {
             if (!(trainingStarted || learningStarted))
             {
                 //check if start BREAK TIME or next trial
-                //if (trialSeqCounter == (int)(nrOfTrialsTotal / 4) || trialSeqCounter == (int)(nrOfTrialsTotal / 2) || trialSeqCounter == (int)(nrOfTrialsTotal * 3 / 4))
                 if (trialSeqCounter == (int)(nrOfTrialsTotal / 2))   //half time break
                 {
                     StartBreak(halfTimeBreakDuration, false);
@@ -802,31 +772,15 @@ public class GUIControl : MonoBehaviour {
                     startTrialCanvas.SetActive(true);
                     resting.SetActive(true);
                     restingDetectionActive = true;
-                    //tableTextBackground.SetActive(true);
 
                     marker.Write("Waiting for hand on resting position");
                     Debug.Log("Waiting for hand on resting position...");
                 }
             }
-            /*
-            else if (learningStarted)
-            {
-                //in learning we have manuel trial start each trial
-                experimentStarted = false;
-                startContinue.SetActive(true);
-                resting.SetActive(true);
-                restingDetectionActive = true;
-
-                marker.Write("Waiting for start/continue button press");
-                Debug.Log("Waiting for start/continue button press...");
-            }*/
             else
             {
-                //TrialStart();
-
                 //wait for manual trial start by putting hand on resting position
                 experimentStarted = false;
-                //startContinue.SetActive(true);
                 resting.SetActive(true);
                 restingDetectionActive = true;
 
@@ -863,7 +817,6 @@ public class GUIControl : MonoBehaviour {
             currentCollisionObj = GO;
 
             //start the hit duration
-            //collisionDuration.Start();
             collisionStartTime = actualTime;
 
             //set hit flag
@@ -874,31 +827,6 @@ public class GUIControl : MonoBehaviour {
 
             //save current time as possible reaction time
             reaction_time_temp =  actualTime - reaction_start_time;
-
-            /*
-            if (collisionEvent == "point") {
-                //activate early visual feedback
-                GO.gameObject.GetComponent<Renderer>().material.color = customYellow;
-
-                tempMarkerText =
-                    "initialVisualFeedbackStarted:" + collisionEvent + ";" +
-                    "color:yellow;" +
-                    "object:" + GO.gameObject.name;
-                marker.Write(tempMarkerText);
-                Debug.Log(tempMarkerText + " " + actualTime.ToString());
-            }
-            //if (collisionEvent == "grab") {
-            if (collisionEvent == "touch") {
-                //activate early visual feedback
-                GO.gameObject.GetComponent<Renderer>().material.color = Color.cyan;
-
-                tempMarkerText =
-                    "initialVisualFeedbackStarted:" + collisionEvent + ";" +
-                    " color:cyan;" +
-                    "object:" + GO.gameObject.name;
-                marker.Write(tempMarkerText);
-                Debug.Log(tempMarkerText + " " + actualTime.ToString());
-            }*/
 
 
             if(earlyFeedbackOn)
@@ -955,7 +883,6 @@ public class GUIControl : MonoBehaviour {
             if(currentResponseType == collisionEvent)
             {
                 //reset the hit duration
-                //collisionDuration.Reset();
                 collisionStartTime = 0;
 
                 //reset hit flag
@@ -1045,9 +972,7 @@ public class GUIControl : MonoBehaviour {
         var q = Quaternion.AngleAxis(angle, Vector3.up);
         //Debug.Log("q: " + q.ToString());
 
-        //Vector3 newPosition = new Vector3(currentPosition.x + newX, currentPosition.y, currentPosition.z + newZ);
         Vector3 newPosition = rootPosition + q * Vector3.forward * distance;
-
         //Debug.Log("newPosition: " + newPosition.ToString());
 
         return newPosition;
@@ -1093,12 +1018,10 @@ public class GUIControl : MonoBehaviour {
             //check if near or far
             if (cupObjects[i].name.Contains("Far"))
             {
-                //currentDistance = armlength_cm + ((float)armlength_cm/100)*offsetFar_percent;
                 currentDistance = currentArmLength + (currentArmLength / 100) * offsetFar_percent;
             }
             else if (cupObjects[i].name.Contains("Near"))
             {
-                //currentDistance = armlength_cm - ((float)armlength_cm/100)*offsetNear_percent;
                 currentDistance = currentArmLength - (currentArmLength / 100) * offsetNear_percent;
             }
             //Debug.Log("currentDistance in m: " + currentDistance.ToString());
@@ -1139,31 +1062,19 @@ public class GUIControl : MonoBehaviour {
         mainMenu.gameObject.SetActive(true);
         calibrationMenu.SetActive(false);
         configurationMenu.SetActive(false);
-        //instructionsExperiment.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
         instructionsExperiment.SetActive(false);
         instructionsLearning.SetActive(false);
         instructionsTraining.SetActive(false);
         instructionsBaselineClosed.SetActive(false);
         instructionsBaselineOpen.SetActive(false);
-        //plane.gameObject.GetComponent<Renderer>().enabled = false;
-        //plane.SetActive(false);
         fixationCross.SetActive(false);
         cue.SetActive(false);
-        //table.gameObject.GetComponent<Renderer>().enabled = false;
-        //table.SetActive(false);
         DeactivateAllCubes();
         startTrialCanvas.SetActive(false);
         continueCanvas.SetActive(false);
         continueButton.SetActive(false);
-        //resting.gameObject.GetComponent<Renderer>().enabled = false;
         resting.SetActive(false);
-        //questionnaire.SetActive(false);
-        //end.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
-        //end.SetActive(false);      //commented out so that the text will stay after experiment ended and main menu is displayed for experimenter (but not for participant)
-        //shoulder.SetActive(false);
-        //breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
-        //tableTextBackground.SetActive(false);
 
         //reset control flags:
         flagStart = false;
@@ -1182,31 +1093,20 @@ public class GUIControl : MonoBehaviour {
         mainMenu.gameObject.SetActive(false);
         calibrationMenu.SetActive(false);
         configurationMenu.SetActive(true);
-        //instructionsExperiment.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
         instructionsExperiment.SetActive(false);
         instructionsLearning.SetActive(false);
         instructionsTraining.SetActive(false);
         instructionsBaselineClosed.SetActive(false);
         instructionsBaselineOpen.SetActive(false);
-        //plane.gameObject.GetComponent<Renderer>().enabled = false;
-        //plane.SetActive(false);
         fixationCross.SetActive(false);
         cue.SetActive(false);
-        //table.gameObject.GetComponent<Renderer>().enabled = false;
-        //table.SetActive(false);
         DeactivateAllCubes();
         startTrialCanvas.SetActive(false);
         continueCanvas.SetActive(false);
         continueButton.SetActive(false);
-        //resting.gameObject.GetComponent<Renderer>().enabled = false;
         resting.SetActive(false);
-        //questionnaire.SetActive(false);
-        //end.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
         end.SetActive(false);
-        //shoulder.SetActive(false);
-        //breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
-        //tableTextBackground.SetActive(false);
     }
 
 
@@ -1215,7 +1115,6 @@ public class GUIControl : MonoBehaviour {
         //this is called when pressing the "Back" button in the configuration menu
 
         //save data from the inputs:
-
         //participantID
         if (inputParticipantID.GetComponent<InputField>().text != "")
         {
@@ -1298,31 +1197,20 @@ public class GUIControl : MonoBehaviour {
         mainMenu.gameObject.SetActive(false);
         calibrationMenu.SetActive(true);
         configurationMenu.SetActive(false);
-        //instructionsExperiment.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
         instructionsExperiment.SetActive(false);
         instructionsLearning.SetActive(false);
         instructionsTraining.SetActive(false);
         instructionsBaselineClosed.SetActive(false);
         instructionsBaselineOpen.SetActive(false);
-        //plane.gameObject.GetComponent<Renderer>().enabled = false;
-        //plane.SetActive(true);
         fixationCross.SetActive(false);
         cue.SetActive(false);
-        //table.gameObject.GetComponent<Renderer>().enabled = false;
-        //table.SetActive(true);
         DeactivateAllCubes();
         startTrialCanvas.SetActive(false);
         continueCanvas.SetActive(false);
         continueButton.SetActive(false);
-        //resting.gameObject.GetComponent<Renderer>().enabled = false;
         resting.SetActive(true);
-        //questionnaire.SetActive(false);
-        //end.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
         end.SetActive(false);
-        //shoulder.SetActive(true);
-        //breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
-        //tableTextBackground.SetActive(false);
 
         ActivateAllCubes();
     }
@@ -1345,10 +1233,8 @@ public class GUIControl : MonoBehaviour {
         marker.Write("instructions activated");
         Debug.Log("Instructions activated");
 
-        //plane.SetActive(true);
         fixationCross.SetActive(false);
         cue.SetActive(false);
-        //table.SetActive(true);
         DeactivateAllCubes();
         startTrialCanvas.SetActive(true);
         startTrialText.GetComponent<Text>().text = startBaselineText;
@@ -1356,10 +1242,7 @@ public class GUIControl : MonoBehaviour {
         continueButton.SetActive(false);
         resting.SetActive(true);
         end.SetActive(false);
-        //shoulder.SetActive(false);
-        //breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
-        //tableTextBackground.SetActive(true);
 
         restingDetectionActive = true;
 
@@ -1422,10 +1305,8 @@ public class GUIControl : MonoBehaviour {
         marker.Write("instructions activated");
         Debug.Log("Instructions activated");
 
-        //plane.SetActive(true);
         fixationCross.SetActive(false);
         cue.SetActive(false);
-        //table.SetActive(true);
         DeactivateAllCubes();
         startTrialCanvas.SetActive(true);
         startTrialText.GetComponent<Text>().text = startBaselineText;
@@ -1433,10 +1314,7 @@ public class GUIControl : MonoBehaviour {
         continueButton.SetActive(false);
         resting.SetActive(true);
         end.SetActive(false);
-        //shoulder.SetActive(false);
-        //breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
-        //tableTextBackground.SetActive(true);
 
         restingDetectionActive = true;
 
@@ -1497,10 +1375,8 @@ public class GUIControl : MonoBehaviour {
         marker.Write("instructions activated");
         Debug.Log("Instructions activated");
 
-        //plane.SetActive(true);
         fixationCross.SetActive(false);
         cue.SetActive(false);
-        //table.SetActive(true);
         DeactivateAllCubes();
         startTrialCanvas.SetActive(true);
         startTrialText.GetComponent<Text>().text = startNextTrialText;
@@ -1508,10 +1384,7 @@ public class GUIControl : MonoBehaviour {
         continueButton.SetActive(false);
         resting.SetActive(true);
         end.SetActive(false);
-        //shoulder.SetActive(false);
-        //breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
-        //tableTextBackground.SetActive(true);
 
     }
 
@@ -1519,7 +1392,6 @@ public class GUIControl : MonoBehaviour {
     public void InitLearning()
     {
         //set experiment control vars
-        //flagStart = true;
         learningStarted = true;
         experimentEnd = false;
         trialSeqCounter = 0;
@@ -1554,15 +1426,11 @@ public class GUIControl : MonoBehaviour {
         {
             Debug.Log(tasks[trialTasks[i]]);
         }*/
-
-        //trialTasks = CreateTrialTaskArray(nrOfTrialsTotal, taskSeq, tasks);
-
-
+        
         //create array with isi durations for all trials
         isiDurations = CreateDurationsArray(nrOfTrialsTotal, isiDurationAvg, isiDurationVariation);
 
         //create array with cue durations for all tasks
-        //cueDurations = CreateCueDurationArray(nrOfTrialsTotal, cueDurationAvg, cueDurationVariation);
         cueDurations = new float[nrOfTrialsTotal];
 
         for (int i=0; i<nrOfTrialsTotal; i++)
@@ -1581,7 +1449,6 @@ public class GUIControl : MonoBehaviour {
         startTrialCanvas.SetActive(true);
         startTrialText.GetComponent<Text>().text = startNextTrialText;
         resting.SetActive(true);
-        //resting.gameObject.GetComponent<Renderer>().enabled = true;
         restingDetectionActive = true;
 
         //set correct end text
@@ -1652,10 +1519,8 @@ public class GUIControl : MonoBehaviour {
         marker.Write("instructions activated");
         Debug.Log("Instructions activated");
 
-        //plane.SetActive(true);
         fixationCross.SetActive(false);
         cue.SetActive(false);
-        //table.SetActive(true);
         DeactivateAllCubes();
         startTrialCanvas.SetActive(true);
         startTrialText.GetComponent<Text>().text = startNextTrialText;
@@ -1663,10 +1528,7 @@ public class GUIControl : MonoBehaviour {
         continueButton.SetActive(false);
         resting.SetActive(true);
         end.SetActive(false);
-        //shoulder.SetActive(false);
-        //breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
-        //tableTextBackground.SetActive(true);
 
     }
 
@@ -1674,7 +1536,6 @@ public class GUIControl : MonoBehaviour {
     public void InitTraining()
     {
         //set experiment control vars
-        //flagStart = true;
         trainingStarted = true;
         experimentEnd = false;
         trialSeqCounter = 0;
@@ -1702,7 +1563,6 @@ public class GUIControl : MonoBehaviour {
         startTrialCanvas.SetActive(true);
         startTrialText.GetComponent<Text>().text = startNextTrialText;
         resting.SetActive(true);
-        //resting.gameObject.GetComponent<Renderer>().enabled = true;
         restingDetectionActive = true;
 
         //set correct end text
@@ -1752,42 +1612,6 @@ public class GUIControl : MonoBehaviour {
 
     }
 
-    /*
-    //  Control all trials 
-    public void RunTraining()
-    {
-        //Check if flag has been activated through TrialStart() via touching the startButton in VR
-        if (trainingStarted)
-        {
-            // add the time taken to render last frame, experiment logic is based on this parameter
-            // actualTime is constantly growing
-            actualTrainingTime += Time.deltaTime;
-
-            if (trainingTrialCounter < nrOfTrainingTrialsTotal && !trainingEnd) // run all trials
-            {
-                RunTrial();
-            }//run all trials
-
-
-            if (trainingEnd)  // after all trials are finished
-            {
-                //write expemriment end marker
-                marker.Write("training:end");
-                Debug.Log("training:end");
-
-                //activate experiment end text
-                end.SetActive(true);
-
-                trainingStarted = false;
-
-                //go to main menu
-                StartMainMenu();
-            }
-
-        }
-
-    }*/
-
 
     public void StartExperiment()
     {
@@ -1810,26 +1634,16 @@ public class GUIControl : MonoBehaviour {
         marker.Write("instructions activated");
         Debug.Log("Instructions activated");
 
-        //plane.gameObject.GetComponent<Renderer>().enabled = false;
-        //plane.SetActive(true);
         fixationCross.SetActive(false);
         cue.SetActive(false);
-        //table.gameObject.GetComponent<Renderer>().enabled = false;
-        //table.SetActive(true);
         DeactivateAllCubes();
         startTrialCanvas.SetActive(true);
         startTrialText.GetComponent<Text>().text = startNextTrialText;
         continueCanvas.SetActive(false);
         continueButton.SetActive(false);
-        //resting.gameObject.GetComponent<Renderer>().enabled = false;
         resting.SetActive(true);
-        //questionnaire.SetActive(false);
-        //end.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
         end.SetActive(false);
-        //shoulder.SetActive(false);
-        //breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
-        //tableTextBackground.SetActive(true);
 
     }
 
@@ -1854,17 +1668,8 @@ public class GUIControl : MonoBehaviour {
         breakCanvasDesktop.GetComponentInChildren<Text>().text = "BREAK TIME: " + breakDuration + "seconds left";
 
         //activate break text
-        //breakCanvasVR.SetActive(true);
         breakCanvasDesktop.SetActive(true);
-        //tableTextBackground.SetActive(true);
-
-        /*
-        //activate startContinue so that the participant can continue with experiment
-        startContinue.SetActive(true);
-        resting.SetActive(true);
-        restingDetectionActive = true;
-        */
-
+        
         tempMarkerText =
             "break:start;" +
             "afterTrial:" + (trialSeqCounter-1).ToString() + ";" +
@@ -1881,18 +1686,14 @@ public class GUIControl : MonoBehaviour {
     public void StopBreak()
     {
         //deactivate break text
-        //breakCanvasVR.SetActive(false);
         breakCanvasDesktop.SetActive(false);
 
         marker.Write("break:end;afterTrial:" + (trialSeqCounter-1).ToString());
         Debug.Log("break:end;afterTrial:" + (trialSeqCounter-1).ToString());
 
         //activate continue button so that the participant can continue with experiment
-        //startTrialCanvas.SetActive(true);
         continueCanvas.SetActive(true);
         continueButton.SetActive(true);
-        //resting.SetActive(true);
-        //restingDetectionActive = true;
 
         marker.Write("Break is over. Waiting for continue button press.");
         Debug.Log("Break is over. Waiting for continue button press.");
@@ -1923,7 +1724,6 @@ public class GUIControl : MonoBehaviour {
         //THe shoulder position is later used as the root position for the calutation of the cup positions.
 
         //Get Tracker position
-        //GameObject tracker = GameObject.Find("Controller (left)");
         GameObject tracker = GameObject.Find("Controller (right)");
 
         try
@@ -1939,7 +1739,6 @@ public class GUIControl : MonoBehaviour {
             marker.Write("Exception: Tracker not found? " + e.ToString());
             Debug.Log("Exception: Tracker not found?");
             Debug.LogError(e);
-            //textHintConfigFirst.GetComponent<Text>().text = "Error: Tracker not found";
             trackerFoundShoulderPos = false;
             textHintShoulderPos.SetActive(true);
         }
@@ -1954,7 +1753,6 @@ public class GUIControl : MonoBehaviour {
         //Then we put a Vive Tracker next to the fingertips (so that the middle of the Tracker is at the finger tips) and measure the Tracker position.
 
         //Get Tracker position
-        //GameObject tracker = GameObject.Find("Controller (left)");
         GameObject tracker = GameObject.Find("Controller (right)");
 
         try
@@ -2004,7 +1802,6 @@ public class GUIControl : MonoBehaviour {
         //and the virtual table Then the position of the real table and the virtual table are synchronized.
 
         //Get Tracker position
-        //GameObject tracker = GameObject.Find("Controller (left)");
         GameObject tracker = GameObject.Find("Controller (right)");
         Vector3 trackerPosition = new Vector3();
 
@@ -2319,19 +2116,7 @@ public class GUIControl : MonoBehaviour {
         if (handMovementThresholdOn)
         {
             //check current velocity of the hand
-            /*
-            //Rigidbody rb = vr_hand_R.GetComponent<Rigidbody>();
-            GameObject controllerRight = GameObject.Find("vr_hand_R");
-            vr_hand_RigidBody = controllerRight.GetComponent<Rigidbody>();
-            Vector3 currentHandVelocityVector = vr_hand_RigidBody.velocity;
-            currentHandVelocity = vr_hand_RigidBody.velocity.magnitude;
-
-            Debug.Log("currentHandVelocityVector: " + currentHandVelocityVector.ToString());
-            Debug.Log("currentHandVelocity: " + currentHandVelocity.ToString());
-            */
-
             //calculate distance between old and current hand position
-
             try
             {
                 if (vr_hand_R == null)
