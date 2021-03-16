@@ -160,7 +160,7 @@ public class GUIControl : MonoBehaviour {
 
 
     // Game objects
-    public static GameObject table, plane, instructionsExp, textBox, end, endTextBox, startTrialCanvas, resting, questionnaire, q, ra, la, send, fixationCross, cue, cueText,
+    public static GameObject table, plane, instructionsExperiment, instructionsLearning, instructionsTraining, instructionsBaselineClosed, instructionsBaselineOpen, textBox, end, endTextBox, startTrialCanvas, resting, questionnaire, q, ra, la, send, fixationCross, cue, cueText,
         mainMenu, calibrationMenu, configurationMenu, inputParticipantID, inputParticipantAge, inputParticipantGender, inputArmLength, buttonExperiment, startTrialText,
         buttonLearning, buttonTraining, buttonShoulderPos, textHintShoulderPos, textMissingInputs, tableSetup, buttonMaximumReach, buttonCupPositions, buttonTablePosition, textHintShoulderFirst,
         textHintCupPos, textHintTablePos, breakCanvasDesktop, vr_hand_R, continueCanvas, continueButton, baselineClosedCanvas, buttonBaselineClosed, buttonBaselineOpen;
@@ -180,7 +180,11 @@ public class GUIControl : MonoBehaviour {
         table = GameObject.Find("Table");
         plane = GameObject.Find("Plane");
         //leapmotion = GameObject.Find("LeapHandController");
-        instructionsExp = GameObject.Find("InstructionsExp");
+        instructionsExperiment = GameObject.Find("InstructionsExperiment");
+        instructionsLearning = GameObject.Find("InstructionsLearning");
+        instructionsTraining = GameObject.Find("InstructionsTraining");
+        instructionsBaselineClosed = GameObject.Find("InstructionsBaselineClosed");
+        instructionsBaselineOpen = GameObject.Find("InstructionsBaselineOpen");
         textBox = GameObject.Find("TextBox");
         end = GameObject.Find("End");
         endTextBox = GameObject.Find("EndTextBox");
@@ -664,9 +668,13 @@ public class GUIControl : MonoBehaviour {
         //tableTextBackground.SetActive(true);
 
         //deactivate instructions
-        if (instructionsExp.activeSelf)
+        if (instructionsExperiment.activeSelf || instructionsLearning.activeSelf || instructionsTraining.activeSelf)
         {
-            instructionsExp.SetActive(false);
+            instructionsExperiment.SetActive(false);
+            instructionsLearning.SetActive(false);
+            instructionsTraining.SetActive(false);
+            instructionsBaselineClosed.SetActive(false);
+            instructionsBaselineOpen.SetActive(false);
             marker.Write("instructions deactivated");
             Debug.Log("instructions deactivated");
         }
@@ -1131,8 +1139,12 @@ public class GUIControl : MonoBehaviour {
         mainMenu.gameObject.SetActive(true);
         calibrationMenu.SetActive(false);
         configurationMenu.SetActive(false);
-        //instructionsExp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
-        instructionsExp.SetActive(false);
+        //instructionsExperiment.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
+        instructionsExperiment.SetActive(false);
+        instructionsLearning.SetActive(false);
+        instructionsTraining.SetActive(false);
+        instructionsBaselineClosed.SetActive(false);
+        instructionsBaselineOpen.SetActive(false);
         //plane.gameObject.GetComponent<Renderer>().enabled = false;
         //plane.SetActive(false);
         fixationCross.SetActive(false);
@@ -1170,8 +1182,12 @@ public class GUIControl : MonoBehaviour {
         mainMenu.gameObject.SetActive(false);
         calibrationMenu.SetActive(false);
         configurationMenu.SetActive(true);
-        //instructionsExp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
-        instructionsExp.SetActive(false);
+        //instructionsExperiment.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
+        instructionsExperiment.SetActive(false);
+        instructionsLearning.SetActive(false);
+        instructionsTraining.SetActive(false);
+        instructionsBaselineClosed.SetActive(false);
+        instructionsBaselineOpen.SetActive(false);
         //plane.gameObject.GetComponent<Renderer>().enabled = false;
         //plane.SetActive(false);
         fixationCross.SetActive(false);
@@ -1282,8 +1298,12 @@ public class GUIControl : MonoBehaviour {
         mainMenu.gameObject.SetActive(false);
         calibrationMenu.SetActive(true);
         configurationMenu.SetActive(false);
-        //instructionsExp.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
-        instructionsExp.SetActive(false);
+        //instructionsExperiment.gameObject.gameObject.GetComponent<Canvas>().enabled = false;
+        instructionsExperiment.SetActive(false);
+        instructionsLearning.SetActive(false);
+        instructionsTraining.SetActive(false);
+        instructionsBaselineClosed.SetActive(false);
+        instructionsBaselineOpen.SetActive(false);
         //plane.gameObject.GetComponent<Renderer>().enabled = false;
         //plane.SetActive(true);
         fixationCross.SetActive(false);
@@ -1321,7 +1341,7 @@ public class GUIControl : MonoBehaviour {
         calibrationMenu.SetActive(false);
         configurationMenu.SetActive(false);
 
-        instructionsExp.SetActive(true);
+        instructionsBaselineClosed.SetActive(true);
         marker.Write("instructions activated");
         Debug.Log("Instructions activated");
 
@@ -1353,7 +1373,11 @@ public class GUIControl : MonoBehaviour {
         baselineClosedRunNo += 1;
 
         //deactivate all visuals
-        instructionsExp.SetActive(false);
+        instructionsExperiment.SetActive(false);
+        instructionsLearning.SetActive(false);
+        instructionsTraining.SetActive(false);
+        instructionsBaselineClosed.SetActive(false);
+        instructionsBaselineOpen.SetActive(false);
         startTrialCanvas.SetActive(false);
         resting.SetActive(false);
 
@@ -1394,7 +1418,7 @@ public class GUIControl : MonoBehaviour {
         calibrationMenu.SetActive(false);
         configurationMenu.SetActive(false);
 
-        instructionsExp.SetActive(true);
+        instructionsBaselineOpen.SetActive(true);
         marker.Write("instructions activated");
         Debug.Log("Instructions activated");
 
@@ -1426,7 +1450,11 @@ public class GUIControl : MonoBehaviour {
         baselineOpenRunNo += 1;
 
         //deactivate all visuals
-        instructionsExp.SetActive(false);
+        instructionsExperiment.SetActive(false);
+        instructionsLearning.SetActive(false);
+        instructionsTraining.SetActive(false);
+        instructionsBaselineClosed.SetActive(false);
+        instructionsBaselineOpen.SetActive(false);
         startTrialCanvas.SetActive(false);
         resting.SetActive(false);
         restingDetectionActive = false;
@@ -1461,7 +1489,11 @@ public class GUIControl : MonoBehaviour {
         calibrationMenu.SetActive(false);
         configurationMenu.SetActive(false);
         
-        instructionsExp.SetActive(true);
+        instructionsExperiment.SetActive(false);
+        instructionsLearning.SetActive(true);
+        instructionsTraining.SetActive(false);
+        instructionsBaselineClosed.SetActive(false);
+        instructionsBaselineOpen.SetActive(false);
         marker.Write("instructions activated");
         Debug.Log("Instructions activated");
 
@@ -1612,7 +1644,11 @@ public class GUIControl : MonoBehaviour {
         calibrationMenu.SetActive(false);
         configurationMenu.SetActive(false);
 
-        instructionsExp.SetActive(true);
+        instructionsExperiment.SetActive(false);
+        instructionsLearning.SetActive(false);
+        instructionsTraining.SetActive(true);
+        instructionsBaselineClosed.SetActive(false);
+        instructionsBaselineOpen.SetActive(false);
         marker.Write("instructions activated");
         Debug.Log("Instructions activated");
 
@@ -1766,7 +1802,11 @@ public class GUIControl : MonoBehaviour {
         calibrationMenu.SetActive(false);
         configurationMenu.SetActive(false);
 
-        instructionsExp.SetActive(true);
+        instructionsExperiment.SetActive(true);
+        instructionsLearning.SetActive(false);
+        instructionsTraining.SetActive(false);
+        instructionsBaselineClosed.SetActive(false);
+        instructionsBaselineOpen.SetActive(false);
         marker.Write("instructions activated");
         Debug.Log("Instructions activated");
 
