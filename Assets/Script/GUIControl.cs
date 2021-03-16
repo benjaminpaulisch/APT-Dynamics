@@ -162,7 +162,7 @@ public class GUIControl : MonoBehaviour {
     // Game objects
     public static GameObject table, plane, instructionsExperiment, instructionsLearning, instructionsTraining, instructionsBaselineClosed, instructionsBaselineOpen, textBox, end, endTextBox, startTrialCanvas, resting, questionnaire, q, ra, la, send, fixationCross, cue, cueText,
         mainMenu, calibrationMenu, configurationMenu, inputParticipantID, inputParticipantAge, inputParticipantGender, inputArmLength, buttonExperiment, startTrialText,
-        buttonLearning, buttonTraining, buttonShoulderPos, textHintShoulderPos, textMissingInputs, tableSetup, buttonMaximumReach, buttonCupPositions, buttonTablePosition, textHintShoulderFirst,
+        buttonLearning, buttonTraining, buttonShoulderPos, textHintShoulderPos, textMissingInputs, tableSetup, buttonMaximumReach, buttonCubePositions, buttonTablePosition, textHintShoulderFirst,
         textHintCupPos, textHintTablePos, breakCanvasDesktop, vr_hand_R, continueCanvas, continueButton, baselineClosedCanvas, buttonBaselineClosed, buttonBaselineOpen;
     private GameObject cubeFarLeft, cubeFarMiddleLeft, cubeFarMiddle, cubeFarMiddleRight, cubeFarRight, cubeNearLeft, cubeNearMiddleLeft, cubeNearMiddle, cubeNearMiddleRight, cubeNearRight;
     private GameObject[] cubeGameObjArr = new GameObject[10];
@@ -211,7 +211,7 @@ public class GUIControl : MonoBehaviour {
         textMissingInputs = GameObject.Find("TextMissingInputs");
         tableSetup = GameObject.Find("TableSetup");
         buttonMaximumReach = GameObject.Find("ButtonMaximumReach");
-        buttonCupPositions = GameObject.Find("ButtonSetCupPositions");
+        buttonCubePositions = GameObject.Find("ButtonSetCubePositions");
         buttonTablePosition = GameObject.Find("ButtonTablePos");
         textHintShoulderFirst = GameObject.Find("TextHintShoulderFirst");
         textHintCupPos = GameObject.Find("TextHintCupPos");
@@ -2110,7 +2110,7 @@ public class GUIControl : MonoBehaviour {
                         //check if maximum reach has been set
                         if(maxReachSet)
                         {
-                            buttonCupPositions.GetComponent<Button>().interactable = true;
+                            buttonCubePositions.GetComponent<Button>().interactable = true;
 
                             if(trackerFoundCupPos)
                                 textHintCupPos.SetActive(false);
@@ -2119,7 +2119,7 @@ public class GUIControl : MonoBehaviour {
                         }
                         else
                         {
-                            buttonCupPositions.GetComponent<Button>().interactable = false;
+                            buttonCubePositions.GetComponent<Button>().interactable = false;
                             textHintCupPos.SetActive(true);
                         }
                         break;
