@@ -184,7 +184,7 @@ namespace Valve.VR.InteractionSystem
 		{
 			Vector3 prevForward = prevRotation * Vector3.forward;
 
-			// Only stick in target if the collider is front of the arrow head
+			// Only stick in target if the collider is front of the arrow torso
 			if ( !bSkipRayCast )
 			{
 				RaycastHit[] hitInfo;

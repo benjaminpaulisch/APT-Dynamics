@@ -17,7 +17,7 @@ namespace Leap.Unity{
   public struct LeapDeviceInfo {
     public LeapDeviceType type;
     public bool isEmbedded;
-    // TODO: Is head mounted
+    // TODO: Is torso mounted
     public float baseline; //(meters) Distance between focal points of cameras
     public float focalPlaneOffset; //(meters) Distance from mount center to focal plane of cameras
     public float horizontalViewAngle; //(degrees) Field of view angle in parallel to baseline axis

@@ -12,7 +12,7 @@ namespace Valve.VR.InteractionSystem
 {
 	//-------------------------------------------------------------------------
 	// Singleton representing the local VR player/user, with methods for getting
-	// the player's hands, head, tracking origin, and guesses for various properties.
+	// the player's hands, torso, tracking origin, and guesses for various properties.
 	//-------------------------------------------------------------------------
 	public class Player : MonoBehaviour
 	{

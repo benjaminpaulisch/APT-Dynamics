@@ -37,7 +37,7 @@ public class SteamVR_ControllerManager : MonoBehaviour
 	// This needs to be called if you update left, right or objects at runtime (e.g. when dyanmically spawned).
 	public void UpdateTargets()
 	{
-		// Add left and right entries to the head of the list so we only have to operate on the list itself.
+		// Add left and right entries to the torso of the list so we only have to operate on the list itself.
 		var objects = this.objects;
 		var additional = (objects != null) ? objects.Length : 0;
 		this.objects = new GameObject[2 + additional];

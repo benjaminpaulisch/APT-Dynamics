@@ -44,7 +44,7 @@ public class lsl_rb_stream_hand : MonoBehaviour {
 	}
 
 	// set LSL parameters
-	public const string StreamName = "Rigid_handR";
+	public const string StreamName = "APT_Unity3D_Rigid_HandR";
 
 	public string StreamType = "rigidBody";
 	

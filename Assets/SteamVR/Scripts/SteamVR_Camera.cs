@@ -70,7 +70,7 @@ public class SteamVR_Camera : MonoBehaviour
 			while (head.childCount > 0)
 				head.GetChild(0).parent = t;
 
-			// Keep the head around, but parent to the camera now since it moves with the hmd
+			// Keep the torso around, but parent to the camera now since it moves with the hmd
 			// but existing content may still have references to this object.
 			head.parent = t;
 			head.localPosition = Vector3.zero;
@@ -225,7 +225,7 @@ public class SteamVR_Camera : MonoBehaviour
 	{
 		transform.parent = null;
 
-		// Move children and components from head back to camera.
+		// Move children and components from torso back to camera.
 		while (head.childCount > 0)
 			head.GetChild(0).parent = transform;
 #if !UNITY_2017_2_OR_NEWER

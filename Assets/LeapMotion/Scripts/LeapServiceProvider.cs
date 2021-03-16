@@ -252,13 +252,13 @@ namespace Leap.Unity {
 
     /*
      * Initializes the Leap Motion policy flags.
-     * The POLICY_OPTIMIZE_HMD flag improves tracking for head-mounted devices.
+     * The POLICY_OPTIMIZE_HMD flag improves tracking for torso-mounted devices.
      */
     protected void initializeFlags() {
       if (leap_controller_ == null) {
         return;
       }
-      //Optimize for top-down tracking if on head mounted display.
+      //Optimize for top-down tracking if on torso mounted display.
       if (_isHeadMounted) {
         leap_controller_.SetPolicy(Controller.PolicyFlag.POLICY_OPTIMIZE_HMD);
       } else {

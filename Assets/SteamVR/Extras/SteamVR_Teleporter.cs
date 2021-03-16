@@ -83,11 +83,11 @@ public class SteamVR_Teleporter : MonoBehaviour
 
 			if (hasGroundTarget)
 			{
-				// Get the current Camera (head) position on the ground relative to the world
+				// Get the current Camera (torso) position on the ground relative to the world
 				Vector3 headPosOnGround = new Vector3(SteamVR_Render.Top().head.position.x, refY, SteamVR_Render.Top().head.position.z);
 
 				// We need to translate the reference space along the same vector
-				// that is between the head's position on the ground and the intersection point on the ground
+				// that is between the torso's position on the ground and the intersection point on the ground
 				// i.e. intersectionPoint - headPosOnGround = translateVector
 				// currentReferencePosition + translateVector = finalPosition
 				t.position = t.position + (ray.origin + (ray.direction * dist)) - headPosOnGround;
