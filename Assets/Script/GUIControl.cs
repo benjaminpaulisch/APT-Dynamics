@@ -155,7 +155,7 @@ public class GUIControl : MonoBehaviour {
     public static GameObject table, plane, instructionsExperiment, instructionsLearning, instructionsTraining, instructionsBaselineClosed, instructionsBaselineOpen, textBox, end, endTextBox, startTrialCanvas, resting, questionnaire, q, ra, la, send, fixationCross, cue, cueText,
         mainMenu, calibrationMenu, configurationMenu, inputParticipantID, inputParticipantAge, inputParticipantGender, inputArmLength, buttonExperiment, startTrialText,
         buttonLearning, buttonTraining, buttonShoulderPos, textHintShoulderPos, textMissingInputs, tableSetup, buttonMaximumReach, buttonCubePositions, buttonTablePosition, textHintShoulderFirst,
-        textHintCupPos, textHintTablePos, breakCanvasDesktop, vr_hand_R, continueCanvas, continueButton, baselineClosedCanvas, buttonBaselineClosed, buttonBaselineOpen, startFirstTrial;
+        textHintCupPos, textHintTablePos, breakCanvasDesktop, vr_hand_R, continueCanvas, continueButton, baselineClosedCanvas, buttonBaselineClosed, buttonBaselineOpen, startFirstTrial, torso;
     private GameObject cubeFarLeft, cubeFarMiddleLeft, cubeFarMiddle, cubeFarMiddleRight, cubeFarRight, cubeNearLeft, cubeNearMiddleLeft, cubeNearMiddle, cubeNearMiddleRight, cubeNearRight;
     private GameObject[] cubeGameObjArr = new GameObject[10];
 
@@ -210,6 +210,7 @@ public class GUIControl : MonoBehaviour {
         buttonBaselineOpen = GameObject.Find("ButtonBaselineOpen");
         baselineClosedCanvas = GameObject.Find("BaselineClosedCanvas");
         startFirstTrial = GameObject.Find("startFirstTrial");
+        torso = GameObject.Find("TorsoObject");
 
         //Stimulus
         cubeFarLeft = GameObject.Find("CubeFarLeft");
@@ -244,6 +245,8 @@ public class GUIControl : MonoBehaviour {
         end.SetActive(false);
         baselineClosedCanvas.SetActive(false);
         startFirstTrial.SetActive(false);
+
+        torso.GetComponent<Renderer>().enabled = false;   //make torso invisible
 
         //start the Main Menu:
         StartMainMenu();
