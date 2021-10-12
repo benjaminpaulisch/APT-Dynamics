@@ -16,17 +16,17 @@ public class GUIControl : MonoBehaviour {
     public float cueDurationAvg = 2f;               //2s cue average duration
     public float cueDurationVariation = 1f;         //1s variation (so the cue duration is 2s +- 1s
     public float responseTimeMax = 5.0f;        //5s max target is visible
-    public float feedbackDuration = 2.0f;           //2s feedback duration
+    public float feedbackDuration = 1.0f;           //2s feedback duration
     public float minimumTaskDuration = 1.0f;        //1s minimum collision duration for a successful response
-    public int[] stimulusAngles = new int[] {-40, -20, 0, 20, 40};    //the angles at which the stimulus can be positioned from the shoulder
-    public int offsetNearPercent = 50;              //offset from maximum reach position
-    public int offsetFarPercent = 20;               //offset from maximum reach position
+    public int[] stimulusAngles = new int[] {-30, -20, -10, 10, 20, 30};    //the angles at which the stimulus can be positioned from the shoulder
+    public int offsetNearPercent = 40;              //offset from maximum reach position
+    public int offsetFarPercent = 40;               //offset from maximum reach position
     public bool earlyFeedbackOn = true;
     public bool handMovementThresholdOn = false;
-    public float handMovementThreshold = 0.003f;    //this is a distance value. It's the distance the hand moved between two frames.
+    public float handMovementThreshold = 0.00075f;    //this is a distance value. It's the distance the hand moved between two frames.
 
     [Header("Experiment specific")]
-    public int trialsPerTask = 100;
+    public int trialsPerTask = 60;
     public int standardBreakDuration = 120;         //2 minutes
     public int standardBreakEveryTrials = 100;
     public int halfTimeBreakDuration = 300;         //5 minutes
@@ -57,8 +57,8 @@ public class GUIControl : MonoBehaviour {
     private string currentCondition;
     private GameObject currentStimulusObj;
     private string stimulusPositions = "";
-    private int[] CubeSeq = new int[] { 0, 1, 2, 3, 4 };   //using the same array for near and far cause it's easier
-    private int[] CubePositions = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    private int[] CubeSeq = new int[] { 0, 1, 2, 3, 4, 5 };   //using the same array for near and far cause it's easier
+    private int[] CubePositions = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
     private int cubeSeqCounter = 0;
     public static int trialSeqCounter;
     public static string currentResponseType = "none";
@@ -156,8 +156,8 @@ public class GUIControl : MonoBehaviour {
         mainMenu, calibrationMenu, configurationMenu, inputParticipantID, inputParticipantAge, inputParticipantGender, inputArmLength, buttonExperiment, startTrialText,
         buttonLearning, buttonTraining, buttonShoulderPos, textHintShoulderPos, textMissingInputs, tableSetup, buttonMaximumReach, buttonCubePositions, buttonTablePosition, textHintShoulderFirst,
         textHintCupPos, textHintTablePos, breakCanvasDesktop, vr_hand_R, continueCanvas, continueButton, baselineClosedCanvas, buttonBaselineClosed, buttonBaselineOpen, startFirstTrial, torso;
-    private GameObject cubeFarLeft, cubeFarMiddleLeft, cubeFarMiddle, cubeFarMiddleRight, cubeFarRight, cubeNearLeft, cubeNearMiddleLeft, cubeNearMiddle, cubeNearMiddleRight, cubeNearRight;
-    private GameObject[] cubeGameObjArr = new GameObject[10];
+    private GameObject cubeFarLeft30, cubeFarLeft20, cubeFarLeft10, cubeFarRight10, cubeFarRight20, cubeFarRight30, cubeNearLeft30, cubeNearLeft20, cubeNearLeft10, cubeNearRight10, cubeNearRight20, cubeNearRight30;
+    private GameObject[] cubeGameObjArr = new GameObject[12];
 
 
     // Use this for initialization
@@ -213,28 +213,32 @@ public class GUIControl : MonoBehaviour {
         torso = GameObject.Find("TorsoObject");
 
         //Stimulus
-        cubeFarLeft = GameObject.Find("CubeFarLeft");
-        cubeFarMiddleLeft = GameObject.Find("CubeFarMiddleLeft");
-        cubeFarMiddle = GameObject.Find("CubeFarMiddle");
-        cubeFarMiddleRight = GameObject.Find("CubeFarMiddleRight");
-        cubeFarRight = GameObject.Find("CubeFarRight");
-        cubeNearLeft = GameObject.Find("CubeNearLeft");
-        cubeNearMiddleLeft = GameObject.Find("CubeNearMiddleLeft");
-        cubeNearMiddle = GameObject.Find("CubeNearMiddle");
-        cubeNearMiddleRight = GameObject.Find("CubeNearMiddleRight");
-        cubeNearRight = GameObject.Find("CubeNearRight");
+        cubeFarLeft30 = GameObject.Find("CubeFarLeft30");
+        cubeFarLeft20 = GameObject.Find("CubeFarLeft20");
+        cubeFarLeft10 = GameObject.Find("CubeFarLeft10");
+        cubeFarRight10 = GameObject.Find("CubeFarRight10");
+        cubeFarRight20 = GameObject.Find("CubeFarRight20");
+        cubeFarRight30 = GameObject.Find("CubeFarRight30");
+        cubeNearLeft30 = GameObject.Find("CubeNearLeft30");
+        cubeNearLeft20 = GameObject.Find("CubeNearLeft20");
+        cubeNearLeft10 = GameObject.Find("CubeNearLeft10");
+        cubeNearRight10 = GameObject.Find("CubeNearRight10");
+        cubeNearRight20 = GameObject.Find("CubeNearRight20");
+        cubeNearRight30 = GameObject.Find("CubeNearRight30");
 
         // Assign stimulus game objects to arrays
-        cubeGameObjArr[0] = cubeFarLeft;
-        cubeGameObjArr[1] = cubeFarMiddleLeft;
-        cubeGameObjArr[2] = cubeFarMiddle;
-        cubeGameObjArr[3] = cubeFarMiddleRight;
-        cubeGameObjArr[4] = cubeFarRight;
-        cubeGameObjArr[5] = cubeNearLeft;
-        cubeGameObjArr[6] = cubeNearMiddleLeft;
-        cubeGameObjArr[7] = cubeNearMiddle;
-        cubeGameObjArr[8] = cubeNearMiddleRight;
-        cubeGameObjArr[9] = cubeNearRight;
+        cubeGameObjArr[0] = cubeFarLeft30;
+        cubeGameObjArr[1] = cubeFarLeft20;
+        cubeGameObjArr[2] = cubeFarLeft10;
+        cubeGameObjArr[3] = cubeFarRight10;
+        cubeGameObjArr[4] = cubeFarRight20;
+        cubeGameObjArr[5] = cubeFarRight30;
+        cubeGameObjArr[6] = cubeNearLeft30;
+        cubeGameObjArr[7] = cubeNearLeft20;
+        cubeGameObjArr[8] = cubeNearRight10;
+        cubeGameObjArr[9] = cubeNearLeft10;
+        cubeGameObjArr[10] = cubeNearRight20;
+        cubeGameObjArr[11] = cubeNearRight30;
 
         //deactivate the "Start Experiment" and "Training" Buttons:
         buttonExperiment.GetComponent<Button>().interactable = false;
@@ -697,8 +701,8 @@ public class GUIControl : MonoBehaviour {
         //set stimulus object for current trial
         if (currentCondition == "near")
         {
-            //For the near positions we have to add 5 to the index, cause the near positions are the indexes 5-9 in the cubeGameObjArray
-            currentStimulusObj = cubeGameObjArr[CubePositions[CubeSeq[cubeSeqCounter] + 5]];
+            //For the near positions we have to add 6 to the index, cause the near positions are the indexes 6-11 in the cubeGameObjArray
+            currentStimulusObj = cubeGameObjArr[CubePositions[CubeSeq[cubeSeqCounter] + 6]];
         }
         else if (currentCondition == "far")
         {
@@ -1002,25 +1006,29 @@ public class GUIControl : MonoBehaviour {
         for (int i=0; i<cupObjects.Length; i++)
         {
             //determine angle
-            if (cupObjects[i].name.Contains("MiddleLeft"))
-            {
-                currentAngle = angles[1];
-            }
-            else if (cupObjects[i].name.Contains("MiddleRight"))
-            {
-                currentAngle = angles[3];
-            }
-            else if (cupObjects[i].name.Contains("Middle"))
-            {
-                currentAngle = angles[2];
-            }
-            else if (cupObjects[i].name.Contains("Left"))
+            if (cupObjects[i].name.Contains("Left30"))
             {
                 currentAngle = angles[0];
             }
-            else if (cupObjects[i].name.Contains("Right"))
+            else if (cupObjects[i].name.Contains("Left20"))
+            {
+                currentAngle = angles[1];
+            }
+            else if (cupObjects[i].name.Contains("Left10"))
+            {
+                currentAngle = angles[2];
+            }
+            else if (cupObjects[i].name.Contains("Right10"))
+            {
+                currentAngle = angles[3];
+            }
+            else if (cupObjects[i].name.Contains("Right20"))
             {
                 currentAngle = angles[4];
+            }
+            else if (cupObjects[i].name.Contains("Right30"))
+            {
+                currentAngle = angles[5];
             }
 
             //check if near or far
