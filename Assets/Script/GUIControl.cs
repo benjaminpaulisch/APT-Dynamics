@@ -27,11 +27,11 @@ public class GUIControl : MonoBehaviour {
 
     [Header("Experiment specific")]
     public int trialsPerTask = 60;
-    public int standardBreakDuration = 120;         //2 minutes
+    public int standardBreakDuration = 60;          //2 minutes
     public int standardBreakEveryTrials = 100;
     public int halfTimeBreakDuration = 300;         //5 minutes
     public int manualBrakeDuration = 10;            //10 seconds
-    public int manualBreakEveryTrials = 25;         //a manual break every 25 trials (except half time)
+    public int manualBreakEveryTrials = 20;         //a manual break every 25 trials (except half time)
 
     [Header("Learning specific")]
     public int trialsPerTaskLearning = 5;
