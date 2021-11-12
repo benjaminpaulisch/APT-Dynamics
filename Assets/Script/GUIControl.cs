@@ -34,14 +34,15 @@ public class GUIControl : MonoBehaviour {
     public int manualBreakEveryTrials = 20;         //a manual break every 25 trials (except half time)
 
     [Header("Learning specific")]
-    public int trialsPerTaskLearning = 5;
+    public int trialsPerTaskLearning = 6;
     public float cueDurationLearning = 1.5f;
 
     [Header("Training specific")]
-    public int trialsPerTaskTraining = 5;
+    public int trialsPerTaskTraining = 6;
 
     [Header("Baseline specific")]
     public int baselineDuration = 120;              //2 minutes
+    public int trialsPerTaskBaselineNew = 6;
 
     [Header("Misc")]
     public LSLMarkerStream marker;
@@ -148,14 +149,15 @@ public class GUIControl : MonoBehaviour {
     private string endTextBaseline = "The baseline has ended.\nPlease contact the experimenter.";
     private int baselineClosedRunNo = 0;
     private int baselineOpenRunNo = 0;
+    private int baselineNewRunNo = 0;
     private string startBaselineText = "Put your hand on the resting position to start the baseline.";
 
 
     // Game objects
-    public static GameObject table, plane, instructionsExperiment, instructionsLearning, instructionsTraining, instructionsBaselineClosed, instructionsBaselineOpen, textBox, end, endTextBox, startTrialCanvas, resting, questionnaire, q, ra, la, send, fixationCross, cue, cueText,
+    public static GameObject table, plane, instructionsExperiment, instructionsLearning, instructionsTraining, instructionsBaselineClosed, instructionsBaselineOpen, instructionsBaselineNew, textBox, end, endTextBox, startTrialCanvas, resting, questionnaire, q, ra, la, send, fixationCross, cue, cueText,
         mainMenu, calibrationMenu, configurationMenu, inputParticipantID, inputParticipantAge, inputParticipantGender, inputArmLength, buttonExperiment, startTrialText,
         buttonLearning, buttonTraining, buttonShoulderPos, textHintShoulderPos, textMissingInputs, tableSetup, buttonMaximumReach, buttonCubePositions, buttonTablePosition, textHintShoulderFirst,
-        textHintCupPos, textHintTablePos, breakCanvasDesktop, vr_hand_R, continueCanvas, continueButton, baselineClosedCanvas, buttonBaselineClosed, buttonBaselineOpen, startFirstTrial, torso;
+        textHintCupPos, textHintTablePos, breakCanvasDesktop, vr_hand_R, continueCanvas, continueButton, baselineClosedCanvas, buttonBaselineClosed, buttonBaselineOpen, startFirstTrial, torso, buttonBaselineNew;
     private GameObject cubeFarLeft30, cubeFarLeft20, cubeFarLeft10, cubeFarRight10, cubeFarRight20, cubeFarRight30, cubeNearLeft30, cubeNearLeft20, cubeNearLeft10, cubeNearRight10, cubeNearRight20, cubeNearRight30;
     private GameObject[] cubeGameObjArr = new GameObject[12];
 
@@ -174,6 +176,7 @@ public class GUIControl : MonoBehaviour {
         instructionsTraining = GameObject.Find("InstructionsTraining");
         instructionsBaselineClosed = GameObject.Find("InstructionsBaselineClosed");
         instructionsBaselineOpen = GameObject.Find("InstructionsBaselineOpen");
+        instructionsBaselineNew = GameObject.Find("InstructionsBaselineNew");
         textBox = GameObject.Find("TextBox");
         end = GameObject.Find("End");
         endTextBox = GameObject.Find("EndTextBox");
@@ -211,6 +214,7 @@ public class GUIControl : MonoBehaviour {
         baselineClosedCanvas = GameObject.Find("BaselineClosedCanvas");
         startFirstTrial = GameObject.Find("startFirstTrial");
         torso = GameObject.Find("TorsoObject");
+        buttonBaselineNew = GameObject.Find("ButtonBaselineNew");
 
         //Stimulus
         cubeFarLeft30 = GameObject.Find("CubeFarLeft30");
@@ -438,7 +442,15 @@ public class GUIControl : MonoBehaviour {
             // run all trials
             if (trialSeqCounter < nrOfTrialsTotal && !experimentEnd) 
             {
-                RunTrial();
+                if (expControlStatus == 9)
+                {
+                    RunBaselineTrial();
+                }
+                else
+                {
+                    RunTrial();
+                }
+                
             }
 
             // after all trials are finished
@@ -454,6 +466,11 @@ public class GUIControl : MonoBehaviour {
                 {
                     marker.Write("training:end");
                     Debug.Log("training:end");
+                }
+                else if (baselineRunning)
+                {
+                    marker.Write("baselineNew:end");
+                    Debug.Log("baselineNew:end");
                 }
                 else
                 {
@@ -644,6 +661,175 @@ public class GUIControl : MonoBehaviour {
     }
 
 
+    public void RunBaselineTrial()
+    {
+        //Start of trial: ISI
+        if (actualTime <= currentIsiDuration)
+        {
+            if (!isiStarted)
+            {
+                isiStarted = true;
+                marker.Write("ISI started");
+                Debug.Log("ISI started: " + actualTime.ToString());
+            }
+        }
+
+        //After ISI: fixation cross
+        //if (actualTime <= fixationDuration)
+        if (actualTime > currentIsiDuration && actualTime <= fixationDuration + currentIsiDuration)
+        {
+            if (!fixationCrossActivated)
+            {
+                //ISI ended
+                isiStarted = false;
+                marker.Write("ISI ended");
+                //Debug.Log("ISI ended: " + actualTime.ToString());
+
+                //enable fixation cross
+                fixationCross.SetActive(true);
+                marker.Write("Fixation cross activated");
+                Debug.Log("Fixation Cross activated: " + actualTime.ToString());
+                fixationCrossActivated = true;
+            }
+        }
+
+        //after fixation cross: show cue
+        //if (actualTime > fixationDuration && actualTime <= fixationDuration + currentCueDuration)
+        if (actualTime > fixationDuration + currentIsiDuration && actualTime <= fixationDuration + currentIsiDuration + currentCueDuration)
+        {
+            if (!cueActivated)
+            {
+                //deactivate fixation cross
+                fixationCross.SetActive(false);
+                marker.Write("Fixation cross deactivated");
+                //Debug.Log("Fixation Cross deactivated: " + actualTime.ToString());
+                fixationCrossActivated = false;
+
+                //activate cue and set correct cue text
+                cueText.GetComponent<UnityEngine.UI.Text>().text = currentTask;
+                marker.Write("cueTextActivated:" + currentTask);
+                Debug.Log("Cue activated: " + currentTask + " " + actualTime.ToString());
+
+                cue.SetActive(true);
+                cueActivated = true;
+            }
+        }
+
+        //after showing cue: show stimulus
+        //if (actualTime > fixationDuration + currentCueDuration)
+        if (actualTime > fixationDuration + currentIsiDuration + currentCueDuration)
+        {
+            if (!taskSuccess)    //if the current task has not been successful yet
+            {
+                //show stimulus
+                if (!targetActivated)
+                {
+                    //deactivate cue
+                    cue.SetActive(false);
+
+                    marker.Write("cue text deactivated");
+                    //Debug.Log("Cue deactivated: " + actualTime.ToString());
+                    cueActivated = false;
+
+
+                    //activate stimulus
+                    CubeVisible(currentStimulusObj);
+                    Debug.Log("Stimulus activated: " + currentStimulusObj.name + " " + actualTime.ToString());
+
+                    //set reaction start time
+                    reaction_start_time = actualTime;
+
+                    targetActivated = true;
+                }
+
+
+                //activate raycast for pointing detection
+                if (handMovementThresholdOn)
+                {
+                    if (handIsMoving)
+                    {
+                        if (activateRaycast)
+                        {
+                            //if raycast was activated before -> write marker
+                            marker.Write("Hand is moving -> deactivating pointing detection");
+                            //Debug.Log("Hand is moving -> deactivating pointing detection " + actualTime.ToString());
+                        }
+                        activateRaycast = false;
+                    }
+                    else
+                    {
+                        if (!activateRaycast)
+                        {
+                            //if raycast was deactivated before -> write marker
+                            marker.Write("Hand stopped moving -> activating pointing detection");
+                            //Debug.Log("Hand stopped moving -> activating pointing detection " + actualTime.ToString());
+                        }
+                        activateRaycast = true;
+                    }
+                }
+                else
+                {
+                    activateRaycast = true;
+                }
+
+
+                //check for successful response (if the collision has reached the minimum duration)
+                if (collisionActive)
+                {
+                    //Debug.Log("colision active: " + (actualTime - collisionStartTime).ToString() + " " + actualTime.ToString());
+
+                    //if ((float)collisionDuration.ElapsedMilliseconds / 10000 >= minimumTaskDuration)
+                    if (actualTime - collisionStartTime >= minimumTaskDuration)
+                    {
+                        //activate correct/incorrect visual feedback
+                        visualFeedbackActive = true;
+                        VisualFeeback(currentCollisionObj, currentResponseType);
+                    }
+                }
+                //if time for a response has run out -> go to next trial (but NOT if there is an active collision)
+                //else if (actualTime > fixationDuration + currentCueDuration + responseTimeMax)
+                else if (actualTime > fixationDuration + currentIsiDuration + currentCueDuration + responseTimeMax)
+                {
+                    //deactivate raycast
+                    activateRaycast = false;
+
+                    marker.Write("response time over");
+                    Debug.Log("response time over. " + actualTime.ToString());
+
+                    DeactivateAllCubes();
+                    NextTrial();
+                }
+
+            }
+            //if the current task has been successful
+            else
+            {
+                //deactivate raycast
+                activateRaycast = false;
+
+                //wait for visual feedback to finish and then -> go to next trial
+                //if (actualTime > fixationDuration + currentCueDuration + reaction_time + minimumTaskDuration + feedbackDuration)
+                if (actualTime > fixationDuration + currentIsiDuration + currentCueDuration + reaction_time + minimumTaskDuration + feedbackDuration)
+                {
+                    //deactivate stimulus
+                    DeactivateAllCubes();
+
+                    marker.Write("visual feeback duration over");
+                    Debug.Log("visual feeback duration over " + actualTime.ToString());
+
+                    //marker.Write("visualFeedback:off");
+                    //Debug.Log("visualFeedback:off " + actualTime.ToString());
+
+                    //transition to next trial
+                    NextTrial();
+                }
+            }
+
+        }
+
+    }
+
+
     public void TrialStart()
     {
         //deactivate start/Continue button
@@ -662,6 +848,7 @@ public class GUIControl : MonoBehaviour {
             instructionsTraining.SetActive(false);
             instructionsBaselineClosed.SetActive(false);
             instructionsBaselineOpen.SetActive(false);
+            instructionsBaselineNew.SetActive(false);
             marker.Write("instructions deactivated");
             Debug.Log("instructions deactivated");
         }
@@ -1083,6 +1270,7 @@ public class GUIControl : MonoBehaviour {
         instructionsTraining.SetActive(false);
         instructionsBaselineClosed.SetActive(false);
         instructionsBaselineOpen.SetActive(false);
+        instructionsBaselineNew.SetActive(false);
         fixationCross.SetActive(false);
         cue.SetActive(false);
         DeactivateAllCubes();
@@ -1114,6 +1302,7 @@ public class GUIControl : MonoBehaviour {
         instructionsTraining.SetActive(false);
         instructionsBaselineClosed.SetActive(false);
         instructionsBaselineOpen.SetActive(false);
+        instructionsBaselineNew.SetActive(false);
         fixationCross.SetActive(false);
         cue.SetActive(false);
         DeactivateAllCubes();
@@ -1218,6 +1407,7 @@ public class GUIControl : MonoBehaviour {
         instructionsTraining.SetActive(false);
         instructionsBaselineClosed.SetActive(false);
         instructionsBaselineOpen.SetActive(false);
+        instructionsBaselineNew.SetActive(false);
         fixationCross.SetActive(false);
         cue.SetActive(false);
         DeactivateAllCubes();
@@ -1278,6 +1468,7 @@ public class GUIControl : MonoBehaviour {
         instructionsTraining.SetActive(false);
         instructionsBaselineClosed.SetActive(false);
         instructionsBaselineOpen.SetActive(false);
+        instructionsBaselineNew.SetActive(false);
         startTrialCanvas.SetActive(false);
         resting.SetActive(false);
 
@@ -1351,6 +1542,7 @@ public class GUIControl : MonoBehaviour {
         instructionsTraining.SetActive(false);
         instructionsBaselineClosed.SetActive(false);
         instructionsBaselineOpen.SetActive(false);
+        instructionsBaselineNew.SetActive(false);
         startTrialCanvas.SetActive(false);
         resting.SetActive(false);
         restingDetectionActive = false;
@@ -1368,6 +1560,125 @@ public class GUIControl : MonoBehaviour {
             "duration:" + baselineDuration.ToString();
         marker.Write(tempMarkerText);
         Debug.Log(tempMarkerText);
+
+    }
+
+
+    public void StartBaselineNew()
+    {
+        //This method is used for the "Start Baseline New" button on the main menu. When the button is pressed this method is executed.
+        marker.Write("Main menu: Start Baseline New button pressed");
+        Debug.Log("Starting Baseline New");
+
+        expControlStatus = 9;
+
+        //activate and deactivate objects:
+        mainMenu.gameObject.SetActive(false);
+        calibrationMenu.SetActive(false);
+        configurationMenu.SetActive(false);
+
+        instructionsExperiment.SetActive(false);
+        instructionsLearning.SetActive(false);
+        instructionsTraining.SetActive(false);
+        instructionsBaselineClosed.SetActive(false);
+        instructionsBaselineOpen.SetActive(false);
+        instructionsBaselineNew.SetActive(true);
+
+        marker.Write("instructions activated");
+        Debug.Log("Instructions activated");
+
+        fixationCross.SetActive(false);
+        cue.SetActive(false);
+        DeactivateAllCubes();
+        startTrialCanvas.SetActive(false);
+        startTrialText.GetComponent<Text>().text = startNextTrialText;
+        continueCanvas.SetActive(false);
+        continueButton.SetActive(false);
+        resting.SetActive(false);
+        end.SetActive(false);
+        breakCanvasDesktop.SetActive(false);
+        startFirstTrial.SetActive(true);
+
+    }
+
+
+    public void InitBaselineNew()
+    {
+        //set experiment control vars
+        baselineRunning = true;
+        experimentEnd = false;
+        trialSeqCounter = 0;
+        baselineNewRunNo += 1;
+
+        //calculate total number of trials
+        nrOfTrialsTotal = trialsPerTaskBaselineNew * tasks.Length;
+
+        //create array with tasks for all trials
+        trialTasks = CreateTrialTaskArray(nrOfTrialsTotal, taskSeq, tasks);
+
+        //create array with isi durations for all trials
+        isiDurations = CreateDurationsArray(nrOfTrialsTotal, isiDurationAvg, isiDurationVariation);
+
+        //create array with cue durations for all tasks
+        cueDurations = CreateDurationsArray(nrOfTrialsTotal, cueDurationAvg, cueDurationVariation);
+
+        // Randomize Cube Appearance Sequence
+        RandomizeArray.ShuffleArray(CubeSeq);
+
+        // activate/deactivate objects in scene
+        table.gameObject.GetComponent<Renderer>().enabled = true;
+        plane.gameObject.GetComponent<Renderer>().enabled = true;
+        end.SetActive(false);
+        startTrialCanvas.SetActive(false);
+        startTrialText.GetComponent<Text>().text = startNextTrialText;
+        resting.SetActive(false);
+        restingDetectionActive = false;
+        startFirstTrial.SetActive(true);
+
+        //set correct end text
+        endTextBox.GetComponent<Text>().text = endTextTraining;
+
+        //write experiment start marker
+        tempMarkerText =
+            "baselineNew:start;" +
+            "runNo:" + trainingRunNo.ToString() + ";" +
+            "trialsPerTask:" + trialsPerTaskTraining.ToString() + ";" +
+            "trialsTotal:" + nrOfTrialsTotal.ToString() + ";" +
+            "isiDurationAvg:" + isiDurationAvg.ToString() + ";" +
+            "isiDurationVariation:" + isiDurationVariation.ToString() + ";" +
+            "fixationDuration:" + fixationDuration.ToString() + ";" +
+            "cueDurationAvg:" + cueDurationAvg.ToString() + ";" +
+            "cueDurationVariation:" + cueDurationVariation.ToString() + ";" +
+            "stimulusDurationMax:" + responseTimeMax.ToString() + ";" +
+            "feedbackDuration:" + feedbackDuration.ToString() + ";" +
+            "minTaskDuration:" + minimumTaskDuration.ToString() + ";" +
+            "offsetNearPercent:" + offsetNearPercent.ToString() + ";" +
+            "offsetFarPercent:" + offsetFarPercent.ToString() + ";" +
+            "handMovementThreshold:" + handMovementThreshold.ToString();
+        marker.Write(tempMarkerText);
+        Debug.Log(tempMarkerText);
+
+        //write participant info (from configuration menu)
+        tempMarkerText =
+            "participantID:" + participantID + ";" +
+            "participantAge:" + participantAge.ToString() + ";" +
+            "participantGender:" + participantGender + ";" +
+            "participantArmLength:" + armLength;
+        marker.Write(tempMarkerText);
+        Debug.Log(tempMarkerText);
+
+        //write calibration info (from calibration menu)
+        tempMarkerText =
+            "posTable:" + table.transform.position.ToString() + ";" +
+            "posShoulder:" + shoulderPosition.ToString() + ";" +
+            "posMaxReach:" + maxReachPosition.ToString() + ";" +
+            "armLengthCalculated:" + armLengthCalculated.ToString() + ";" +
+            "stimulusPositions:" + stimulusPositions.ToString();
+        marker.Write(tempMarkerText);
+        Debug.Log(tempMarkerText);
+
+        marker.Write("Waiting for touch on startFirstTrialButton");
+        Debug.Log("Waiting for touch on startFirstTrialButton...");
 
     }
 
@@ -1390,6 +1701,7 @@ public class GUIControl : MonoBehaviour {
         instructionsTraining.SetActive(false);
         instructionsBaselineClosed.SetActive(false);
         instructionsBaselineOpen.SetActive(false);
+        instructionsBaselineNew.SetActive(false);
         marker.Write("instructions activated");
         Debug.Log("Instructions activated");
 
@@ -1536,6 +1848,7 @@ public class GUIControl : MonoBehaviour {
         instructionsTraining.SetActive(true);
         instructionsBaselineClosed.SetActive(false);
         instructionsBaselineOpen.SetActive(false);
+        instructionsBaselineNew.SetActive(false);
         marker.Write("instructions activated");
         Debug.Log("Instructions activated");
 
@@ -1653,6 +1966,7 @@ public class GUIControl : MonoBehaviour {
         instructionsTraining.SetActive(false);
         instructionsBaselineClosed.SetActive(false);
         instructionsBaselineOpen.SetActive(false);
+        instructionsBaselineNew.SetActive(false);
         marker.Write("instructions activated");
         Debug.Log("Instructions activated");
 
@@ -1906,6 +2220,7 @@ public class GUIControl : MonoBehaviour {
                             buttonTraining.GetComponent<Button>().interactable = true;
                             buttonBaselineClosed.GetComponent<Button>().interactable = true;
                             buttonBaselineOpen.GetComponent<Button>().interactable = true;
+                            buttonBaselineNew.GetComponent<Button>().interactable = true;
                             textMissingInputs.SetActive(false);
                         }
                         else
@@ -1915,6 +2230,7 @@ public class GUIControl : MonoBehaviour {
                             buttonTraining.GetComponent<Button>().interactable = false;
                             buttonBaselineClosed.GetComponent<Button>().interactable = false;
                             buttonBaselineOpen.GetComponent<Button>().interactable = false;
+                            buttonBaselineNew.GetComponent<Button>().interactable = false;
                             textMissingInputs.SetActive(true);
                         }
                         break;
@@ -2134,6 +2450,26 @@ public class GUIControl : MonoBehaviour {
                         }
 
                         break;
+                    }
+                case 9: //baseline new
+                    {
+                        //check for abort by pressing the escape key
+                        if (Input.GetKeyDown("escape"))
+                        {
+                            marker.Write("baselineNew:abort");
+                            Debug.Log("baselineNew:abort");
+
+                            baselineRunning = false;
+
+                            //go to main menu
+                            StartMainMenu();
+                        }
+                        else if (flagStart)
+                            ControlTrial();
+                        else
+                            InitBaselineNew(); // run only once
+                        break;
+
                     }
             }//switch
             
