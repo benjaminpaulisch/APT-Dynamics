@@ -71,6 +71,7 @@ public class GUIControl : MonoBehaviour {
     private Vector3 shoulderPosition;
     private Vector3 maxReachPosition;
     private string tempMarkerText = "";
+    private int currentInstructionPage;
 
     private float actualTime = 0;       // start timer at 0
     private float reaction_time = 0;
@@ -157,9 +158,11 @@ public class GUIControl : MonoBehaviour {
     public static GameObject table, plane, instructionsExperiment, instructionsLearning, instructionsTraining, instructionsBaselineClosed, instructionsBaselineOpen, instructionsBaselineNew, textBox, end, endTextBox, startTrialCanvas, resting, questionnaire, q, ra, la, send, fixationCross, cue, cueText,
         mainMenu, calibrationMenu, configurationMenu, inputParticipantID, inputParticipantAge, inputParticipantGender, inputArmLength, buttonExperiment, startTrialText,
         buttonLearning, buttonTraining, buttonShoulderPos, textHintShoulderPos, textMissingInputs, tableSetup, buttonMaximumReach, buttonCubePositions, buttonTablePosition, textHintShoulderFirst,
-        textHintCupPos, textHintTablePos, breakCanvasDesktop, vr_hand_R, continueCanvas, continueButton, baselineClosedCanvas, buttonBaselineClosed, buttonBaselineOpen, startFirstTrial, torso, buttonBaselineNew;
+        textHintCupPos, textHintTablePos, breakCanvasDesktop, vr_hand_R, continueCanvas, continueButton, baselineClosedCanvas, buttonBaselineClosed, buttonBaselineOpen, startFirstTrial, torso, buttonBaselineNew,
+        buttonNextPage, textLearningPage1, textLearningPage2, textLearningPage3, textLearningPage4, textLearningPage5, textLearningPage6, textLearningNextPage;
     private GameObject cubeFarLeft30, cubeFarLeft20, cubeFarLeft10, cubeFarRight10, cubeFarRight20, cubeFarRight30, cubeNearLeft30, cubeNearLeft20, cubeNearLeft10, cubeNearRight10, cubeNearRight20, cubeNearRight30;
     private GameObject[] cubeGameObjArr = new GameObject[12];
+    private GameObject[] textLearningPages = new GameObject[6];
 
 
     // Use this for initialization
@@ -171,8 +174,16 @@ public class GUIControl : MonoBehaviour {
         // Finding the game object 
         table = GameObject.Find("Table");
         plane = GameObject.Find("Plane");
+        buttonNextPage = GameObject.Find("ButtonNextPage");
         instructionsExperiment = GameObject.Find("InstructionsExperiment");
         instructionsLearning = GameObject.Find("InstructionsLearning");
+        textLearningPage1 = GameObject.Find("TextLearningPage1");
+        textLearningPage2 = GameObject.Find("TextLearningPage2");
+        textLearningPage3 = GameObject.Find("TextLearningPage3");
+        textLearningPage4 = GameObject.Find("TextLearningPage4");
+        textLearningPage5 = GameObject.Find("TextLearningPage5");
+        textLearningPage6 = GameObject.Find("TextLearningPage6");
+        textLearningNextPage = GameObject.Find("TextLearningNextPage");
         instructionsTraining = GameObject.Find("InstructionsTraining");
         instructionsBaselineClosed = GameObject.Find("InstructionsBaselineClosed");
         instructionsBaselineOpen = GameObject.Find("InstructionsBaselineOpen");
@@ -230,7 +241,7 @@ public class GUIControl : MonoBehaviour {
         cubeNearRight20 = GameObject.Find("CubeNearRight20");
         cubeNearRight30 = GameObject.Find("CubeNearRight30");
 
-        // Assign stimulus game objects to arrays
+        // Assign game objects to arrays
         cubeGameObjArr[0] = cubeFarLeft30;
         cubeGameObjArr[1] = cubeFarLeft20;
         cubeGameObjArr[2] = cubeFarLeft10;
@@ -244,6 +255,14 @@ public class GUIControl : MonoBehaviour {
         cubeGameObjArr[10] = cubeNearRight20;
         cubeGameObjArr[11] = cubeNearRight30;
 
+        textLearningPages[0] = textLearningPage1;
+        textLearningPages[1] = textLearningPage2;
+        textLearningPages[2] = textLearningPage3;
+        textLearningPages[3] = textLearningPage4;
+        textLearningPages[4] = textLearningPage5;
+        textLearningPages[5] = textLearningPage6;
+
+
         //deactivate the "Start Experiment" and "Training" Buttons:
         buttonExperiment.GetComponent<Button>().interactable = false;
         buttonLearning.GetComponent<Button>().interactable = false;
@@ -253,6 +272,14 @@ public class GUIControl : MonoBehaviour {
         end.SetActive(false);
         baselineClosedCanvas.SetActive(false);
         startFirstTrial.SetActive(false);
+        buttonNextPage.SetActive(false);
+
+        for (int i=0; i<textLearningPages.Length; i++)
+        {
+            textLearningPages[i].SetActive(false);
+        }
+        textLearningNextPage.SetActive(false);
+
 
         torso.GetComponent<Renderer>().enabled = false;   //make torso invisible
 
@@ -424,8 +451,8 @@ public class GUIControl : MonoBehaviour {
         marker.Write(tempMarkerText);
         Debug.Log(tempMarkerText);
 
-        marker.Write("Waiting for touch on startFirstTrialButton");
-        Debug.Log("Waiting for touch on startFirstTrialButton...");
+        //marker.Write("Waiting for touch on startFirstTrialButton");
+        //Debug.Log("Waiting for touch on startFirstTrialButton...");
 
     }
 
@@ -1702,6 +1729,7 @@ public class GUIControl : MonoBehaviour {
         instructionsBaselineClosed.SetActive(false);
         instructionsBaselineOpen.SetActive(false);
         instructionsBaselineNew.SetActive(false);
+        buttonNextPage.SetActive(true);
         marker.Write("instructions activated");
         Debug.Log("Instructions activated");
 
@@ -1715,7 +1743,7 @@ public class GUIControl : MonoBehaviour {
         resting.SetActive(false);
         end.SetActive(false);
         breakCanvasDesktop.SetActive(false);
-        startFirstTrial.SetActive(true);
+        startFirstTrial.SetActive(false);
 
     }
 
@@ -1727,6 +1755,7 @@ public class GUIControl : MonoBehaviour {
         experimentEnd = false;
         trialSeqCounter = 0;
         learningRunNo += 1;
+        currentInstructionPage = 0;
 
         //calculate total number of trials
         nrOfTrialsTotal = trialsPerTaskLearning * tasks.Length;
@@ -1781,7 +1810,9 @@ public class GUIControl : MonoBehaviour {
         startTrialText.GetComponent<Text>().text = startNextTrialText;
         resting.SetActive(false);
         restingDetectionActive = false;
-        startFirstTrial.SetActive(true);
+        startFirstTrial.SetActive(false);
+        textLearningPages[currentInstructionPage].SetActive(true);
+        textLearningNextPage.SetActive(true);
 
         //set correct end text
         endTextBox.GetComponent<Text>().text = endTextLearning;
@@ -1824,8 +1855,8 @@ public class GUIControl : MonoBehaviour {
         marker.Write(tempMarkerText);
         Debug.Log(tempMarkerText);
 
-        marker.Write("Waiting for touch on startFirstTrialButton");
-        Debug.Log("Waiting for touch on startFirstTrialButton...");
+        //marker.Write("Waiting for touch on startFirstTrialButton");
+        //Debug.Log("Waiting for touch on startFirstTrialButton...");
 
     }
 
@@ -1942,8 +1973,8 @@ public class GUIControl : MonoBehaviour {
         marker.Write(tempMarkerText);
         Debug.Log(tempMarkerText);
 
-        marker.Write("Waiting for touch on startFirstTrialButton");
-        Debug.Log("Waiting for touch on startFirstTrialButton...");
+        //marker.Write("Waiting for touch on startFirstTrialButton");
+        //Debug.Log("Waiting for touch on startFirstTrialButton...");
 
     }
 
@@ -2198,6 +2229,34 @@ public class GUIControl : MonoBehaviour {
             Debug.LogError(e);
             textHintTablePos.GetComponent<Text>().text = "Error: Tracker not found.";
             textHintTablePos.SetActive(true);
+        }
+
+    }
+
+
+    public void NextInstructionPage()
+    {
+        if (expControlStatus == 3)  //learning
+        {
+            textLearningPages[currentInstructionPage].SetActive(false);
+            currentInstructionPage += 1;
+            textLearningPages[currentInstructionPage].SetActive(true);
+
+            //when last page is activated
+            if (currentInstructionPage == textLearningPages.Length-1) 
+            {
+                buttonNextPage.SetActive(false);
+                startFirstTrial.SetActive(true);
+                textLearningNextPage.SetActive(false);
+            }
+        }
+        else if (expControlStatus == 4) //training
+        {
+
+        }
+        else if (expControlStatus == 6) //experiment
+        {
+
         }
 
     }
