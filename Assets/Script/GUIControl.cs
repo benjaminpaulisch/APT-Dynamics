@@ -142,7 +142,7 @@ public class GUIControl : MonoBehaviour {
     private int experimentRunNo = 0;
     private string endTextExp = "The experiment has ended.\nThank you for your participation.";
     private bool manualBreakTriggered = false;
-    private string startNextTrialText = "Put your hand on the resting position to start the next trial";
+    private string startNextTrialText = "Put your hand on the resting position to start the trial";
 
     //baseline specific
     [HideInInspector] // Hides vars from Inspector
@@ -159,12 +159,13 @@ public class GUIControl : MonoBehaviour {
         mainMenu, calibrationMenu, configurationMenu, inputParticipantID, inputParticipantAge, inputParticipantGender, inputArmLength, buttonExperiment, startTrialText,
         buttonLearning, buttonTraining, buttonShoulderPos, textHintShoulderPos, textMissingInputs, tableSetup, buttonMaximumReach, buttonCubePositions, buttonTablePosition, textHintShoulderFirst,
         textHintCupPos, textHintTablePos, breakCanvasDesktop, vr_hand_R, continueCanvas, continueButton, baselineClosedCanvas, buttonBaselineClosed, buttonBaselineOpen, startFirstTrial, torso, buttonBaselineNew,
-        buttonNextPage, textLearningPage1, textLearningPage2, textLearningPage3, textLearningPage4, textLearningPage5, textLearningPage6, textLearningNextPage, textTrainingPage1, textTrainingPage2, textTrainingPage3, textTrainingPage4, textTrainingNextPage;
+        buttonNextPage, textLearningPage1, textLearningPage2, textLearningPage3, textLearningPage4, textLearningPage5, textLearningPage6, textLearningNextPage, textTrainingPage1, textTrainingPage2, textTrainingPage3, textTrainingPage4, textTrainingNextPage, textExperimentPage1, textExperimentPage2, textExperimentPage3, textExperimentPage4, textExperimentNextPage;
 
     private GameObject cubeFarLeft30, cubeFarLeft20, cubeFarLeft10, cubeFarRight10, cubeFarRight20, cubeFarRight30, cubeNearLeft30, cubeNearLeft20, cubeNearLeft10, cubeNearRight10, cubeNearRight20, cubeNearRight30;
     private GameObject[] cubeGameObjArr = new GameObject[12];
     private GameObject[] textLearningPages = new GameObject[6];
     private GameObject[] textTrainingPages = new GameObject[4];
+    private GameObject[] textExperimentPages = new GameObject[4];
 
 
     // Use this for initialization
@@ -178,6 +179,11 @@ public class GUIControl : MonoBehaviour {
         plane = GameObject.Find("Plane");
         buttonNextPage = GameObject.Find("ButtonNextPage");
         instructionsExperiment = GameObject.Find("InstructionsExperiment");
+        textExperimentPage1 = GameObject.Find("TextExperimentPage1");
+        textExperimentPage2 = GameObject.Find("TextExperimentPage2");
+        textExperimentPage3 = GameObject.Find("TextExperimentPage3");
+        textExperimentPage4 = GameObject.Find("TextExperimentPage4");
+        textExperimentNextPage = GameObject.Find("TextExperimentNextPage");
         instructionsLearning = GameObject.Find("InstructionsLearning");
         textLearningPage1 = GameObject.Find("TextLearningPage1");
         textLearningPage2 = GameObject.Find("TextLearningPage2");
@@ -192,6 +198,7 @@ public class GUIControl : MonoBehaviour {
         textTrainingPage3 = GameObject.Find("TextTrainingPage3");
         textTrainingPage4 = GameObject.Find("TextTrainingPage4");
         textTrainingNextPage = GameObject.Find("TextTrainingNextPage");
+
         instructionsBaselineClosed = GameObject.Find("InstructionsBaselineClosed");
         instructionsBaselineOpen = GameObject.Find("InstructionsBaselineOpen");
         instructionsBaselineNew = GameObject.Find("InstructionsBaselineNew");
@@ -273,6 +280,11 @@ public class GUIControl : MonoBehaviour {
         textTrainingPages[1] = textTrainingPage2;
         textTrainingPages[2] = textTrainingPage3;
         textTrainingPages[3] = textTrainingPage4;
+
+        textExperimentPages[0] = textExperimentPage1;
+        textExperimentPages[1] = textExperimentPage2;
+        textExperimentPages[2] = textExperimentPage3;
+        textExperimentPages[3] = textExperimentPage4;
 
 
         //deactivate the "Start Experiment" and "Training" Buttons:
@@ -373,92 +385,6 @@ public class GUIControl : MonoBehaviour {
         RandomizeArray.ShuffleArray(tempDurations);
 
         return tempDurations;
-    }
-
-
-    public void InitExperiment()
-    {   
-        //set experiment control vars
-        flagStart = true;
-        experimentEnd = false;
-        experimentRunNo += 1;
-        trialSeqCounter = 0;
-
-        //calculate total number of trials
-        nrOfTrialsTotal = trialsPerTask * tasks.Length;
-
-        //create array with tasks for all trials
-        trialTasks = CreateTrialTaskArray(nrOfTrialsTotal, taskSeq, tasks);
-
-        //create array with isi durations for all trials
-        isiDurations = CreateDurationsArray(nrOfTrialsTotal, isiDurationAvg, isiDurationVariation);
-
-        //create array with cue durations for all trials
-        cueDurations = CreateDurationsArray(nrOfTrialsTotal, cueDurationAvg, cueDurationVariation);
-
-        // Randomize Cube Appearance Sequence
-        RandomizeArray.ShuffleArray(CubeSeq);
-
-        //activate/deactivate objects
-        table.gameObject.GetComponent<Renderer>().enabled = true;
-        plane.gameObject.GetComponent<Renderer>().enabled = true;
-        end.SetActive(false);
-        //startTrialCanvas.SetActive(true);
-        startTrialText.GetComponent<Text>().text = startNextTrialText;
-        continueCanvas.SetActive(false);
-        continueButton.SetActive(false);
-        //tableTextBackground.SetActive(true);
-        restingDetectionActive = false;
-        resting.SetActive(false);
-        startTrialCanvas.SetActive(false);
-        startFirstTrial.SetActive(true);
-
-
-        //set correct end text
-        endTextBox.GetComponent<Text>().text = endTextExp;
-
-        //write experiment start marker
-        tempMarkerText = 
-            "experiment:start;" +
-            "runNo:" + experimentRunNo.ToString() + ";" +
-            "trialsPerTask:" + trialsPerTask.ToString() + ";" +
-            "trialsTotal:" + nrOfTrialsTotal.ToString() + ";" +
-            "isiDurationAvg:" + isiDurationAvg.ToString() + ";" +
-            "isiDurationVariation:" + isiDurationVariation.ToString() + ";" +
-            "fixationDuration:" + fixationDuration.ToString() + ";" +
-            "cueDurationAvg:" + cueDurationAvg.ToString() + ";" +
-            "cueDurationVariation:" + cueDurationVariation.ToString() + ";" +
-            "stimulusDurationMax:" + responseTimeMax.ToString() + ";" +
-            "feedbackDuration:" + feedbackDuration.ToString() + ";" +
-            "minTaskDuration:" + minimumTaskDuration.ToString() + ";" +
-            "offsetNearPercent:" + offsetNearPercent.ToString() + ";" +
-            "offsetFarPercent:" + offsetFarPercent.ToString() + ";" +
-            "handMovementThreshold:" + handMovementThreshold.ToString();
-        marker.Write(tempMarkerText);
-        Debug.Log(tempMarkerText);
-
-        //write participant info (from configuration menu)
-        tempMarkerText =
-            "participantID:" + participantID + ";" +
-            "participantAge:" + participantAge.ToString() + ";" +
-            "participantGender:" + participantGender + ";" +
-            "participantArmLength:" + armLength;
-        marker.Write(tempMarkerText);
-        Debug.Log(tempMarkerText);
-
-        //write calibration info (from calibration menu)
-        tempMarkerText =
-            "posTable:" + table.transform.position.ToString() + ";" +
-            "posShoulder:" + shoulderPosition.ToString() + ";" +
-            "posMaxReach:" + maxReachPosition.ToString() + ";" +
-            "armLengthCalculated:" + armLengthCalculated.ToString() + ";" +
-            "stimulusPositions:" + stimulusPositions;
-        marker.Write(tempMarkerText);
-        Debug.Log(tempMarkerText);
-
-        //marker.Write("Waiting for touch on startFirstTrialButton");
-        //Debug.Log("Waiting for touch on startFirstTrialButton...");
-
     }
 
     
@@ -1324,6 +1250,12 @@ public class GUIControl : MonoBehaviour {
         }
         textTrainingNextPage.SetActive(false);
 
+        for (int i = 0; i < textExperimentPages.Length; i++)
+        {
+            textExperimentPages[i].SetActive(false);
+        }
+        textExperimentNextPage.SetActive(false);
+
         //reset control flags:
         flagStart = false;
         learningStarted = false;
@@ -1911,7 +1843,6 @@ public class GUIControl : MonoBehaviour {
         resting.SetActive(false);
         end.SetActive(false);
         breakCanvasDesktop.SetActive(false);
-        
 
     }
 
@@ -2021,6 +1952,7 @@ public class GUIControl : MonoBehaviour {
         instructionsBaselineNew.SetActive(false);
         marker.Write("instructions activated");
         Debug.Log("Instructions activated");
+        buttonNextPage.SetActive(true);
 
         fixationCross.SetActive(false);
         cue.SetActive(false);
@@ -2032,7 +1964,96 @@ public class GUIControl : MonoBehaviour {
         resting.SetActive(false);
         end.SetActive(false);
         breakCanvasDesktop.SetActive(false);
-        startFirstTrial.SetActive(true);
+        startFirstTrial.SetActive(false);
+
+    }
+
+
+    public void InitExperiment()
+    {
+        //set experiment control vars
+        flagStart = true;
+        experimentEnd = false;
+        experimentRunNo += 1;
+        trialSeqCounter = 0;
+        currentInstructionPage = 0;
+
+        //calculate total number of trials
+        nrOfTrialsTotal = trialsPerTask * tasks.Length;
+
+        //create array with tasks for all trials
+        trialTasks = CreateTrialTaskArray(nrOfTrialsTotal, taskSeq, tasks);
+
+        //create array with isi durations for all trials
+        isiDurations = CreateDurationsArray(nrOfTrialsTotal, isiDurationAvg, isiDurationVariation);
+
+        //create array with cue durations for all trials
+        cueDurations = CreateDurationsArray(nrOfTrialsTotal, cueDurationAvg, cueDurationVariation);
+
+        // Randomize Cube Appearance Sequence
+        RandomizeArray.ShuffleArray(CubeSeq);
+
+        //activate/deactivate objects
+        table.gameObject.GetComponent<Renderer>().enabled = true;
+        plane.gameObject.GetComponent<Renderer>().enabled = true;
+        end.SetActive(false);
+        //startTrialCanvas.SetActive(true);
+        startTrialText.GetComponent<Text>().text = startNextTrialText;
+        continueCanvas.SetActive(false);
+        continueButton.SetActive(false);
+        //tableTextBackground.SetActive(true);
+        restingDetectionActive = false;
+        resting.SetActive(false);
+        startTrialCanvas.SetActive(false);
+        startFirstTrial.SetActive(false);
+        textExperimentPages[currentInstructionPage].SetActive(true);
+        textExperimentNextPage.SetActive(true);
+
+
+        //set correct end text
+        endTextBox.GetComponent<Text>().text = endTextExp;
+
+        //write experiment start marker
+        tempMarkerText =
+            "experiment:start;" +
+            "runNo:" + experimentRunNo.ToString() + ";" +
+            "trialsPerTask:" + trialsPerTask.ToString() + ";" +
+            "trialsTotal:" + nrOfTrialsTotal.ToString() + ";" +
+            "isiDurationAvg:" + isiDurationAvg.ToString() + ";" +
+            "isiDurationVariation:" + isiDurationVariation.ToString() + ";" +
+            "fixationDuration:" + fixationDuration.ToString() + ";" +
+            "cueDurationAvg:" + cueDurationAvg.ToString() + ";" +
+            "cueDurationVariation:" + cueDurationVariation.ToString() + ";" +
+            "stimulusDurationMax:" + responseTimeMax.ToString() + ";" +
+            "feedbackDuration:" + feedbackDuration.ToString() + ";" +
+            "minTaskDuration:" + minimumTaskDuration.ToString() + ";" +
+            "offsetNearPercent:" + offsetNearPercent.ToString() + ";" +
+            "offsetFarPercent:" + offsetFarPercent.ToString() + ";" +
+            "handMovementThreshold:" + handMovementThreshold.ToString();
+        marker.Write(tempMarkerText);
+        Debug.Log(tempMarkerText);
+
+        //write participant info (from configuration menu)
+        tempMarkerText =
+            "participantID:" + participantID + ";" +
+            "participantAge:" + participantAge.ToString() + ";" +
+            "participantGender:" + participantGender + ";" +
+            "participantArmLength:" + armLength;
+        marker.Write(tempMarkerText);
+        Debug.Log(tempMarkerText);
+
+        //write calibration info (from calibration menu)
+        tempMarkerText =
+            "posTable:" + table.transform.position.ToString() + ";" +
+            "posShoulder:" + shoulderPosition.ToString() + ";" +
+            "posMaxReach:" + maxReachPosition.ToString() + ";" +
+            "armLengthCalculated:" + armLengthCalculated.ToString() + ";" +
+            "stimulusPositions:" + stimulusPositions;
+        marker.Write(tempMarkerText);
+        Debug.Log(tempMarkerText);
+
+        //marker.Write("Waiting for touch on startFirstTrialButton");
+        //Debug.Log("Waiting for touch on startFirstTrialButton...");
 
     }
 
@@ -2285,9 +2306,19 @@ public class GUIControl : MonoBehaviour {
                 textTrainingNextPage.SetActive(false);
             }
         }
-        else if (expControlStatus == 6) //experiment
+        else if (expControlStatus == 5) //experiment
         {
+            textExperimentPages[currentInstructionPage].SetActive(false);
+            currentInstructionPage += 1;
+            textExperimentPages[currentInstructionPage].SetActive(true);
 
+            //when last page is activated
+            if (currentInstructionPage == textExperimentPages.Length-1) 
+            {
+                buttonNextPage.SetActive(false);
+                startFirstTrial.SetActive(true);
+                textExperimentNextPage.SetActive(false);
+            }
         }
 
     }
