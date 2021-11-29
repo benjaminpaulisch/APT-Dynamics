@@ -435,6 +435,7 @@
     <Compile Include="Assets\Script\Network\UDPClient.cs" />
     <Compile Include="Assets\Script\Network\UDPServer.cs" />
     <Compile Include="Assets\Script\Network\UDPTest.cs" />
+    <Compile Include="Assets\Script\PageSwitcher.cs" />
     <Compile Include="Assets\Script\ParallelPort.cs" />
     <Compile Include="Assets\Script\PersistBehaviour.cs" />
     <Compile Include="Assets\Script\PointingTask.cs" />

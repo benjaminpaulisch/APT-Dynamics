@@ -33,9 +33,11 @@ public class GUIControl : MonoBehaviour {
     public int manualBrakeDuration = 10;            //10 seconds
     public int manualBreakEveryTrials = 20;         //a manual break every 25 trials (except half time)
 
+    /*
     [Header("Learning specific")]
     public int trialsPerTaskLearning = 6;
     public float cueDurationLearning = 1.5f;
+    */
 
     [Header("Training specific")]
     public int trialsPerTaskTraining = 6;
@@ -58,8 +60,10 @@ public class GUIControl : MonoBehaviour {
     private string currentCondition;
     private GameObject currentStimulusObj;
     private string stimulusPositions = "";
-    private int[] CubeSeq = new int[] { 0, 1, 2, 3, 4, 5 };   //using the same array for near and far cause it's easier
-    private int[] CubePositions = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
+    private int[] cubeSeqExperiment = new int[] { 0, 1, 2, 3, 4, 5 };   //using the same array for near and far cause it's easier
+    private int[] cubeSeqTraining = new int[] { 1, 4 };     //using the same array for near and far cause it's easier
+    private int[] cubeSeq;
+    private int[] cubePositions = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
     private int cubeSeqCounter = 0;
     public static int trialSeqCounter;
     public static string currentResponseType = "none";
@@ -157,8 +161,8 @@ public class GUIControl : MonoBehaviour {
     // Game objects
     public static GameObject table, plane, instructionsExperiment, instructionsLearning, instructionsTraining, instructionsBaselineClosed, instructionsBaselineOpen, instructionsBaselineNew, textBox, end, endTextBox, startTrialCanvas, resting, questionnaire, q, ra, la, send, fixationCross, cue, cueText,
         mainMenu, calibrationMenu, configurationMenu, inputParticipantID, inputParticipantAge, inputParticipantGender, inputArmLength, buttonExperiment, startTrialText,
-        buttonLearning, buttonTraining, buttonShoulderPos, textHintShoulderPos, textMissingInputs, tableSetup, buttonMaximumReach, buttonCubePositions, buttonTablePosition, textHintShoulderFirst,
-        textHintCupPos, textHintTablePos, breakCanvasDesktop, vr_hand_R, continueCanvas, continueButton, baselineClosedCanvas, buttonBaselineClosed, buttonBaselineOpen, startFirstTrial, torso, buttonBaselineNew,
+        /*buttonLearning,*/ buttonTraining, buttonShoulderPos, textHintShoulderPos, textMissingInputs, tableSetup, buttonMaximumReach, buttonCubePositions, buttonTablePosition, textHintShoulderFirst,
+        textHintCupPos, textHintTablePos, breakCanvasDesktop, vr_hand_R, continueCanvas, continueButton, baselineClosedCanvas, buttonBaselineClosed, buttonBaselineOpen, startFirstTrial, torso, //buttonBaselineNew,
         buttonNextPage, textLearningPage1, textLearningPage2, textLearningPage3, textLearningPage4, textLearningPage5, textLearningPage6, textLearningNextPage, textTrainingPage1, textTrainingPage2, textTrainingPage3, textTrainingPage4, textTrainingNextPage, textExperimentPage1, textExperimentPage2, textExperimentPage3, textExperimentPage4, textExperimentNextPage;
 
     private GameObject cubeFarLeft30, cubeFarLeft20, cubeFarLeft10, cubeFarRight10, cubeFarRight20, cubeFarRight30, cubeNearLeft30, cubeNearLeft20, cubeNearLeft10, cubeNearRight10, cubeNearRight20, cubeNearRight30;
@@ -221,7 +225,7 @@ public class GUIControl : MonoBehaviour {
         inputParticipantGender = GameObject.Find("DropdownGender");
         inputArmLength = GameObject.Find("InputParticipantArmLength");
         buttonExperiment = GameObject.Find("ButtonExperiment");
-        buttonLearning = GameObject.Find("ButtonLearning");
+        //buttonLearning = GameObject.Find("ButtonLearning");
         buttonTraining = GameObject.Find("ButtonTraining");
         buttonShoulderPos = GameObject.Find("ButtonShoulderPos");
         textHintShoulderPos = GameObject.Find("TextHintShoulderPos");
@@ -239,7 +243,7 @@ public class GUIControl : MonoBehaviour {
         baselineClosedCanvas = GameObject.Find("BaselineClosedCanvas");
         startFirstTrial = GameObject.Find("startFirstTrial");
         torso = GameObject.Find("TorsoObject");
-        buttonBaselineNew = GameObject.Find("ButtonBaselineNew");
+        //buttonBaselineNew = GameObject.Find("ButtonBaselineNew");
 
         //Stimulus
         cubeFarLeft30 = GameObject.Find("CubeFarLeft30");
@@ -289,7 +293,7 @@ public class GUIControl : MonoBehaviour {
 
         //deactivate the "Start Experiment" and "Training" Buttons:
         buttonExperiment.GetComponent<Button>().interactable = false;
-        buttonLearning.GetComponent<Button>().interactable = false;
+        //buttonLearning.GetComponent<Button>().interactable = false;
 
         textHintTablePos.SetActive(false);
         textHintShoulderPos.SetActive(false);
@@ -847,11 +851,11 @@ public class GUIControl : MonoBehaviour {
         if (currentCondition == "near")
         {
             //For the near positions we have to add 6 to the index, cause the near positions are the indexes 6-11 in the cubeGameObjArray
-            currentStimulusObj = cubeGameObjArr[CubePositions[CubeSeq[cubeSeqCounter] + 6]];
+            currentStimulusObj = cubeGameObjArr[cubePositions[cubeSeq[cubeSeqCounter] + 6]];
         }
         else if (currentCondition == "far")
         {
-            currentStimulusObj = cubeGameObjArr[CubePositions[CubeSeq[cubeSeqCounter]]];
+            currentStimulusObj = cubeGameObjArr[cubePositions[cubeSeq[cubeSeqCounter]]];
         }
 
         //write trial start marker
@@ -879,10 +883,10 @@ public class GUIControl : MonoBehaviour {
         cubeSeqCounter = cubeSeqCounter + 1;
 
         // reshuffle stimulus sequence
-        if (cubeSeqCounter == CubeSeq.Length)
+        if (cubeSeqCounter == cubeSeq.Length)
         {
             cubeSeqCounter = 0;
-            RandomizeArray.ShuffleArray(CubeSeq); // re-randomize stimulus sequence 
+            RandomizeArray.ShuffleArray(cubeSeq); // re-randomize stimulus sequence 
         }
         
         taskSuccess = false;
@@ -1539,7 +1543,7 @@ public class GUIControl : MonoBehaviour {
 
     }
 
-
+    /*
     public void StartBaselineNew()
     {
         //This method is used for the "Start Baseline New" button on the main menu. When the button is pressed this method is executed.
@@ -1575,9 +1579,9 @@ public class GUIControl : MonoBehaviour {
         breakCanvasDesktop.SetActive(false);
         startFirstTrial.SetActive(true);
 
-    }
+    }*/
 
-
+    /*
     public void InitBaselineNew()
     {
         //set experiment control vars
@@ -1599,7 +1603,7 @@ public class GUIControl : MonoBehaviour {
         cueDurations = CreateDurationsArray(nrOfTrialsTotal, cueDurationAvg, cueDurationVariation);
 
         // Randomize Cube Appearance Sequence
-        RandomizeArray.ShuffleArray(CubeSeq);
+        RandomizeArray.ShuffleArray(cubeSeq);
 
         // activate/deactivate objects in scene
         table.gameObject.GetComponent<Renderer>().enabled = true;
@@ -1656,9 +1660,9 @@ public class GUIControl : MonoBehaviour {
         marker.Write("Waiting for touch on startFirstTrialButton");
         Debug.Log("Waiting for touch on startFirstTrialButton...");
 
-    }
+    }*/
 
-
+    /*
     public void StartLearning()
     {
         //This method is used for the "Start Learning" button on the main menu. When the button is pressed this method is executed.
@@ -1694,9 +1698,9 @@ public class GUIControl : MonoBehaviour {
         breakCanvasDesktop.SetActive(false);
         startFirstTrial.SetActive(false);
 
-    }
+    }*/
 
-
+    /*
     public void InitLearning()
     {
         //set experiment control vars
@@ -1728,13 +1732,13 @@ public class GUIControl : MonoBehaviour {
             }
         }
 
-        /*
+        /
         //Debug: print out the array:
         Debug.Log("trialTasks:");
         for (int i=0; i< trialTasks.Length; i++)
         {
             Debug.Log(tasks[trialTasks[i]]);
-        }*/
+        } /
         
         //create array with isi durations for all trials
         isiDurations = CreateDurationsArray(nrOfTrialsTotal, isiDurationAvg, isiDurationVariation);
@@ -1749,7 +1753,7 @@ public class GUIControl : MonoBehaviour {
 
 
         // Randomize Cube Appearance Sequence
-        RandomizeArray.ShuffleArray(CubeSeq);
+        RandomizeArray.ShuffleArray(cubeSeq);
 
         // activate/deactivate objects in scene
         table.gameObject.GetComponent<Renderer>().enabled = true;
@@ -1807,7 +1811,7 @@ public class GUIControl : MonoBehaviour {
         //marker.Write("Waiting for touch on startFirstTrialButton");
         //Debug.Log("Waiting for touch on startFirstTrialButton...");
 
-    }
+    }*/
 
 
     public void StartTraining()
@@ -1855,12 +1859,39 @@ public class GUIControl : MonoBehaviour {
         trialSeqCounter = 0;
         trainingRunNo += 1;
         currentInstructionPage = 0;
+        cubeSeq = cubeSeqTraining;
 
         //calculate total number of trials
         nrOfTrialsTotal = trialsPerTaskTraining * tasks.Length;
 
+        /*
         //create array with tasks for all trials
         trialTasks = CreateTrialTaskArray(nrOfTrialsTotal, taskSeq, tasks);
+        */
+        //Create array with tasks for all trials
+        //For training we do not mix tasks between all trials. We do a sequence of trials from each task.
+        //The order of tasks will be randomed.
+        int[] tempSequence = taskSeq;
+        RandomizeArray.ShuffleArray(tempSequence);
+        trialTasks = new int[nrOfTrialsTotal];
+        int tempCounter = 0;
+
+        for (int i = 0; i < tempSequence.Length; i++)    //for every task
+        {
+            for (int j = 0; j < trialsPerTaskTraining; j++)
+            {
+                trialTasks[tempCounter] = tempSequence[i];
+                //Debug.Log(tasks[tempSequence[i]]);
+
+                tempCounter++;
+            }
+        }
+        /*Debug: print out the array:
+        Debug.Log("trialTasks:");
+        for (int i = 0; i < trialTasks.Length; i++)
+        {
+            Debug.Log(tasks[trialTasks[i]]);
+        }*/
 
         //create array with isi durations for all trials
         isiDurations = CreateDurationsArray(nrOfTrialsTotal, isiDurationAvg, isiDurationVariation);
@@ -1869,7 +1900,7 @@ public class GUIControl : MonoBehaviour {
         cueDurations = CreateDurationsArray(nrOfTrialsTotal, cueDurationAvg, cueDurationVariation);
 
         // Randomize Cube Appearance Sequence
-        RandomizeArray.ShuffleArray(CubeSeq);
+        RandomizeArray.ShuffleArray(cubeSeq);
 
         // activate/deactivate objects in scene
         table.gameObject.GetComponent<Renderer>().enabled = true;
@@ -1977,6 +2008,7 @@ public class GUIControl : MonoBehaviour {
         experimentRunNo += 1;
         trialSeqCounter = 0;
         currentInstructionPage = 0;
+        cubeSeq = cubeSeqExperiment;
 
         //calculate total number of trials
         nrOfTrialsTotal = trialsPerTask * tasks.Length;
@@ -1991,7 +2023,7 @@ public class GUIControl : MonoBehaviour {
         cueDurations = CreateDurationsArray(nrOfTrialsTotal, cueDurationAvg, cueDurationVariation);
 
         // Randomize Cube Appearance Sequence
-        RandomizeArray.ShuffleArray(CubeSeq);
+        RandomizeArray.ShuffleArray(cubeSeq);
 
         //activate/deactivate objects
         table.gameObject.GetComponent<Renderer>().enabled = true;
@@ -2337,21 +2369,21 @@ public class GUIControl : MonoBehaviour {
                         if (idSet && ageSet && genderSet && armLengthSet && cupPositionsSet && tablePosSet)
                         {
                             buttonExperiment.GetComponent<Button>().interactable = true;
-                            buttonLearning.GetComponent<Button>().interactable = true;
+                            //buttonLearning.GetComponent<Button>().interactable = true;
                             buttonTraining.GetComponent<Button>().interactable = true;
                             buttonBaselineClosed.GetComponent<Button>().interactable = true;
                             buttonBaselineOpen.GetComponent<Button>().interactable = true;
-                            buttonBaselineNew.GetComponent<Button>().interactable = true;
+                            //buttonBaselineNew.GetComponent<Button>().interactable = true;
                             textMissingInputs.SetActive(false);
                         }
                         else
                         {
                             buttonExperiment.GetComponent<Button>().interactable = false;
-                            buttonLearning.GetComponent<Button>().interactable = false;
+                            //buttonLearning.GetComponent<Button>().interactable = false;
                             buttonTraining.GetComponent<Button>().interactable = false;
                             buttonBaselineClosed.GetComponent<Button>().interactable = false;
                             buttonBaselineOpen.GetComponent<Button>().interactable = false;
-                            buttonBaselineNew.GetComponent<Button>().interactable = false;
+                            //buttonBaselineNew.GetComponent<Button>().interactable = false;
                             textMissingInputs.SetActive(true);
                         }
                         break;
@@ -2396,6 +2428,7 @@ public class GUIControl : MonoBehaviour {
                         }
                         break;
                     }
+                /*
                 case 3: //learning (manual trial start and consecutive trials for each task task)
                     {
                         //check for abort by pressing the escape key
@@ -2414,7 +2447,7 @@ public class GUIControl : MonoBehaviour {
                         else
                             InitLearning(); // run only once after
                         break;
-                    }
+                    }*/
                 case 4: //training (like experiment but shorter)
                     {
                         //check for abort by pressing the escape key
@@ -2572,6 +2605,7 @@ public class GUIControl : MonoBehaviour {
 
                         break;
                     }
+                /*
                 case 9: //baseline new
                     {
                         //check for abort by pressing the escape key
@@ -2591,7 +2625,7 @@ public class GUIControl : MonoBehaviour {
                             InitBaselineNew(); // run only once
                         break;
 
-                    }
+                    }*/
             }//switch
             
         }
