@@ -44,7 +44,7 @@ public class GUIControl : MonoBehaviour {
 
     [Header("Baseline specific")]
     public int baselineDuration = 120;              //2 minutes
-    public int trialsPerTaskBaselineNew = 6;
+    //public int trialsPerTaskBaselineNew = 6;
 
     [Header("Misc")]
     public LSLMarkerStream marker;
@@ -125,11 +125,12 @@ public class GUIControl : MonoBehaviour {
     public bool handIsMoving = true;
     private Vector3 handPosition_old = Vector3.zero;
 
-    // learning specific
+    /* learning specific
     [HideInInspector] // Hides vars from Inspector
     public bool learningStarted = false;
     private int learningRunNo = 0;
     private string endTextLearning = "The learning block has ended.\nPlease contact the experimenter.";
+    */
 
     // training specific
     [HideInInspector] // Hides vars from Inspector
@@ -154,21 +155,21 @@ public class GUIControl : MonoBehaviour {
     private string endTextBaseline = "The baseline has ended.\nPlease contact the experimenter.";
     private int baselineClosedRunNo = 0;
     private int baselineOpenRunNo = 0;
-    private int baselineNewRunNo = 0;
+    //private int baselineNewRunNo = 0;
     private string startBaselineText = "Put your hand on the resting position to start the baseline.";
 
 
     // Game objects
-    public static GameObject table, plane, instructionsExperiment, instructionsLearning, instructionsTraining, instructionsBaselineClosed, instructionsBaselineOpen, instructionsBaselineNew, textBox, end, endTextBox, startTrialCanvas, resting, questionnaire, q, ra, la, send, fixationCross, cue, cueText,
+    public static GameObject table, plane, instructionsExperiment, /*instructionsLearning,*/ instructionsTraining, instructionsBaselineClosed, instructionsBaselineOpen, /*instructionsBaselineNew,*/ textBox, end, endTextBox, startTrialCanvas, resting, questionnaire, q, ra, la, send, fixationCross, cue, cueText,
         mainMenu, calibrationMenu, configurationMenu, inputParticipantID, inputParticipantAge, inputParticipantGender, inputArmLength, buttonExperiment, startTrialText,
         /*buttonLearning,*/ buttonTraining, buttonShoulderPos, textHintShoulderPos, textMissingInputs, tableSetup, buttonMaximumReach, buttonCubePositions, buttonTablePosition, textHintShoulderFirst,
         textHintCupPos, textHintTablePos, breakCanvasDesktop, vr_hand_R, continueCanvas, continueButton, baselineClosedCanvas, buttonBaselineClosed, buttonBaselineOpen, startFirstTrial, torso, //buttonBaselineNew,
-        buttonNextPage, textLearningPage1, textLearningPage2, textLearningPage3, textLearningPage4, textLearningPage5, textLearningPage6, textLearningNextPage, textTrainingPage1, textTrainingPage2, textTrainingPage3, textTrainingPage4, textTrainingNextPage, textExperimentPage1, textExperimentPage2, textExperimentPage3, textExperimentPage4, textExperimentNextPage;
+        buttonNextPage, /*textLearningPage1, textLearningPage2, textLearningPage3, textLearningPage4, textLearningPage5, textLearningPage6, textLearningNextPage,*/ textTrainingPage1, textTrainingPage2, textTrainingPage3, textTrainingPage4, textTrainingPage5, textTrainingPage6, textTrainingNextPage, textExperimentPage1, textExperimentPage2, textExperimentPage3, textExperimentPage4, textExperimentNextPage;
 
     private GameObject cubeFarLeft30, cubeFarLeft20, cubeFarLeft10, cubeFarRight10, cubeFarRight20, cubeFarRight30, cubeNearLeft30, cubeNearLeft20, cubeNearLeft10, cubeNearRight10, cubeNearRight20, cubeNearRight30;
     private GameObject[] cubeGameObjArr = new GameObject[12];
-    private GameObject[] textLearningPages = new GameObject[6];
-    private GameObject[] textTrainingPages = new GameObject[4];
+    //private GameObject[] textLearningPages = new GameObject[6];
+    private GameObject[] textTrainingPages = new GameObject[6];
     private GameObject[] textExperimentPages = new GameObject[4];
 
 
@@ -188,24 +189,26 @@ public class GUIControl : MonoBehaviour {
         textExperimentPage3 = GameObject.Find("TextExperimentPage3");
         textExperimentPage4 = GameObject.Find("TextExperimentPage4");
         textExperimentNextPage = GameObject.Find("TextExperimentNextPage");
-        instructionsLearning = GameObject.Find("InstructionsLearning");
+        /*instructionsLearning = GameObject.Find("InstructionsLearning");
         textLearningPage1 = GameObject.Find("TextLearningPage1");
         textLearningPage2 = GameObject.Find("TextLearningPage2");
         textLearningPage3 = GameObject.Find("TextLearningPage3");
         textLearningPage4 = GameObject.Find("TextLearningPage4");
         textLearningPage5 = GameObject.Find("TextLearningPage5");
         textLearningPage6 = GameObject.Find("TextLearningPage6");
-        textLearningNextPage = GameObject.Find("TextLearningNextPage");
+        textLearningNextPage = GameObject.Find("TextLearningNextPage");*/
         instructionsTraining = GameObject.Find("InstructionsTraining");
         textTrainingPage1 = GameObject.Find("TextTrainingPage1");
         textTrainingPage2 = GameObject.Find("TextTrainingPage2");
         textTrainingPage3 = GameObject.Find("TextTrainingPage3");
         textTrainingPage4 = GameObject.Find("TextTrainingPage4");
+        textTrainingPage5 = GameObject.Find("TextTrainingPage5");
+        textTrainingPage6 = GameObject.Find("TextTrainingPage6");
         textTrainingNextPage = GameObject.Find("TextTrainingNextPage");
 
         instructionsBaselineClosed = GameObject.Find("InstructionsBaselineClosed");
         instructionsBaselineOpen = GameObject.Find("InstructionsBaselineOpen");
-        instructionsBaselineNew = GameObject.Find("InstructionsBaselineNew");
+        //instructionsBaselineNew = GameObject.Find("InstructionsBaselineNew");
         textBox = GameObject.Find("TextBox");
         end = GameObject.Find("End");
         endTextBox = GameObject.Find("EndTextBox");
@@ -272,18 +275,20 @@ public class GUIControl : MonoBehaviour {
         cubeGameObjArr[9] = cubeNearLeft10;
         cubeGameObjArr[10] = cubeNearRight20;
         cubeGameObjArr[11] = cubeNearRight30;
-
+        /*
         textLearningPages[0] = textLearningPage1;
         textLearningPages[1] = textLearningPage2;
         textLearningPages[2] = textLearningPage3;
         textLearningPages[3] = textLearningPage4;
         textLearningPages[4] = textLearningPage5;
         textLearningPages[5] = textLearningPage6;
-
+        */
         textTrainingPages[0] = textTrainingPage1;
         textTrainingPages[1] = textTrainingPage2;
         textTrainingPages[2] = textTrainingPage3;
         textTrainingPages[3] = textTrainingPage4;
+        textTrainingPages[4] = textTrainingPage5;
+        textTrainingPages[5] = textTrainingPage6; 
 
         textExperimentPages[0] = textExperimentPage1;
         textExperimentPages[1] = textExperimentPage2;
@@ -419,21 +424,21 @@ public class GUIControl : MonoBehaviour {
             if (experimentEnd)  
             {
                 //write specific end marker
-                if (learningStarted)
+                /*if (learningStarted)
                 {
                     marker.Write("learning:end");
                     Debug.Log("learning:end");
                 }
-                else if (trainingStarted)
+                else*/ if (trainingStarted)
                 {
                     marker.Write("training:end");
                     Debug.Log("training:end");
                 }
-                else if (baselineRunning)
+                /*else if (baselineRunning)
                 {
                     marker.Write("baselineNew:end");
                     Debug.Log("baselineNew:end");
-                }
+                }*/
                 else
                 {
                     marker.Write("experiment:end");
@@ -803,14 +808,14 @@ public class GUIControl : MonoBehaviour {
         //tableTextBackground.SetActive(true);
 
         //deactivate instructions
-        if (instructionsExperiment.activeSelf || instructionsLearning.activeSelf || instructionsTraining.activeSelf)
+        if (instructionsExperiment.activeSelf || /*instructionsLearning.activeSelf ||*/ instructionsTraining.activeSelf)
         {
             instructionsExperiment.SetActive(false);
-            instructionsLearning.SetActive(false);
+            //instructionsLearning.SetActive(false);
             instructionsTraining.SetActive(false);
             instructionsBaselineClosed.SetActive(false);
             instructionsBaselineOpen.SetActive(false);
-            instructionsBaselineNew.SetActive(false);
+            //instructionsBaselineNew.SetActive(false);
             marker.Write("instructions deactivated");
             Debug.Log("instructions deactivated");
         }
@@ -905,7 +910,7 @@ public class GUIControl : MonoBehaviour {
         else
         {
             //ONLY during experiment and NOT during learning or training: BREAK TIME after 1/4, 1/2, 3/4 of total trials:
-            if (!(trainingStarted || learningStarted))
+            if (!(trainingStarted /*|| learningStarted*/))
             {
                 //check if start BREAK TIME or next trial
                 if (trialSeqCounter == (int)(nrOfTrialsTotal / 2))   //half time break
@@ -1228,11 +1233,11 @@ public class GUIControl : MonoBehaviour {
         calibrationMenu.SetActive(false);
         configurationMenu.SetActive(false);
         instructionsExperiment.SetActive(false);
-        instructionsLearning.SetActive(false);
+        //instructionsLearning.SetActive(false);
         instructionsTraining.SetActive(false);
         instructionsBaselineClosed.SetActive(false);
         instructionsBaselineOpen.SetActive(false);
-        instructionsBaselineNew.SetActive(false);
+        //instructionsBaselineNew.SetActive(false);
         fixationCross.SetActive(false);
         cue.SetActive(false);
         DeactivateAllCubes();
@@ -1241,12 +1246,13 @@ public class GUIControl : MonoBehaviour {
         continueButton.SetActive(false);
         resting.SetActive(false);
         breakCanvasDesktop.SetActive(false);
-
+        startFirstTrial.SetActive(false);
+        /*
         for (int i = 0; i < textLearningPages.Length; i++)
         {
             textLearningPages[i].SetActive(false);
         }
-        textLearningNextPage.SetActive(false);
+        textLearningNextPage.SetActive(false);*/
 
         for (int i = 0; i < textTrainingPages.Length; i++)
         {
@@ -1262,7 +1268,7 @@ public class GUIControl : MonoBehaviour {
 
         //reset control flags:
         flagStart = false;
-        learningStarted = false;
+        //learningStarted = false;
         trainingStarted = false;
 
     }
@@ -1278,11 +1284,11 @@ public class GUIControl : MonoBehaviour {
         calibrationMenu.SetActive(false);
         configurationMenu.SetActive(true);
         instructionsExperiment.SetActive(false);
-        instructionsLearning.SetActive(false);
+        //instructionsLearning.SetActive(false);
         instructionsTraining.SetActive(false);
         instructionsBaselineClosed.SetActive(false);
         instructionsBaselineOpen.SetActive(false);
-        instructionsBaselineNew.SetActive(false);
+        //instructionsBaselineNew.SetActive(false);
         fixationCross.SetActive(false);
         cue.SetActive(false);
         DeactivateAllCubes();
@@ -1383,11 +1389,11 @@ public class GUIControl : MonoBehaviour {
         calibrationMenu.SetActive(true);
         configurationMenu.SetActive(false);
         instructionsExperiment.SetActive(false);
-        instructionsLearning.SetActive(false);
+        //instructionsLearning.SetActive(false);
         instructionsTraining.SetActive(false);
         instructionsBaselineClosed.SetActive(false);
         instructionsBaselineOpen.SetActive(false);
-        instructionsBaselineNew.SetActive(false);
+        //instructionsBaselineNew.SetActive(false);
         fixationCross.SetActive(false);
         cue.SetActive(false);
         DeactivateAllCubes();
@@ -1444,11 +1450,11 @@ public class GUIControl : MonoBehaviour {
 
         //deactivate all visuals
         instructionsExperiment.SetActive(false);
-        instructionsLearning.SetActive(false);
+        //instructionsLearning.SetActive(false);
         instructionsTraining.SetActive(false);
         instructionsBaselineClosed.SetActive(false);
         instructionsBaselineOpen.SetActive(false);
-        instructionsBaselineNew.SetActive(false);
+        //instructionsBaselineNew.SetActive(false);
         startTrialCanvas.SetActive(false);
         resting.SetActive(false);
 
@@ -1518,11 +1524,11 @@ public class GUIControl : MonoBehaviour {
 
         //deactivate all visuals
         instructionsExperiment.SetActive(false);
-        instructionsLearning.SetActive(false);
+        //instructionsLearning.SetActive(false);
         instructionsTraining.SetActive(false);
         instructionsBaselineClosed.SetActive(false);
         instructionsBaselineOpen.SetActive(false);
-        instructionsBaselineNew.SetActive(false);
+        //instructionsBaselineNew.SetActive(false);
         startTrialCanvas.SetActive(false);
         resting.SetActive(false);
         restingDetectionActive = false;
@@ -1828,11 +1834,11 @@ public class GUIControl : MonoBehaviour {
         configurationMenu.SetActive(false);
 
         instructionsExperiment.SetActive(false);
-        instructionsLearning.SetActive(false);
+        //instructionsLearning.SetActive(false);
         instructionsTraining.SetActive(true);
         instructionsBaselineClosed.SetActive(false);
         instructionsBaselineOpen.SetActive(false);
-        instructionsBaselineNew.SetActive(false);
+        //instructionsBaselineNew.SetActive(false);
         buttonNextPage.SetActive(true);
         marker.Write("instructions activated");
         Debug.Log("Instructions activated");
@@ -1976,11 +1982,11 @@ public class GUIControl : MonoBehaviour {
         configurationMenu.SetActive(false);
 
         instructionsExperiment.SetActive(true);
-        instructionsLearning.SetActive(false);
+        //instructionsLearning.SetActive(false);
         instructionsTraining.SetActive(false);
         instructionsBaselineClosed.SetActive(false);
         instructionsBaselineOpen.SetActive(false);
-        instructionsBaselineNew.SetActive(false);
+        //instructionsBaselineNew.SetActive(false);
         marker.Write("instructions activated");
         Debug.Log("Instructions activated");
         buttonNextPage.SetActive(true);
@@ -2310,6 +2316,7 @@ public class GUIControl : MonoBehaviour {
 
     public void NextInstructionPage()
     {
+        /*
         if (expControlStatus == 3)  //learning
         {
             textLearningPages[currentInstructionPage].SetActive(false);
@@ -2324,7 +2331,7 @@ public class GUIControl : MonoBehaviour {
                 textLearningNextPage.SetActive(false);
             }
         }
-        else if (expControlStatus == 4) //training
+        else*/ if (expControlStatus == 4) //training
         {
             textTrainingPages[currentInstructionPage].SetActive(false);
             currentInstructionPage += 1;

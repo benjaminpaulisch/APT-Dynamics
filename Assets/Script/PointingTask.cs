@@ -40,7 +40,7 @@ public class PointingTask : MonoBehaviour {
                     //check if it's a new hit
                     if (!hitActive)
                     {
-                        //in Learning only start correct feedback!
+                        /*in Learning only start correct feedback!
                         if (GUIC.learningStarted)
                         {
                             if (GUIC.currentTask == "point")
@@ -50,7 +50,7 @@ public class PointingTask : MonoBehaviour {
                                 GUIC.StartVisualFeedback(vision.collider.gameObject, "point");
                             }
                         }
-                        else
+                        else*/
                         {
                             hitActive = true;
                             //Debug.Log(vision.collider.name);    //output the name of the object our raycast is hitting

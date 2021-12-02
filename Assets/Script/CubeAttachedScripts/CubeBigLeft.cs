@@ -12,7 +12,7 @@ public class CubeBigLeft : MonoBehaviour {
             //check if it's the collider from the fingertip
             if (other.name == "f_index.03_end")
             {
-                //in Learning only start correct feedback!
+                /*in Learning only start correct feedback!
                 if (GUIC.learningStarted)
                 {
                     if (GUIC.currentTask == "touch")
@@ -21,9 +21,9 @@ public class CubeBigLeft : MonoBehaviour {
                     }
                 }
                 else
-                {
+                {*/
                     GUIC.StartVisualFeedback(gameObject, "touch");
-                }
+                //}
             }
         }
         
