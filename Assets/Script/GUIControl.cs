@@ -82,7 +82,7 @@ public class GUIControl : MonoBehaviour {
     private float reaction_time_temp = 0;
     private float reaction_start_time = 0;
 
-    private string participantID;
+    private string participantNo;
     private int participantAge;
     private string participantGender;
     private float armLength;
@@ -161,7 +161,7 @@ public class GUIControl : MonoBehaviour {
 
     // Game objects
     public static GameObject table, plane, instructionsExperiment, /*instructionsLearning,*/ instructionsTraining, instructionsBaselineClosed, instructionsBaselineOpen, /*instructionsBaselineNew,*/ textBox, end, endTextBox, startTrialCanvas, resting, questionnaire, q, ra, la, send, fixationCross, cue, cueText,
-        mainMenu, calibrationMenu, configurationMenu, inputParticipantID, inputParticipantAge, inputParticipantGender, inputArmLength, buttonExperiment, startTrialText,
+        mainMenu, calibrationMenu, configurationMenu, inputParticipantNo, inputParticipantAge, inputParticipantGender, inputArmLength, buttonExperiment, startTrialText,
         /*buttonLearning,*/ buttonTraining, buttonShoulderPos, textHintShoulderPos, textMissingInputs, tableSetup, buttonMaximumReach, buttonCubePositions, buttonTablePosition, textHintShoulderFirst,
         textHintCupPos, textHintTablePos, breakCanvasDesktop, vr_hand_R, continueCanvas, continueButton, baselineClosedCanvas, buttonBaselineClosed, buttonBaselineOpen, startFirstTrial, torso, //buttonBaselineNew,
         buttonNextPage, /*textLearningPage1, textLearningPage2, textLearningPage3, textLearningPage4, textLearningPage5, textLearningPage6, textLearningNextPage,*/ textTrainingPage1, textTrainingPage2, textTrainingPage3, textTrainingPage4, textTrainingPage5, textTrainingPage6, textTrainingNextPage, textExperimentPage1, textExperimentPage2, textExperimentPage3, textExperimentPage4, textExperimentNextPage;
@@ -223,7 +223,7 @@ public class GUIControl : MonoBehaviour {
         mainMenu = GameObject.Find("MainMenu");
         calibrationMenu = GameObject.Find("CalibrationMenu");
         configurationMenu = GameObject.Find("ConfigurationMenu");
-        inputParticipantID = GameObject.Find("InputParticipantID");
+        inputParticipantNo = GameObject.Find("InputParticipantNo");
         inputParticipantAge = GameObject.Find("InputParticipantAge");
         inputParticipantGender = GameObject.Find("DropdownGender");
         inputArmLength = GameObject.Find("InputParticipantArmLength");
@@ -1306,11 +1306,11 @@ public class GUIControl : MonoBehaviour {
         //this is called when pressing the "Back" button in the configuration menu
 
         //save data from the inputs:
-        //participantID
-        if (inputParticipantID.GetComponent<InputField>().text != "")
+        //participantNo
+        if (inputParticipantNo.GetComponent<InputField>().text != "")
         {
             idSet = true;
-            participantID = inputParticipantID.GetComponent<InputField>().text;
+            participantNo = inputParticipantNo.GetComponent<InputField>().text;
         }
         else
             idSet = false;
@@ -1367,7 +1367,7 @@ public class GUIControl : MonoBehaviour {
         else
             armLengthSet = false;
         /*
-        Debug.Log("participantID: " + participantID + " InputField.text: " + inputParticipantID.GetComponent<InputField>().text);
+        Debug.Log("participantNo: " + participantNo + " InputField.text: " + inputParticipantNo.GetComponent<InputField>().text);
         Debug.Log("participantAge: " + participantAge.ToString() + " InputField.text: " + inputParticipantAge.GetComponent<InputField>().text);
         Debug.Log("participantGender: " + participantGender + " InputField.text: " + inputParticipantGender.GetComponent<Dropdown>().options[inputParticipantGender.GetComponent<Dropdown>().value].text);
         Debug.Log("armLength: " + armLength + " InputField.text: " + inputArmLength.GetComponent<InputField>().text);
@@ -1646,7 +1646,7 @@ public class GUIControl : MonoBehaviour {
 
         //write participant info (from configuration menu)
         tempMarkerText =
-            "participantID:" + participantID + ";" +
+            "participantNo:" + participantNo + ";" +
             "participantAge:" + participantAge.ToString() + ";" +
             "participantGender:" + participantGender + ";" +
             "participantArmLength:" + armLength;
@@ -1797,7 +1797,7 @@ public class GUIControl : MonoBehaviour {
 
         //write participant info (from configuration menu)
         tempMarkerText =
-            "participantID:" + participantID + ";" +
+            "participantNo:" + participantNo + ";" +
             "participantAge:" + participantAge.ToString() + ";" +
             "participantGender:" + participantGender + ";" +
             "participantArmLength:" + armLength;
@@ -1945,7 +1945,7 @@ public class GUIControl : MonoBehaviour {
         
         //write participant info (from configuration menu)
         tempMarkerText =
-            "participantID:" + participantID + ";" +
+            "participantNo:" + participantNo + ";" +
             "participantAge:" + participantAge.ToString() + ";" +
             "participantGender:" + participantGender + ";" +
             "participantArmLength:" + armLength;
@@ -2073,7 +2073,7 @@ public class GUIControl : MonoBehaviour {
 
         //write participant info (from configuration menu)
         tempMarkerText =
-            "participantID:" + participantID + ";" +
+            "participantNo:" + participantNo + ";" +
             "participantAge:" + participantAge.ToString() + ";" +
             "participantGender:" + participantGender + ";" +
             "participantArmLength:" + armLength;
