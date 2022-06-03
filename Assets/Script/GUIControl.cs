@@ -1197,7 +1197,8 @@ public class GUIControl : MonoBehaviour {
             //Debug.Log("currentDistance in m: " + currentDistance.ToString());
 
             //change the height (y-axis) value from rootPosition to the cupObjects height value (so that is corretly positioned at table heigth)
-            Vector3 newRootPosition = new Vector3(rootPosition.x, cupObjects[i].transform.position.y, rootPosition.z);
+            //also we take the x position from the resting object so that the middle of the cubes is aligned with the resting position and independantly from the shoulder position
+            Vector3 newRootPosition = new Vector3(resting.transform.position.x, cupObjects[i].transform.position.y, rootPosition.z);
 
             //move current object
             cupObjects[i].transform.position = CalculatePosition(cupObjects[i], newRootPosition, currentDistance, currentAngle);
@@ -2244,7 +2245,7 @@ public class GUIControl : MonoBehaviour {
     }
 
 
-    public void SetCupPositions()
+    public void SetCubePositions()
     {
         //calculate all cup positions according to the armlength and move them to the new positions:
         //MoveCups(cubeGameObjArr, resting.transform.position, 70, angles, offsetNearPercent, offsetFarPercent);
