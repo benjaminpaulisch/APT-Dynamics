@@ -87,6 +87,9 @@ public class GUIControl : MonoBehaviour {
     private string participantGender;
     private float armLength;
     private float armLengthCalculated;
+    private float currentStimulusDistanceFromShoulder = 0f;
+    private float currentStimulusDistanceFromShoulder2D = 0f;
+    private int currentStimulusAngle = 0;
 
     // experiment logic handler
     private bool idSet = false;
@@ -166,7 +169,7 @@ public class GUIControl : MonoBehaviour {
         textHintCupPos, textHintTablePos, breakCanvasDesktop, vr_hand_R, continueCanvas, continueButton, baselineClosedCanvas, buttonBaselineClosed, buttonBaselineOpen, startFirstTrial, torso, //buttonBaselineNew,
         buttonNextPage, /*textLearningPage1, textLearningPage2, textLearningPage3, textLearningPage4, textLearningPage5, textLearningPage6, textLearningNextPage,*/ textTrainingPage1, textTrainingPage2, textTrainingPage3, textTrainingPage4, textTrainingPage5, textTrainingPage6, textTrainingNextPage, textExperimentPage1, textExperimentPage2, textExperimentPage3, textExperimentPage4, textExperimentNextPage;
 
-    private GameObject cubeFarLeft30, cubeFarLeft20, cubeFarLeft10, cubeFarRight10, cubeFarRight20, cubeFarRight30, cubeNearLeft30, cubeNearLeft20, cubeNearLeft10, cubeNearRight10, cubeNearRight20, cubeNearRight30;
+    private GameObject cubeFarLeft2, cubeFarLeft1, cubeFarLeft0, cubeFarRight0, cubeFarRight1, cubeFarRight2, cubeNearLeft2, cubeNearLeft1, cubeNearLeft0, cubeNearRight0, cubeNearRight1, cubeNearRight2;
     private GameObject[] cubeGameObjArr = new GameObject[12];
     //private GameObject[] textLearningPages = new GameObject[6];
     private GameObject[] textTrainingPages = new GameObject[6];
@@ -249,32 +252,32 @@ public class GUIControl : MonoBehaviour {
         //buttonBaselineNew = GameObject.Find("ButtonBaselineNew");
 
         //Stimulus
-        cubeFarLeft30 = GameObject.Find("CubeFarLeft30");
-        cubeFarLeft20 = GameObject.Find("CubeFarLeft20");
-        cubeFarLeft10 = GameObject.Find("CubeFarLeft10");
-        cubeFarRight10 = GameObject.Find("CubeFarRight10");
-        cubeFarRight20 = GameObject.Find("CubeFarRight20");
-        cubeFarRight30 = GameObject.Find("CubeFarRight30");
-        cubeNearLeft30 = GameObject.Find("CubeNearLeft30");
-        cubeNearLeft20 = GameObject.Find("CubeNearLeft20");
-        cubeNearLeft10 = GameObject.Find("CubeNearLeft10");
-        cubeNearRight10 = GameObject.Find("CubeNearRight10");
-        cubeNearRight20 = GameObject.Find("CubeNearRight20");
-        cubeNearRight30 = GameObject.Find("CubeNearRight30");
+        cubeFarLeft2 = GameObject.Find("CubeFarLeft2");
+        cubeFarLeft1 = GameObject.Find("CubeFarLeft1");
+        cubeFarLeft0 = GameObject.Find("CubeFarLeft0");
+        cubeFarRight0 = GameObject.Find("CubeFarRight0");
+        cubeFarRight1 = GameObject.Find("CubeFarRight1");
+        cubeFarRight2 = GameObject.Find("CubeFarRight2");
+        cubeNearLeft2 = GameObject.Find("CubeNearLeft2");
+        cubeNearLeft1 = GameObject.Find("CubeNearLeft1");
+        cubeNearLeft0 = GameObject.Find("CubeNearLeft0");
+        cubeNearRight0 = GameObject.Find("CubeNearRight0");
+        cubeNearRight1 = GameObject.Find("CubeNearRight1");
+        cubeNearRight2 = GameObject.Find("CubeNearRight2");
 
         // Assign game objects to arrays
-        cubeGameObjArr[0] = cubeFarLeft30;
-        cubeGameObjArr[1] = cubeFarLeft20;
-        cubeGameObjArr[2] = cubeFarLeft10;
-        cubeGameObjArr[3] = cubeFarRight10;
-        cubeGameObjArr[4] = cubeFarRight20;
-        cubeGameObjArr[5] = cubeFarRight30;
-        cubeGameObjArr[6] = cubeNearLeft30;
-        cubeGameObjArr[7] = cubeNearLeft20;
-        cubeGameObjArr[8] = cubeNearRight10;
-        cubeGameObjArr[9] = cubeNearLeft10;
-        cubeGameObjArr[10] = cubeNearRight20;
-        cubeGameObjArr[11] = cubeNearRight30;
+        cubeGameObjArr[0] = cubeFarLeft2;
+        cubeGameObjArr[1] = cubeFarLeft1;
+        cubeGameObjArr[2] = cubeFarLeft0;
+        cubeGameObjArr[3] = cubeFarRight0;
+        cubeGameObjArr[4] = cubeFarRight1;
+        cubeGameObjArr[5] = cubeFarRight2;
+        cubeGameObjArr[6] = cubeNearLeft2;
+        cubeGameObjArr[7] = cubeNearLeft1;
+        cubeGameObjArr[8] = cubeNearRight0;
+        cubeGameObjArr[9] = cubeNearLeft0;
+        cubeGameObjArr[10] = cubeNearRight1;
+        cubeGameObjArr[11] = cubeNearRight2;
         /*
         textLearningPages[0] = textLearningPage1;
         textLearningPages[1] = textLearningPage2;
@@ -863,6 +866,16 @@ public class GUIControl : MonoBehaviour {
             currentStimulusObj = cubeGameObjArr[cubePositions[cubeSeq[cubeSeqCounter]]];
         }
 
+        //calculate stimulus distance from shoulder
+        currentStimulusDistanceFromShoulder = Vector3.Distance(currentStimulusObj.transform.position, shoulderPosition);
+        
+        //calculate stimulus distance from shoulder (ignoring the height difference)
+        currentStimulusDistanceFromShoulder2D = Vector3.Distance(currentStimulusObj.transform.position, new Vector3(shoulderPosition.x, currentStimulusObj.transform.position.y, shoulderPosition.z));
+
+
+        //set current cube angle
+        currentStimulusAngle = stimulusAngles[cubeSeq[cubeSeqCounter]];
+
         //write trial start marker
         tempMarkerText =
             "trialStart:" + trialSeqCounter.ToString() + ";" +
@@ -870,7 +883,11 @@ public class GUIControl : MonoBehaviour {
             "condition:" + currentCondition + ";" +
             "isiDuration:" + currentIsiDuration.ToString() + ";" +
             "cueDuration:" + currentCueDuration.ToString() + ";" +
-            "stimulusPosition:" + currentStimulusObj.gameObject.name;
+            "stimulusObject:" + currentStimulusObj.gameObject.name + ";" +
+            "stimulusPosition:" + currentStimulusObj.transform.position.ToString() + ";" +
+            "stimulusAngle:" + currentStimulusAngle.ToString() + ";" +
+            "stimulusDistanceFromShoulder:" + currentStimulusDistanceFromShoulder.ToString() + ";" +
+            "stimulusDistanceFromShoulder2D:" + currentStimulusDistanceFromShoulder2D.ToString();
         marker.Write(tempMarkerText);
         Debug.Log(tempMarkerText);
 
@@ -1160,27 +1177,27 @@ public class GUIControl : MonoBehaviour {
         for (int i=0; i<cupObjects.Length; i++)
         {
             //determine angle
-            if (cupObjects[i].name.Contains("Left30"))
+            if (cupObjects[i].name.Contains("Left2"))
             {
                 currentAngle = angles[0];
             }
-            else if (cupObjects[i].name.Contains("Left20"))
+            else if (cupObjects[i].name.Contains("Left1"))
             {
                 currentAngle = angles[1];
             }
-            else if (cupObjects[i].name.Contains("Left10"))
+            else if (cupObjects[i].name.Contains("Left0"))
             {
                 currentAngle = angles[2];
             }
-            else if (cupObjects[i].name.Contains("Right10"))
+            else if (cupObjects[i].name.Contains("Right0"))
             {
                 currentAngle = angles[3];
             }
-            else if (cupObjects[i].name.Contains("Right20"))
+            else if (cupObjects[i].name.Contains("Right1"))
             {
                 currentAngle = angles[4];
             }
-            else if (cupObjects[i].name.Contains("Right30"))
+            else if (cupObjects[i].name.Contains("Right2"))
             {
                 currentAngle = angles[5];
             }
