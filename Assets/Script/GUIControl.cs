@@ -163,7 +163,7 @@ public class GUIControl : MonoBehaviour {
 
 
     // Game objects
-    public static GameObject table, plane, instructionsExperiment, /*instructionsLearning,*/ instructionsTraining, instructionsBaselineClosed, instructionsBaselineOpen, /*instructionsBaselineNew,*/ textBox, end, endTextBox, startTrialCanvas, resting, questionnaire, q, ra, la, send, fixationCross, cue, cueText,
+    public static GameObject table, plane, instructionsExperiment, /*instructionsLearning,*/ instructionsTraining, instructionsBaselineClosed, instructionsBaselineOpen, /*instructionsBaselineNew,*/ textBox, end, endTextBox, startTrialCanvas, resting, tableCalibration, questionnaire, q, ra, la, send, fixationCross, cue, cueText,
         mainMenu, calibrationMenu, configurationMenu, inputParticipantNo, inputParticipantAge, inputParticipantGender, inputArmLength, buttonExperiment, startTrialText,
         /*buttonLearning,*/ buttonTraining, buttonShoulderPos, textHintShoulderPos, textMissingInputs, tableSetup, buttonMaximumReach, buttonCubePositions, buttonTablePosition, textHintShoulderFirst,
         textHintCupPos, textHintTablePos, breakCanvasDesktop, vr_hand_R, continueCanvas, continueButton, baselineClosedCanvas, buttonBaselineClosed, buttonBaselineOpen, startFirstTrial, torso, //buttonBaselineNew,
@@ -220,6 +220,7 @@ public class GUIControl : MonoBehaviour {
         continueCanvas = GameObject.Find("continueCanvas");
         continueButton = GameObject.Find("continue");
         resting = GameObject.Find("resting");
+        tableCalibration = GameObject.Find("TableCalibration");
         fixationCross = GameObject.Find("FixationCross");
         cue = GameObject.Find("Cue");
         cueText = GameObject.Find("CueText");
@@ -1263,6 +1264,7 @@ public class GUIControl : MonoBehaviour {
         continueCanvas.SetActive(false);
         continueButton.SetActive(false);
         resting.SetActive(false);
+        tableCalibration.SetActive(false);
         breakCanvasDesktop.SetActive(false);
         startFirstTrial.SetActive(false);
         /*
@@ -1419,6 +1421,7 @@ public class GUIControl : MonoBehaviour {
         continueCanvas.SetActive(false);
         continueButton.SetActive(false);
         resting.SetActive(true);
+        tableCalibration.SetActive(true); 
         end.SetActive(false);
         breakCanvasDesktop.SetActive(false);
 
@@ -2276,11 +2279,11 @@ public class GUIControl : MonoBehaviour {
     public void SetTablePosition()
     {
         //How this should be done: 
-        // - During Calibration but a Vive Tracker on the table at the resting position
+        // - During Calibration put the Vive Tracker for the virtual hand on the table at the calibration position (yellow round spot in the middle of the table front)
         // - Important: If the Tracker is visually rotated in VR, like 90° tilted to the side, this will not work!!!
         // - press the "Set Table Position" button
         //The position of the Tracker is taken and now we try to calculate the offset in height and position between the Tracker on the real table
-        //and the virtual table Then the position of the real table and the virtual table are synchronized.
+        //and the virtual table. Then the position of the real table and the virtual table are synchronized.
 
         //Get Tracker position
         GameObject tracker = GameObject.Find("Controller (right)");
@@ -2305,9 +2308,9 @@ public class GUIControl : MonoBehaviour {
             Debug.Log("tableLocalPosition: " + tableLocalPosition.ToString());
             */
             //calculate offset
-            float offsetX = trackerPosition.x - resting.transform.position.x;       //resting position because the Tracker should be put at the resting position
+            float offsetX = trackerPosition.x - tableCalibration.transform.position.x;       //the Tracker should be put at the calibration position
             float offsetY = trackerPosition.y-trackerHeightOffset - tableSize.y - tablePosition.y;    //table height
-            float offsetZ = trackerPosition.z - resting.transform.position.z;       //resting position because the Tracker should be put at the resting position
+            float offsetZ = trackerPosition.z - tableCalibration.transform.position.z;       //the Tracker should be put at the calibration position
 
             //Debug.Log("offsetX: " + offsetX.ToString() + " offsetY: " + offsetY.ToString() + " offsetZ: " + offsetZ.ToString());
 

@@ -79,10 +79,10 @@
      <Compile Include="Assets\Uniduino\Editor\UniduinoAutorun.cs" />
      <Compile Include="Assets\Uniduino\Editor\UniduinoSetup.cs" />
  <Reference Include="UnityEditor.StandardEvents">
- <HintPath>E:/Eigene Dateien/Benjamin/TU Berlin BPN/Bilal/APT-Dynamics/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
+ <HintPath>D:/Benjamin/APT-Dynamics/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
  </Reference>
  <Reference Include="Unity.PackageManagerUI.Editor">
- <HintPath>E:/Eigene Dateien/Benjamin/TU Berlin BPN/Bilal/APT-Dynamics/Library/ScriptAssemblies/Unity.PackageManagerUI.Editor.dll</HintPath>
+ <HintPath>D:/Benjamin/APT-Dynamics/Library/ScriptAssemblies/Unity.PackageManagerUI.Editor.dll</HintPath>
  </Reference>
  <Reference Include="UnityEngine.AIModule">
  <HintPath>C:/Program Files/Unity/Hub/Editor/2018.1.0f2/Editor/Data/Managed/UnityEngine/UnityEngine.AIModule.dll</HintPath>
@@ -322,7 +322,7 @@
  <HintPath>C:/Program Files/Unity/Hub/Editor/2018.1.0f2/Editor/Data/PlaybackEngines/windowsstandalonesupport/UnityEditor.WindowsStandalone.Extensions.dll</HintPath>
  </Reference>
  <Reference Include="LeapCSharp.NET3.5">
- <HintPath>E:/Eigene Dateien/Benjamin/TU Berlin BPN/Bilal/APT-Dynamics/Assets/Plugins/LeapCSharp.NET3.5.dll</HintPath>
+ <HintPath>D:/Benjamin/APT-Dynamics/Assets/Plugins/LeapCSharp.NET3.5.dll</HintPath>
  </Reference>
  <Reference Include="UnityEditor.Advertisements">
  <HintPath>C:/Users/Benjamin/AppData/Local/Unity/cache/packages/packages.unity.com/com.unity.ads@2.0.7/Editor/UnityEditor.Advertisements.dll</HintPath>
