@@ -335,12 +335,47 @@
      <Compile Include="Assets\Uniduino\Tutorials\Servo\Servo.cs" />
      <Compile Include="Assets\Uniduino\Tutorials\Servo\ServoSlideControl.cs" />
      <Compile Include="Assets\Uniduino\UniduinoTestPanel\UniduinoTestPanel.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\Eye\Sample\DartBoard.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\Eye\Sample\SRanipal_AvatarEyeSample.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\Eye\Sample\SRanipal_AvatarEyeSample_v2.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\Eye\Sample\SRanipal_EyeFocusSample.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\Eye\Sample\SRanipal_EyeFocusSample_v2.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\Eye\Sample\SRanipal_EyeSettingSample.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\Eye\Sample\SRanipal_GazeRaySample.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\Eye\Sample\SRanipal_GazeRaySample_v2.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\Eye\Sample\SRanipal_MirrorCameraSample_Eye.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\Eye\Sample\SRanipal_MirrorCameraSample_Eye_v2.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\Eye\SRanipal_Eye.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\Eye\SRanipal_Eye_API.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\Eye\SRanipal_Eye_Enums.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\Eye\SRanipal_Eye_Framework.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\Eye\SRanipal_Eye_v2.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\Eye\SRanipal_EyeData.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\Eye\SRanipal_EyeDataType_v1.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\Eye\SRanipal_EyeDataType_v2.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\Eye\SRanipal_EyeShapeTableDrawer.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\Eye\SRanipal_EyeShapeTableDrawer_v2.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\Lip\Sample\SRanipal_AvatarLipSample.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\Lip\Sample\SRanipal_AvatarLipSample_v2.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\Lip\Sample\SRanipal_MirrorCameraSample_Lip.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\Lip\SRanipal_Lip.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\Lip\SRanipal_Lip_API.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\Lip\SRanipal_Lip_Framework.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\Lip\SRanipal_Lip_v2.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\Lip\SRanipal_LipData_v1.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\Lip\SRanipal_LipData_v2.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\Lip\SRanipal_LipShapeTableDrawer.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\Lip\SRanipal_LipShapeTableDrawer_v2.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\SRanipal_API.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\SRanipal_Enums.cs" />
+     <Compile Include="Assets\ViveSR\Scripts\SRWorks_Enums.cs" />
      <None Include="Assets\SteamVR\Resources\SteamVR_Fade.shader" />
      <None Include="Assets\LeapMotion\Resources\LeapCG.cginc" />
      <None Include="Assets\LeapMotion\README_BEFORE_UPDATING.txt" />
      <None Include="Assets\SteamVR\Resources\SteamVR_ClearAll.shader" />
      <None Include="Assets\SteamVR\InteractionSystem\Hints\Shaders\ControllerButtonHints.shader" />
      <None Include="Assets\LeapMotion\readme.txt" />
+     <None Include="Assets\ViveSR\Shaders\DartBoardShader.shader" />
      <None Include="Assets\SteamVR\InteractionSystem\Teleport\Shaders\Highlight.shader" />
      <None Include="Assets\LeapMotion\Dependencies.txt" />
      <None Include="Assets\LeapMotion\Resources\ThresholdOverlay.shader" />
@@ -353,12 +388,13 @@
      <None Include="Assets\SteamVR\InteractionSystem\Core\Shaders\Silhouette.shader" />
      <None Include="Assets\SteamVR\Resources\SteamVR_ColorOut.shader" />
      <None Include="Assets\SteamVR\InteractionSystem\Core\Shaders\SeeThru.shader" />
+     <None Include="Assets\ViveSR\Shaders\Unlit-Alpha2Gray.shader" />
      <None Include="Assets\SteamVR\InteractionSystem\Readme_InteractionSystem.txt" />
  <Reference Include="UnityEditor.StandardEvents">
- <HintPath>E:/Eigene Dateien/Benjamin/TU Berlin BPN/Bilal/APT-Dynamics/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
+ <HintPath>D:/Benjamin/APT-Dynamics/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
  </Reference>
  <Reference Include="Unity.PackageManagerUI.Editor">
- <HintPath>E:/Eigene Dateien/Benjamin/TU Berlin BPN/Bilal/APT-Dynamics/Library/ScriptAssemblies/Unity.PackageManagerUI.Editor.dll</HintPath>
+ <HintPath>D:/Benjamin/APT-Dynamics/Library/ScriptAssemblies/Unity.PackageManagerUI.Editor.dll</HintPath>
  </Reference>
  <Reference Include="UnityEngine.AIModule">
  <HintPath>C:/Program Files/Unity/Hub/Editor/2018.1.0f2/Editor/Data/Managed/UnityEngine/UnityEngine.AIModule.dll</HintPath>
@@ -556,7 +592,7 @@
  <HintPath>C:/Program Files/Unity/Hub/Editor/2018.1.0f2/Editor/Data/UnityExtensions/Unity/UnitySpatialTracking/RuntimeEditor/UnityEngine.SpatialTracking.dll</HintPath>
  </Reference>
  <Reference Include="LeapCSharp.NET3.5">
- <HintPath>E:/Eigene Dateien/Benjamin/TU Berlin BPN/Bilal/APT-Dynamics/Assets/Plugins/LeapCSharp.NET3.5.dll</HintPath>
+ <HintPath>D:/Benjamin/APT-Dynamics/Assets/Plugins/LeapCSharp.NET3.5.dll</HintPath>
  </Reference>
  <Reference Include="UnityEngine.Analytics">
  <HintPath>C:/Users/Benjamin/AppData/Local/Unity/cache/packages/packages.unity.com/com.unity.analytics@2.0.16/UnityEngine.Analytics.dll</HintPath>
