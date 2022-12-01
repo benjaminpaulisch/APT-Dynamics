@@ -146,6 +146,11 @@
      <Compile Include="Assets\Script\GUIControl.cs" />
      <Compile Include="Assets\Script\HandStyleControl.cs" />
      <Compile Include="Assets\Script\LoadXMLData.cs" />
+     <Compile Include="Assets\Script\LSL custom\lsl_rb_stream_object.cs" />
+     <Compile Include="Assets\Script\LSL custom\LSLMarkerStream_BeMoBIL.cs" />
+     <Compile Include="Assets\Script\LSL custom\LSLMarkerStream_ExpEvents.cs" />
+     <Compile Include="Assets\Script\LSL custom\LSLMarkerStream_FocusedObjs.cs" />
+     <Compile Include="Assets\Script\LSL custom\LSLSRanipalEyeTrackingDataStream.cs" />
      <Compile Include="Assets\Script\Network\Client.cs" />
      <Compile Include="Assets\Script\Network\Message\BasicColliderMessage.cs" />
      <Compile Include="Assets\Script\Network\Message\Message.cs" />

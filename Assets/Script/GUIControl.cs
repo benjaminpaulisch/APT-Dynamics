@@ -48,6 +48,11 @@ public class GUIControl : MonoBehaviour {
 
     [Header("Misc")]
     public LSLMarkerStream marker;
+    public GameObject EyeTracking;
+    public GameObject ButtonEyeCalibration;
+
+    [Header("Debugging")]    
+    public bool disableSRanipal = false;
 
 
     [HideInInspector] // Hides vars from Inspector
@@ -175,6 +180,15 @@ public class GUIControl : MonoBehaviour {
     private GameObject[] textTrainingPages = new GameObject[6];
     private GameObject[] textExperimentPages = new GameObject[4];
 
+
+    void Awake()
+    {
+        if (disableSRanipal)
+        {
+            EyeTracking.SetActive(false);
+            ButtonEyeCalibration.SetActive(false);
+        }
+    }
 
     // Use this for initialization
     void Start()
@@ -2381,6 +2395,12 @@ public class GUIControl : MonoBehaviour {
             }
         }
 
+    }
+
+
+    public void StartEyeCalibration()
+    {
+        ViveSR.anipal.Eye.SRanipal_Eye.LaunchEyeCalibration();
     }
 
 
