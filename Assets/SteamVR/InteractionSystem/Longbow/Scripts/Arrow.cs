@@ -94,8 +94,20 @@ namespace Valve.VR.InteractionSystem
 			prevHeadPosition = arrowHeadRB.transform.position;
 			prevVelocity = GetComponent<Rigidbody>().velocity;
 
+            SetCollisionMode(CollisionDetectionMode.ContinuousDynamic);
+
 			Destroy( gameObject, 30 );
 		}
+
+        protected void SetCollisionMode(CollisionDetectionMode newMode, bool force = false)
+        {
+            Rigidbody[] rigidBodies = this.GetComponentsInChildren<Rigidbody>();
+            for (int rigidBodyIndex = 0; rigidBodyIndex < rigidBodies.Length; rigidBodyIndex++)
+            {
+                if (rigidBodies[rigidBodyIndex].isKinematic == false || force)
+                    rigidBodies[rigidBodyIndex].collisionDetectionMode = newMode;
+            }
+        }
 
 
 		//-------------------------------------------------
@@ -184,7 +196,7 @@ namespace Valve.VR.InteractionSystem
 		{
 			Vector3 prevForward = prevRotation * Vector3.forward;
 
-			// Only stick in target if the collider is front of the arrow torso
+			// Only stick in target if the collider is front of the arrow head
 			if ( !bSkipRayCast )
 			{
 				RaycastHit[] hitInfo;
@@ -211,7 +223,9 @@ namespace Valve.VR.InteractionSystem
 
 			inFlight = false;
 
-			shaftRB.velocity = Vector3.zero;
+            SetCollisionMode(CollisionDetectionMode.Discrete, true);
+
+            shaftRB.velocity = Vector3.zero;
 			shaftRB.angularVelocity = Vector3.zero;
 			shaftRB.isKinematic = true;
 			shaftRB.useGravity = false;

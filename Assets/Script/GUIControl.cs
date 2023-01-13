@@ -24,6 +24,7 @@ public class GUIControl : MonoBehaviour {
     public bool earlyFeedbackOn = true;
     public bool handMovementThresholdOn = false;
     public float handMovementThreshold = 0.00075f;    //this is a distance value. It's the distance the hand moved between two frames.
+    public string mpsQuestionnairePath = "Assets/Questionnaires/Data/Questions/MPS_Questionaire.json";
 
     [Header("Experiment specific")]
     public int trialsPerTask = 60;
@@ -50,6 +51,9 @@ public class GUIControl : MonoBehaviour {
     public LSLMarkerStream marker;
     public GameObject EyeTracking;
     public GameObject ButtonEyeCalibration;
+    public GameObject vrQuestionnaireToolkit;
+    public GameObject vrQuestionnaireExport;
+    public GameObject vivePointers;
 
     [Header("Debugging")]    
     public bool disableSRanipal = false;
@@ -96,6 +100,11 @@ public class GUIControl : MonoBehaviour {
     private float currentStimulusDistanceFromShoulder2D = 0f;
     private int currentStimulusAngle = 0;
 
+    //questionnaire
+    private VRQuestionnaireToolkit.GenerateQuestionnaire vrQuestionnaire;
+    private string currentQuestionnaireName = "";
+
+
     // experiment logic handler
     private bool idSet = false;
     private bool ageSet = false;
@@ -112,6 +121,8 @@ public class GUIControl : MonoBehaviour {
     [HideInInspector] // Hides vars from Inspector
     public int expControlStatus;
     private float breakDurationCountdown;       //break timer
+    private bool questionnaireStarted = false;
+    private bool questionnaireFinished = false;
 
     // trial logic handler
     private bool experimentStarted = false;
@@ -326,6 +337,12 @@ public class GUIControl : MonoBehaviour {
         buttonNextPage.SetActive(false);
 
         torso.GetComponent<Renderer>().enabled = false;   //make torso invisible
+
+
+        //##### Initialize VRQuestionnaire
+        vrQuestionnaire = vrQuestionnaireToolkit.GetComponentInChildren<VRQuestionnaireToolkit.GenerateQuestionnaire>();
+        //StopQuestionnaire(0);       //stop first questionnaire (as it is automaticalle started)
+
 
         //start the Main Menu:
         StartMainMenu();
@@ -2402,6 +2419,89 @@ public class GUIControl : MonoBehaviour {
     {
         ViveSR.anipal.Eye.SRanipal_Eye.LaunchEyeCalibration();
     }
+
+
+
+    //public void StartQuestionnaire(int number)
+    public void StartQuestionnaire()
+    {
+        /*activates the questionnaire (just makes it visible)
+        vrQuestionnaire.Questionnaires[number].SetActive(true);
+
+        //activate VivePointers
+        vivePointers.SetActive(true);
+        */
+
+        //generate and start new mps questionnaire
+        currentQuestionnaireName = vrQuestionnaire.GenerateNewQuestionnaire(mpsQuestionnairePath);
+        vrQuestionnaire.StartQuestionnaire(currentQuestionnaireName);
+
+        //write marker
+        marker.Write("questionnaire:start;" +
+                    "questionnaireName:" + currentQuestionnaireName);
+        Debug.Log("questionnaire:start;" +
+                    "questionnaireName:" + currentQuestionnaireName);
+
+        //activate VivePointers
+        vivePointers.SetActive(true);
+        //Model.SetActive(true);
+
+        //add listenener for questionnaire finish event:
+        vrQuestionnaireExport.GetComponent<VRQuestionnaireToolkit.ExportToCSV>().QuestionnaireFinishedEvent.AddListener(QuestionnaireFinished);
+
+        //update file name in csv export
+        vrQuestionnaireExport.GetComponent<VRQuestionnaireToolkit.ExportToCSV>().FileName = currentQuestionnaireName;
+
+        questionnaireStarted = true;
+
+    }
+
+    //public void StopQuestionnaire(int number)
+    public void StopQuestionnaire()
+    {
+        /*deactivates the questionnaire (just makes it invisible)
+        vrQuestionnaire.Questionnaires[number].SetActive(false);
+
+        //deactivate VivePointers
+        vivePointers.SetActive(false);
+        */
+
+
+        marker.Write("questionnaire:end");
+        Debug.Log("questionnaire:end");
+
+        //stop MPS questionnaire
+        vrQuestionnaire.StopQuestionnaire(currentQuestionnaireName);
+
+        //deactivate VivePointers
+        vivePointers.SetActive(false);
+        //Model.SetActive(false);
+
+        //remove listenener for questionnaire finish event:
+        vrQuestionnaireExport.GetComponent<VRQuestionnaireToolkit.ExportToCSV>().QuestionnaireFinishedEvent.RemoveListener(QuestionnaireFinished);
+
+
+    }
+
+    /*
+    public void ResetQuestionnaire(int number)
+    {
+        //resets the questionnaire values to default
+        vrQuestionnaire.ResetQuestionnaire(number);
+
+    }*/
+
+    public void QuestionnaireFinished()
+    {
+        questionnaireFinished = true;
+
+        //deactivate VivePointers
+        vivePointers.SetActive(false);
+        //Model.SetActive(false);
+
+    }
+
+
 
 
     // Update is called once per frame
