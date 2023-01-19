@@ -1,4 +1,4 @@
-﻿//========= Copyright 2016-2022, HTC Corporation. All rights reserved. ===========
+﻿//========= Copyright 2016-2019, HTC Corporation. All rights reserved. ===========
 
 using HTC.UnityPlugin.Utility;
 using HTC.UnityPlugin.VRModuleManagement;
@@ -33,7 +33,6 @@ namespace HTC.UnityPlugin.Vive
     /// </summary>
     public enum ControllerButton
     {
-        [InvalidEnumArrayIndex]
         None = -1,
 
         // classic buttons
@@ -44,8 +43,6 @@ namespace HTC.UnityPlugin.Vive
         TriggerTouch = 8, // on:0.25 off:0.20
         Pad = 1,
         PadTouch = 3,
-        Joystick = 47,
-        JoystickTouch = 48,
         Grip = 2,
         GripTouch = 9,
         CapSenseGrip = 10, // on:1.00 off:0.90 // Knuckles, Oculus Touch only
@@ -108,29 +105,10 @@ namespace HTC.UnityPlugin.Vive
         DPadUpperRightTouch = 33,
         DPadLowerRightTouch = 34,
         DPadLowerLeftTouch = 35,
-
-        DPadCenter = 36,
-        DPadCenterTouch = 37,
-
-        // Gestures
-        IndexPinch = 38,
-        MiddlePinch = 39,
-        RingPinch = 40,
-        PinkyPinch = 41,
-        Fist = 42,
-        Five = 43,
-        Ok = 44,
-        ThumbUp = 45,
-        IndexUp = 46,
-
-        [Obsolete]
-        [HideInInspector]
-        JoystickToucn = 48,
     }
 
     public enum ControllerAxis
     {
-        [InvalidEnumArrayIndex]
         None = -1,
         PadX,
         PadY,
@@ -145,12 +123,6 @@ namespace HTC.UnityPlugin.Vive
 
         JoystickX,
         JoystickY,
-
-        // Gestures
-        IndexPinch,
-        MiddlePinch,
-        RingPinch,
-        PinkyPinch,
     }
 
     public enum ScrollType
@@ -166,8 +138,6 @@ namespace HTC.UnityPlugin.Vive
         public readonly bool[] buttonPress = new bool[ViveInput.CONTROLLER_BUTTON_COUNT];
         public readonly float[] axisValue = new float[ViveInput.CONTROLLER_AXIS_COUNT];
     }
-
-    internal class ControllerButtonReslver : EnumToIntResolver<ControllerButton> { public override int Resolve(ControllerButton e) { return (int)e; } }
 
     /// <summary>
     /// Singleton that manage and update controllers input
@@ -241,7 +211,7 @@ namespace HTC.UnityPlugin.Vive
 
         private static bool IsValidAxis(ControllerAxis axis) { return axis >= 0 && (int)axis < CONTROLLER_BUTTON_COUNT; }
 
-        public static ICtrlState GetState(Type roleType, int roleValue)
+        private static ICtrlState GetState(Type roleType, int roleValue)
         {
             Initialize();
             var info = ViveRoleEnum.GetInfo(roleType);
@@ -264,7 +234,7 @@ namespace HTC.UnityPlugin.Vive
             return stateList[roleOffset];
         }
 
-        public static ICtrlState<TRole> GetState<TRole>(TRole role)
+        private static ICtrlState<TRole> GetState<TRole>(TRole role)
         {
             Initialize();
             var info = ViveRoleEnum.GetInfo<TRole>();
@@ -279,9 +249,8 @@ namespace HTC.UnityPlugin.Vive
             var roleOffset = info.RoleToRoleOffset(role);
             if (RGCtrolState<TRole>.s_roleStates[roleOffset] == null)
             {
-                var state = new RGCtrolState<TRole>(role);
-                RGCtrolState<TRole>.s_roleStates[roleOffset] = state;
-                s_roleStateTable[typeof(TRole)][roleOffset] = state;
+                RGCtrolState<TRole>.s_roleStates[roleOffset] = new RGCtrolState<TRole>(role);
+                s_roleStateTable[typeof(TRole)][roleOffset] = RGCtrolState<TRole>.s_roleStates[roleOffset];
             }
 
             RGCtrolState<TRole>.s_roleStates[roleOffset].Update();

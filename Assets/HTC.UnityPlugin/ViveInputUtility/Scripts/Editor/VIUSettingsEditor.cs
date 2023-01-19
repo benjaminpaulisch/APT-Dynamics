@@ -1,4 +1,4 @@
-﻿//========= Copyright 2016-2022, HTC Corporation. All rights reserved. ===========
+﻿//========= Copyright 2016-2019, HTC Corporation. All rights reserved. ===========
 
 using HTC.UnityPlugin.Utility;
 using HTC.UnityPlugin.VRModuleManagement;
@@ -7,15 +7,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
-
 #if UNITY_2018_1_OR_NEWER
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 #endif
-
 using GraphicsDeviceType = UnityEngine.Rendering.GraphicsDeviceType;
 
 
@@ -108,7 +105,6 @@ namespace HTC.UnityPlugin.Vive
             public static readonly VRSDK OpenVR = new VRSDK("OpenVR", true);
             public static readonly VRSDK Daydream = new VRSDK("daydream");
             public static readonly VRSDK MockHMD = new VRSDK("MockHMD");
-            public static readonly VRSDK WindowsMR = new VRSDK("WindowsMR");
 
             public static bool vrEnabled
             {
@@ -123,11 +119,7 @@ namespace HTC.UnityPlugin.Vive
                     if (vrEnabled != value)
                     {
                         s_isDirty = true;
-#if UNITY_2018_1_OR_NEWER
-                        s_vrEnabled = value && (!PackageManagerHelper.IsPackageInList(OPENVR_XR_PACKAGE_NAME) || !PackageManagerHelper.IsPackageInList(OCULUS_XR_PACKAGE_NAME));
-#else
                         s_vrEnabled = value;
-#endif
                     }
                 }
             }
@@ -144,7 +136,6 @@ namespace HTC.UnityPlugin.Vive
                     OpenVR,
                     Daydream,
                     MockHMD,
-                    WindowsMR,
                 };
 
                 s_projectSettingAsset = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/ProjectSettings.asset")[0]);
@@ -267,18 +258,6 @@ namespace HTC.UnityPlugin.Vive
                 }
             }
 
-            public void ShowFoldoutWithLabel(GUIContent content)
-            {
-                GUILayout.BeginHorizontal();
-                ShowFoldoutButton();
-                if (GUILayout.Button(content, EditorStyles.label))
-                {
-                    isExpended = !isExpended;
-                }
-                //EditorGUILayout.LabelField(content);
-                GUILayout.EndHorizontal();
-            }
-
             public bool ShowFoldoutButtonOnToggleEnabled(GUIContent content, bool toggleValue)
             {
                 GUILayout.BeginHorizontal();
@@ -342,11 +321,8 @@ namespace HTC.UnityPlugin.Vive
 #if UNITY_2018_1_OR_NEWER
             private static bool s_wasPreparing;
             private static bool m_wasAdded;
-            private static bool s_wasRemoved;
             private static ListRequest m_listRequest;
             private static AddRequest m_addRequest;
-            private static RemoveRequest m_removeRequest;
-            private static string s_fallbackIdentifier;
 
             public static bool isPreparingList
             {
@@ -361,7 +337,7 @@ namespace HTC.UnityPlugin.Vive
                         case StatusCode.Failure:
                             if (!s_wasPreparing)
                             {
-                                Debug.LogError("Something wrong when adding package to list. error:" + m_listRequest.Error.errorCode + "(" + m_listRequest.Error.message + ")");
+                                Debug.LogError("Something wrong when adding package to list. error:" + m_addRequest.Error.errorCode + "(" + m_addRequest.Error.message + ")");
                             }
                             break;
                         case StatusCode.Success:
@@ -385,26 +361,13 @@ namespace HTC.UnityPlugin.Vive
                         case StatusCode.Failure:
                             if (!m_wasAdded)
                             {
-                                AddRequest request = m_addRequest;
-                                m_addRequest = null;
-                                if (string.IsNullOrEmpty(s_fallbackIdentifier))
-                                {
-                                    Debug.LogError("Something wrong when adding package to list. error:" + request.Error.errorCode + "(" + request.Error.message + ")");
-                                }
-                                else
-                                {
-                                    Debug.Log("Failed to install package: \"" + request.Error.message + "\". Retry with fallback identifier \"" + s_fallbackIdentifier + "\"");
-                                    AddToPackageList(s_fallbackIdentifier);
-                                }
-
-                                s_fallbackIdentifier = null;
+                                Debug.LogError("Something wrong when adding package to list. error:" + m_addRequest.Error.errorCode + "(" + m_addRequest.Error.message + ")");
                             }
                             break;
                         case StatusCode.Success:
                             if (!m_wasAdded)
                             {
                                 m_addRequest = null;
-                                s_fallbackIdentifier = null;
                                 ResetPackageList();
                             }
                             break;
@@ -414,45 +377,10 @@ namespace HTC.UnityPlugin.Vive
                 }
             }
 
-            public static bool isRemovingFromList
-            {
-                get
-                {
-                    if (m_removeRequest == null) { return s_wasRemoved = false; }
-
-                    switch (m_removeRequest.Status)
-                    {
-                        case StatusCode.InProgress:
-                            return s_wasRemoved = true;
-                        case StatusCode.Failure:
-                            if (!s_wasRemoved)
-                            {
-                                var request = m_removeRequest;
-                                m_removeRequest = null;
-                                Debug.LogError("Something wrong when removing package from list. error:" + m_removeRequest.Error.errorCode + "(" + m_removeRequest.Error.message + ")");
-                            }
-                            break;
-                        case StatusCode.Success:
-                            if (!s_wasRemoved)
-                            {
-                                m_removeRequest = null;
-                                ResetPackageList();
-                            }
-                            break;
-                    }
-
-                    return s_wasRemoved = false;
-                }
-            }
-
             public static void PreparePackageList()
             {
                 if (m_listRequest != null) { return; }
-#if UNITY_2019_3_OR_NEWER
-                m_listRequest = Client.List(true, true);
-#else
                 m_listRequest = Client.List(true);
-#endif
             }
 
             public static void ResetPackageList()
@@ -468,41 +396,20 @@ namespace HTC.UnityPlugin.Vive
                 return m_listRequest.Result.Any(pkg => pkg.name == name);
             }
 
-            public static void AddToPackageList(string identifier, string fallbackIdentifier = null)
+            public static void AddToPackageList(string name)
             {
                 Debug.Assert(m_addRequest == null);
-
-                m_addRequest = Client.Add(identifier);
-                s_fallbackIdentifier = fallbackIdentifier;
-            }
-
-            public static void RemovePackage(string identifier)
-            {
-                Debug.Assert(m_removeRequest == null);
-
-                m_removeRequest = Client.Remove(identifier);
-            }
-
-            public static PackageCollection GetPackageList()
-            {
-                if (m_listRequest == null || m_listRequest.Result == null)
-                {
-                    return null;
-                }
-
-                return m_listRequest.Result;
+                m_addRequest = Client.Add(name);
             }
 #else
             public static bool isPreparingList { get { return false; } }
             public static bool isAddingToList { get { return false; } }
             public static void PreparePackageList() { }
             public static void ResetPackageList() { }
-            public static bool IsPackageInList(string name) { return false; }
-            public static void AddToPackageList(string identifier, string fallbackIdentifier = null) { }
-            public static void RemovePackage(string identifier) { }
+            public static bool IsPackageInList(string name) { return true; }
+            public static void AddToPackageList(string name) { }
 #endif
         }
-
         private abstract class VRPlatformSetting
         {
             public bool isStandaloneVR { get { return requirdPlatform == BuildTargetGroup.Standalone; } }
@@ -519,23 +426,20 @@ namespace HTC.UnityPlugin.Vive
         private static VRPlatformSetting[] s_platformSettings;
 
         public const string URL_VIU_GITHUB_RELEASE_PAGE = "https://github.com/ViveSoftware/ViveInputUtility-Unity/releases";
-        public const string OPENXR_PLUGIN_PACKAGE_NAME = "com.unity.xr.openxr";
-        public const string OPENXR_PLUGIN_LOADER_NAME = "Open XR Loader";
-        public const string OPENXR_PLUGIN_LOADER_TYPE = "OpenXRLoader";
-
-        private const string DEFAULT_ASSET_PATH = "Assets/VIUSettings/Resources/VIUSettings.asset";
+        public const string URL_STEAM_VR_PLUGIN = "https://www.assetstore.unity3d.com/en/#!/content/32647";
+        public const string URL_OCULUS_VR_PLUGIN = "https://www.assetstore.unity3d.com/en/#!/content/82022";
+        public const string URL_GOOGLE_VR_PLUGIN = "https://developers.google.com/vr/develop/unity/download";
+        public const string URL_WAVE_VR_PLUGIN = "https://developer.vive.com/resources/knowledgebase/wave-sdk/";
+        public const string URL_WAVE_VR_6DOF_SUMULATOR_USAGE_PAGE = "https://github.com/ViveSoftware/ViveInputUtility-Unity/wiki/Wave-VR-6-DoF-Controller-Simulator";
 
         private static Vector2 s_scrollValue = Vector2.zero;
         private static float s_warningHeight;
         private static GUIStyle s_labelStyle;
         private static bool s_guiChanged;
-        private static bool s_symbolChanged;
         private static string s_defaultAssetPath;
-        private static string s_VIUPackageName = null;
 
         private static Foldouter s_autoBindFoldouter = new Foldouter();
         private static Foldouter s_bindingUIFoldouter = new Foldouter();
-        private static Foldouter s_overrideModelFoldouter = new Foldouter();
 
         static VIUSettingsEditor()
         {
@@ -552,7 +456,6 @@ namespace HTC.UnityPlugin.Vive
         public static ISupportedSDK OculusSDK { get { return VRSDKSettings.Oculus; } }
         public static ISupportedSDK DaydreamSDK { get { return VRSDKSettings.Daydream; } }
         public static ISupportedSDK MockHMDSDK { get { return VRSDKSettings.MockHMD; } }
-        public static ISupportedSDK WindowsMRSDK { get { return VRSDKSettings.WindowsMR; } }
         public static void ApplySDKChanges() { VRSDKSettings.ApplyChanges(); }
 
         public static BuildTargetGroup activeBuildTargetGroup { get { return BuildPipeline.GetBuildTargetGroup(EditorUserBuildSettings.activeBuildTarget); } }
@@ -563,7 +466,10 @@ namespace HTC.UnityPlugin.Vive
             {
                 if (s_defaultAssetPath == null)
                 {
-                    s_defaultAssetPath = DEFAULT_ASSET_PATH;
+                    var ms = MonoScript.FromScriptableObject(VIUSettings.Instance);
+                    var path = AssetDatabase.GetAssetPath(ms);
+                    path = System.IO.Path.GetDirectoryName(path);
+                    s_defaultAssetPath = path.Substring(0, path.Length - "Scripts".Length) + "Resources/" + VIUSettings.DEFAULT_RESOURCE_PATH + ".asset";
                 }
 
                 return s_defaultAssetPath;
@@ -615,29 +521,6 @@ namespace HTC.UnityPlugin.Vive
             }
         }
 
-        public static string VIUPackageName
-        {
-            get
-            {
-                if (s_VIUPackageName == null)
-                {
-                    MonoScript script = MonoScript.FromScriptableObject(VIUSettings.Instance);
-                    string settingsPath = AssetDatabase.GetAssetPath(script);
-                    Match match = Regex.Match(settingsPath, @"^Packages\/([^\/]+)\/");
-                    if (match.Success)
-                    {
-                        s_VIUPackageName = match.Groups[1].Value;
-                    }
-                    else
-                    {
-                        s_VIUPackageName = "";
-                    }
-                }
-
-                return s_VIUPackageName;
-            }
-        }
-
         public static bool GraphicsAPIContainsOnly(BuildTarget buildTarget, params GraphicsDeviceType[] types)
         {
             if (PlayerSettings.GetUseDefaultGraphicsAPIs(buildTarget)) { return false; }
@@ -663,9 +546,7 @@ namespace HTC.UnityPlugin.Vive
             PlayerSettings.SetGraphicsAPIs(buildTarget, types);
         }
 
-#pragma warning disable 0618
         [PreferenceItem("VIU Settings")]
-#pragma warning restore 0618
         private static void OnVIUPreferenceGUI()
         {
 #if UNITY_2017_1_OR_NEWER
@@ -678,12 +559,7 @@ namespace HTC.UnityPlugin.Vive
 #if UNITY_2018_1_OR_NEWER
             if (PackageManagerHelper.isAddingToList)
             {
-                EditorGUILayout.LabelField("Installing packages...");
-                return;
-            }
-            if (PackageManagerHelper.isRemovingFromList)
-            {
-                EditorGUILayout.LabelField("Removing packages...");
+                EditorGUILayout.LabelField("Installing Packages...");
                 return;
             }
             PackageManagerHelper.PreparePackageList();
@@ -702,7 +578,6 @@ namespace HTC.UnityPlugin.Vive
             Foldouter.Initialize();
 
             s_guiChanged = false;
-            s_symbolChanged = false;
 
             s_scrollValue = EditorGUILayout.BeginScrollView(s_scrollValue);
 
@@ -733,19 +608,12 @@ namespace HTC.UnityPlugin.Vive
                 EditorGUI.indentLevel += 2;
 
                 // on Windows, following preferences is stored at HKEY_CURRENT_USER\Software\Unity Technologies\Unity Editor 5.x\
-#if UNITY_2019_1_OR_NEWER
-                if (!EditorPrefs.GetBool("SdkUseEmbedded") && string.IsNullOrEmpty(EditorPrefs.GetString("AndroidSdkRoot")))
-#else
                 if (string.IsNullOrEmpty(EditorPrefs.GetString("AndroidSdkRoot")))
-#endif
                 {
                     EditorGUILayout.HelpBox("AndroidSdkRoot is empty. Setup at Edit -> Preferences... -> External Tools -> Android SDK", MessageType.Warning);
                 }
-#if UNITY_2018_3_OR_NEWER
-                if (!EditorPrefs.GetBool("JdkUseEmbedded") && string.IsNullOrEmpty(EditorPrefs.GetString("JdkPath")))
-#else
+
                 if (string.IsNullOrEmpty(EditorPrefs.GetString("JdkPath")))
-#endif
                 {
                     EditorGUILayout.HelpBox("JdkPath is empty. Setup at Edit -> Preferences... -> External Tools -> Android JDK", MessageType.Warning);
                 }
@@ -830,75 +698,38 @@ namespace HTC.UnityPlugin.Vive
                 if (supportAnyStandaloneVR && VIUSettings.enableBindingInterfaceSwitch) { s_guiChanged |= EditorGUI.EndChangeCheck(); } else { GUI.enabled = true; }
             }
 
-            GUILayout.Space(5);
-
-            EditorGUILayout.LabelField("<b>Other</b>", s_labelStyle);
-            GUILayout.Space(5);
-
-            EditorGUI.BeginChangeCheck();
-            EditorGUI.indentLevel += 1;
-            VRModuleSettings.initializeOnStartup = EditorGUILayout.ToggleLeft(new GUIContent("Initialize on Startup", VRModuleSettings.INITIALIZE_ON_STARTUP_TOOLTIP), VRModuleSettings.initializeOnStartup);
-            EditorGUI.indentLevel -= 1;
-            s_guiChanged |= EditorGUI.EndChangeCheck();
-
-            s_overrideModelFoldouter.ShowFoldoutWithLabel(new GUIContent("Globel Custom Render Model", "Override model object created by RenderModelHook with custom render model"));
-            if (s_overrideModelFoldouter.isExpended)
-            {
-                EditorGUI.BeginChangeCheck();
-                EditorGUI.indentLevel += 1;
-                foreach (var e in EnumArrayBase<VRModuleDeviceModel>.StaticEnums)
-                {
-                    EditorGUILayout.ObjectField(ObjectNames.NicifyVariableName(e.ToString()), VIUSettings.GetOverrideDeviceModel(e), typeof(GameObject), false);
-                }
-                EditorGUI.indentLevel -= 1;
-                s_guiChanged |= EditorGUI.EndChangeCheck();
-            }
-
             //Foldouter.ApplyChanges();
             ApplySDKChanges();
 
-            var viuSettingsAssetPath = AssetDatabase.GetAssetPath(VIUSettings.Instance);
-            var moduleSettingsAssetPath = AssetDatabase.GetAssetPath(VRModuleSettings.Instance);
+            var assetPath = AssetDatabase.GetAssetPath(VIUSettings.Instance);
 
             if (s_guiChanged)
             {
-                if (string.IsNullOrEmpty(viuSettingsAssetPath))
+                if (string.IsNullOrEmpty(assetPath))
                 {
-                    Directory.CreateDirectory(Path.GetDirectoryName(defaultAssetPath));
                     AssetDatabase.CreateAsset(VIUSettings.Instance, defaultAssetPath);
                 }
 
                 EditorUtility.SetDirty(VIUSettings.Instance);
 
-                if (string.IsNullOrEmpty(moduleSettingsAssetPath))
-                {
-                    const string defaultModuleSettingsAssetPath = "Assets/VIUSettings/Resources/VRModuleSettings.asset";
-                    Directory.CreateDirectory(Path.GetDirectoryName(defaultModuleSettingsAssetPath));
-                    AssetDatabase.CreateAsset(VRModuleSettings.Instance, defaultModuleSettingsAssetPath);
-                }
-
-                EditorUtility.SetDirty(VRModuleSettings.Instance);
-
                 VIUVersionCheck.UpdateIgnoredNotifiedSettingsCount(false);
+
+                VRModuleManagerEditor.UpdateScriptingDefineSymbols();
             }
 
-            if (!string.IsNullOrEmpty(viuSettingsAssetPath) || !string.IsNullOrEmpty(moduleSettingsAssetPath))
+            if (!string.IsNullOrEmpty(assetPath))
             {
                 GUILayout.Space(10);
 
                 GUILayout.BeginHorizontal();
                 if (GUILayout.Button("Use Default Settings"))
                 {
-                    AssetDatabase.DeleteAsset(viuSettingsAssetPath);
-                    AssetDatabase.DeleteAsset(moduleSettingsAssetPath);
-                    foreach (var ps in s_platformSettings)
-                    {
-                        if (ps.canSupport && !ps.support)
-                        {
-                            ps.support = true;
-                            s_symbolChanged |= ps.support;
-                        }
-                    }
+                    AssetDatabase.DeleteAsset(assetPath);
+                    supportSimulator = canSupportSimulator;
+                    supportOpenVR = canSupportOpenVR;
+                    supportOculus = canSupportOculus;
+                    supportDaydream = canSupportDaydream;
+                    supportWaveVR = canSupportWaveVR;
 
                     VRSDKSettings.ApplyChanges();
                 }
@@ -909,107 +740,89 @@ namespace HTC.UnityPlugin.Vive
             GUILayout.BeginHorizontal();
             if (GUILayout.Button(new GUIContent("Repair Define Symbols", "Repair symbols that handled by VIU.")))
             {
-                s_symbolChanged = true;
+                VRModuleManagerEditor.UpdateScriptingDefineSymbols();
             }
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
-            if (s_symbolChanged)
-            {
-                VRModuleManagerEditor.UpdateScriptingDefineSymbols();
-            }
+            //if (GUILayout.Button("Create Partial Action Set", GUILayout.ExpandWidth(false)))
+            //{
+            //    var actionFile = new SteamVRExtension.VIUSteamVRActionFile()
+            //    {
+            //        dirPath = VIUProjectSettings.partialActionDirPath,
+            //        fileName = VIUProjectSettings.partialActionFileName,
+            //    };
 
-#if VIU_STEAMVR_2_0_0_OR_NEWER && UNITY_STANDALONE
-            if (false && GUILayout.Button("Create Partial Action Set", GUILayout.ExpandWidth(false)))
-            {
-                var actionFile = new SteamVRExtension.VIUSteamVRActionFile()
-                {
-                    dirPath = VIUProjectSettings.partialActionDirPath,
-                    fileName = VIUProjectSettings.partialActionFileName,
-                };
+            //    actionFile.action_sets.Add(new SteamVRExtension.VIUSteamVRActionFile.ActionSet()
+            //    {
+            //        name = SteamVRModule.ACTION_SET_NAME,
+            //        usage = "leftright",
+            //    });
 
-                actionFile.action_sets.Add(new SteamVRExtension.VIUSteamVRActionFile.ActionSet()
-                {
-                    name = SteamVRModule.ACTION_SET_NAME,
-                    usage = "leftright",
-                });
+            //    actionFile.localization.Add(new SteamVRExtension.VIUSteamVRActionFile.Localization()
+            //    {
+            //        { "language_tag", "en_US" },
+            //    });
 
-                actionFile.localization.Add(new SteamVRExtension.VIUSteamVRActionFile.Localization()
-                {
-                    { "language_tag", "en_US" },
-                });
+            //    SteamVRModule.InitializePaths();
+            //    for (SteamVRModule.pressActions.Reset(); SteamVRModule.pressActions.IsCurrentValid(); SteamVRModule.pressActions.MoveNext())
+            //    {
+            //        if (string.IsNullOrEmpty(SteamVRModule.pressActions.CurrentPath)) { continue; }
+            //        actionFile.actions.Add(new SteamVRExtension.VIUSteamVRActionFile.Action()
+            //        {
+            //            name = SteamVRModule.pressActions.CurrentPath,
+            //            type = SteamVRModule.pressActions.DataType,
+            //            requirement = "optional",
+            //        });
+            //        actionFile.localization[0].Add(SteamVRModule.pressActions.CurrentPath, SteamVRModule.pressActions.CurrentAlias);
+            //    }
+            //    for (SteamVRModule.touchActions.Reset(); SteamVRModule.touchActions.IsCurrentValid(); SteamVRModule.touchActions.MoveNext())
+            //    {
+            //        if (string.IsNullOrEmpty(SteamVRModule.touchActions.CurrentPath)) { continue; }
+            //        actionFile.actions.Add(new SteamVRExtension.VIUSteamVRActionFile.Action()
+            //        {
+            //            name = SteamVRModule.touchActions.CurrentPath,
+            //            type = SteamVRModule.touchActions.DataType,
+            //            requirement = "optional",
+            //        });
+            //        actionFile.localization[0].Add(SteamVRModule.touchActions.CurrentPath, SteamVRModule.touchActions.CurrentAlias);
+            //    }
+            //    for (SteamVRModule.v1Actions.Reset(); SteamVRModule.v1Actions.IsCurrentValid(); SteamVRModule.v1Actions.MoveNext())
+            //    {
+            //        if (string.IsNullOrEmpty(SteamVRModule.v1Actions.CurrentPath)) { continue; }
+            //        actionFile.actions.Add(new SteamVRExtension.VIUSteamVRActionFile.Action()
+            //        {
+            //            name = SteamVRModule.v1Actions.CurrentPath,
+            //            type = SteamVRModule.v1Actions.DataType,
+            //            requirement = "optional",
+            //        });
+            //        actionFile.localization[0].Add(SteamVRModule.v1Actions.CurrentPath, SteamVRModule.v1Actions.CurrentAlias);
+            //    }
+            //    for (SteamVRModule.v2Actions.Reset(); SteamVRModule.v2Actions.IsCurrentValid(); SteamVRModule.v2Actions.MoveNext())
+            //    {
+            //        if (string.IsNullOrEmpty(SteamVRModule.v2Actions.CurrentPath)) { continue; }
+            //        actionFile.actions.Add(new SteamVRExtension.VIUSteamVRActionFile.Action()
+            //        {
+            //            name = SteamVRModule.v2Actions.CurrentPath,
+            //            type = SteamVRModule.v2Actions.DataType,
+            //            requirement = "optional",
+            //        });
+            //        actionFile.localization[0].Add(SteamVRModule.v2Actions.CurrentPath, SteamVRModule.v2Actions.CurrentAlias);
+            //    }
+            //    for (SteamVRModule.vibrateActions.Reset(); SteamVRModule.vibrateActions.IsCurrentValid(); SteamVRModule.vibrateActions.MoveNext())
+            //    {
+            //        if (string.IsNullOrEmpty(SteamVRModule.vibrateActions.CurrentPath)) { continue; }
+            //        actionFile.actions.Add(new SteamVRExtension.VIUSteamVRActionFile.Action()
+            //        {
+            //            name = SteamVRModule.vibrateActions.CurrentPath,
+            //            type = SteamVRModule.vibrateActions.DataType,
+            //            requirement = "optional",
+            //        });
+            //        actionFile.localization[0].Add(SteamVRModule.vibrateActions.CurrentPath, SteamVRModule.vibrateActions.CurrentAlias);
+            //    }
 
-                SteamVRModule.InitializePaths();
-                foreach (var rawBtn in EnumArrayBase<VRModuleRawButton>.StaticEnums)
-                {
-                    var pressPath = SteamVRModule.pressActions.ActionPaths[(int)rawBtn];
-                    if (!string.IsNullOrEmpty(pressPath))
-                    {
-                        actionFile.actions.Add(new SteamVRExtension.VIUSteamVRActionFile.Action()
-                        {
-                            name = pressPath,
-                            type = SteamVRModule.pressActions.DataTypeName,
-                            requirement = "optional",
-                        });
-                        actionFile.localization[0].Add(pressPath, SteamVRModule.pressActions.ActionAlias[(int)rawBtn]);
-                    }
-
-                    var touchPath = SteamVRModule.touchActions.ActionPaths[(int)rawBtn];
-                    if (!string.IsNullOrEmpty(touchPath))
-                    {
-                        actionFile.actions.Add(new SteamVRExtension.VIUSteamVRActionFile.Action()
-                        {
-                            name = touchPath,
-                            type = SteamVRModule.touchActions.DataTypeName,
-                            requirement = "optional",
-                        });
-                        actionFile.localization[0].Add(touchPath, SteamVRModule.touchActions.ActionAlias[(int)rawBtn]);
-                    }
-                }
-                foreach (var rawAxis in EnumArrayBase<VRModuleRawButton>.StaticEnums)
-                {
-                    var v1Path = SteamVRModule.v1Actions.ActionPaths[(int)rawAxis];
-                    if (!string.IsNullOrEmpty(v1Path))
-                    {
-                        actionFile.actions.Add(new SteamVRExtension.VIUSteamVRActionFile.Action()
-                        {
-                            name = v1Path,
-                            type = SteamVRModule.v1Actions.DataTypeName,
-                            requirement = "optional",
-                        });
-                        actionFile.localization[0].Add(v1Path, SteamVRModule.v1Actions.ActionAlias[(int)rawAxis]);
-                    }
-
-                    var v2Path = SteamVRModule.v2Actions.ActionPaths[(int)rawAxis];
-                    if (!string.IsNullOrEmpty(v2Path))
-                    {
-                        actionFile.actions.Add(new SteamVRExtension.VIUSteamVRActionFile.Action()
-                        {
-                            name = v2Path,
-                            type = SteamVRModule.v1Actions.DataTypeName,
-                            requirement = "optional",
-                        });
-                        actionFile.localization[0].Add(v2Path, SteamVRModule.v2Actions.ActionAlias[(int)rawAxis]);
-                    }
-                }
-                foreach (var haptic in EnumArrayBase<SteamVRModule.HapticStruct>.StaticEnums)
-                {
-                    var path = SteamVRModule.vibrateActions.ActionPaths[(int)haptic];
-                    if (!string.IsNullOrEmpty(path))
-                    {
-                        actionFile.actions.Add(new SteamVRExtension.VIUSteamVRActionFile.Action()
-                        {
-                            name = path,
-                            type = SteamVRModule.vibrateActions.DataTypeName,
-                            requirement = "optional",
-                        });
-                        actionFile.localization[0].Add(path, SteamVRModule.vibrateActions.ActionAlias[(int)haptic]);
-                    }
-                }
-
-                actionFile.Save();
-            }
-#endif
+            //    actionFile.Save();
+            //}
 
             EditorGUILayout.EndScrollView();
         }
@@ -1035,11 +848,11 @@ namespace HTC.UnityPlugin.Vive
             }
         }
 
-        private static void ShowAddPackageButton(string displayName, string identifier, string fallbackIdentifier = null)
+        private static void ShowAddPackageButton(string displayName, string pkgName)
         {
-            if (GUILayout.Button(new GUIContent("Add " + displayName + " Package", "Add " + identifier + " to Package Manager"), GUILayout.ExpandWidth(false)))
+            if (GUILayout.Button(new GUIContent("Add " + displayName + " Package", "Add " + pkgName + " to Package Manager"), GUILayout.ExpandWidth(false)))
             {
-                PackageManagerHelper.AddToPackageList(identifier, fallbackIdentifier);
+                PackageManagerHelper.AddToPackageList(pkgName);
             }
         }
 

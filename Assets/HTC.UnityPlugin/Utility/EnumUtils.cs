@@ -1,4 +1,4 @@
-﻿//========= Copyright 2016-2022, HTC Corporation. All rights reserved. ===========
+﻿//========= Copyright 2016-2019, HTC Corporation. All rights reserved. ===========
 
 using System;
 using System.Collections.Generic;
@@ -276,43 +276,16 @@ namespace HTC.UnityPlugin.Utility
             }
         }
 
-        public static void SetFlag(ref uint maskField, bool value, int enumValue, params int[] enumValues)
+        public static uint SetFlag(uint maskField, int enumValue)
         {
-            SetFlag(ref maskField, enumValue, value);
-            if (enumValues != null && enumValues.Length > 0)
-            {
-                foreach (var ev in enumValues) { SetFlag(ref maskField, ev, value); }
-            }
+            if (enumValue < 0 || enumValue >= UINT_MASK_FIELD_LENGTH) { return maskField; }
+            return maskField | (1u << enumValue);
         }
 
-        public static uint SetFlag(uint maskField, int enumValue, params int[] enumValues)
+        public static uint UnsetFlag(uint maskField, int enumValue)
         {
-            if (enumValue >= 0 && enumValue < UINT_MASK_FIELD_LENGTH) { maskField |= (1u << enumValue); }
-
-            if (enumValues != null && enumValues.Length > 0)
-            {
-                foreach (var ev in enumValues)
-                {
-                    if (ev >= 0 && ev < UINT_MASK_FIELD_LENGTH) { maskField |= (1u << ev); }
-                }
-            }
-
-            return maskField;
-        }
-
-        public static uint UnsetFlag(uint maskField, int enumValue, params int[] enumValues)
-        {
-            if (enumValue >= 0 && enumValue < UINT_MASK_FIELD_LENGTH) { maskField &= ~(1u << enumValue); }
-
-            if (enumValues != null && enumValues.Length > 0)
-            {
-                foreach (var ev in enumValues)
-                {
-                    if (ev >= 0 && ev < UINT_MASK_FIELD_LENGTH) { maskField &= ~(1u << ev); }
-                }
-            }
-
-            return maskField;
+            if (enumValue < 0 || enumValue >= UINT_MASK_FIELD_LENGTH) { return maskField; }
+            return maskField & ~(1u << enumValue);
         }
 
         public static bool GetFlag(ulong maskField, int enumValue)
@@ -334,43 +307,16 @@ namespace HTC.UnityPlugin.Utility
             }
         }
 
-        public static void SetFlag(ref ulong maskField, bool value, int enumValue, params int[] enumValues)
+        public static ulong SetFlag(ulong maskField, int enumValue)
         {
-            SetFlag(ref maskField, enumValue, value);
-            if (enumValues != null && enumValues.Length > 0)
-            {
-                foreach (var ev in enumValues) { SetFlag(ref maskField, ev, value); }
-            }
+            if (enumValue < 0 || enumValue >= ULONG_MASK_FIELD_LENGTH) { return maskField; }
+            return maskField | (1ul << enumValue);
         }
 
-        public static ulong SetFlag(ulong maskField, int enumValue, params int[] enumValues)
+        public static ulong UnsetFlag(ulong maskField, int enumValue)
         {
-            if (enumValue >= 0 && enumValue < ULONG_MASK_FIELD_LENGTH) { maskField |= (1ul << enumValue); }
-
-            if (enumValues != null && enumValues.Length > 0)
-            {
-                foreach (var ev in enumValues)
-                {
-                    if (ev >= 0 && ev < ULONG_MASK_FIELD_LENGTH) { maskField |= (1ul << ev); }
-                }
-            }
-
-            return maskField;
-        }
-
-        public static ulong UnsetFlag(ulong maskField, int enumValue, params int[] enumValues)
-        {
-            if (enumValue >= 0 && enumValue < ULONG_MASK_FIELD_LENGTH) { maskField &= ~(1ul << enumValue); }
-
-            if (enumValues != null && enumValues.Length > 0)
-            {
-                foreach (var ev in enumValues)
-                {
-                    if (ev >= 0 && ev < ULONG_MASK_FIELD_LENGTH) { maskField &= ~(1ul << ev); }
-                }
-            }
-
-            return maskField;
+            if (enumValue < 0 || enumValue >= ULONG_MASK_FIELD_LENGTH) { return maskField; }
+            return maskField & ~(1ul << enumValue);
         }
     }
 }

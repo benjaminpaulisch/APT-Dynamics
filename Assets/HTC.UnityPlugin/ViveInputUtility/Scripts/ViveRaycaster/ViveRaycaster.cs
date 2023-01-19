@@ -1,4 +1,4 @@
-﻿//========= Copyright 2016-2022, HTC Corporation. All rights reserved. ===========
+﻿//========= Copyright 2016-2019, HTC Corporation. All rights reserved. ===========
 
 using HTC.UnityPlugin.Pointer3D;
 using HTC.UnityPlugin.Utility;
@@ -42,8 +42,6 @@ namespace HTC.UnityPlugin.Vive
         public ulong additionalButtonMask { get { return m_additionalButtons; } }
         public ScrollType scrollType { get { return m_scrollType; } set { m_scrollType = value; } }
         public Vector2 scrollDeltaScale { get { return m_scrollDeltaScale; } set { m_scrollDeltaScale = value; } }
-
-        public bool IsAdditionalButtonOn(ControllerButton btn) { return EnumUtils.GetFlag(m_additionalButtons, (int)btn); }
 #if UNITY_EDITOR
         protected override void OnValidate()
         {
@@ -54,19 +52,18 @@ namespace HTC.UnityPlugin.Vive
 #endif
         protected void FilterOutAssignedButton()
         {
-            EnumUtils.SetFlag(ref m_additionalButtons, (int)m_mouseButtonLeft, false);
-            EnumUtils.SetFlag(ref m_additionalButtons, (int)m_mouseButtonMiddle, false);
-            EnumUtils.SetFlag(ref m_additionalButtons, (int)m_mouseButtonRight, false);
+            if (EnumUtils.GetFlag(m_additionalButtons, (int)m_mouseButtonLeft)) { EnumUtils.SetFlag(ref m_additionalButtons, (int)m_mouseButtonLeft, false); }
+            if (EnumUtils.GetFlag(m_additionalButtons, (int)m_mouseButtonMiddle)) { EnumUtils.SetFlag(ref m_additionalButtons, (int)m_mouseButtonMiddle, false); }
+            if (EnumUtils.GetFlag(m_additionalButtons, (int)m_mouseButtonRight)) { EnumUtils.SetFlag(ref m_additionalButtons, (int)m_mouseButtonRight, false); }
         }
 
         protected override void Start()
         {
             base.Start();
 
-            // ensure HoverEventData (buttonEventDataList[0]) exist
             buttonEventDataList.Add(new VivePointerEventData(this, EventSystem.current, m_mouseButtonLeft, PointerEventData.InputButton.Left));
-            if (m_mouseButtonRight != ControllerButton.None) { buttonEventDataList.Add(new VivePointerEventData(this, EventSystem.current, m_mouseButtonRight, PointerEventData.InputButton.Right)); }
-            if (m_mouseButtonMiddle != ControllerButton.None) { buttonEventDataList.Add(new VivePointerEventData(this, EventSystem.current, m_mouseButtonMiddle, PointerEventData.InputButton.Middle)); }
+            buttonEventDataList.Add(new VivePointerEventData(this, EventSystem.current, m_mouseButtonRight, PointerEventData.InputButton.Right));
+            buttonEventDataList.Add(new VivePointerEventData(this, EventSystem.current, m_mouseButtonMiddle, PointerEventData.InputButton.Middle));
 
             FilterOutAssignedButton();
 

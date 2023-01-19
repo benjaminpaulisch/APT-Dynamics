@@ -1,4 +1,4 @@
-﻿//========= Copyright 2016-2022, HTC Corporation. All rights reserved. ===========
+﻿//========= Copyright 2016-2019, HTC Corporation. All rights reserved. ===========
 
 using HTC.UnityPlugin.Vive;
 using HTC.UnityPlugin.Utility;
@@ -53,9 +53,7 @@ namespace HTC.UnityPlugin.VRModuleManagement
         public event Action onDeactivated;
         public event UpdateDeviceStateHandler onUpdateDeviceState;
 
-        public override int moduleOrder { get { return (int)DefaultModuleOrder.Simulator; } }
-
-        public override int moduleIndex { get { return (int)VRModuleSelectEnum.Simulator; } }
+        public override int moduleIndex { get { return (int)VRModuleActiveEnum.Simulator; } }
 
         public uint selectedDeviceIndex { get; private set; }
 

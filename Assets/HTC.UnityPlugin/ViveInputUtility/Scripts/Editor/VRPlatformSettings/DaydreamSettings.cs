@@ -1,4 +1,4 @@
-﻿//========= Copyright 2016-2022, HTC Corporation. All rights reserved. ===========
+﻿//========= Copyright 2016-2019, HTC Corporation. All rights reserved. ===========
 
 using HTC.UnityPlugin.VRModuleManagement;
 using UnityEditor;
@@ -24,8 +24,6 @@ namespace HTC.UnityPlugin.Vive
 
     public static partial class VIUSettingsEditor
     {
-        public const string URL_GOOGLE_VR_PLUGIN = "https://developers.google.com/vr/develop/unity/download";
-
         public static bool canSupportDaydream
         {
             get { return DaydreamSettings.instance.canSupport; }
@@ -104,9 +102,7 @@ namespace HTC.UnityPlugin.Vive
                 const string title = "Daydream";
                 if (canSupport)
                 {
-                    var wasSupported = support;
-                    support = m_foldouter.ShowFoldoutButtonOnToggleEnabled(new GUIContent(title, "Google Pixel series, others"), wasSupported);
-                    s_symbolChanged |= wasSupported != support;
+                    support = m_foldouter.ShowFoldoutButtonOnToggleEnabled(new GUIContent(title, "Google Pixel series, others"), support);
                 }
                 else
                 {

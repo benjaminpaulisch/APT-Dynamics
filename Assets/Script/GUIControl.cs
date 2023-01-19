@@ -49,6 +49,7 @@ public class GUIControl : MonoBehaviour {
 
     [Header("Misc")]
     public LSLMarkerStream marker;
+    public GameObject rightHand;
     public GameObject EyeTracking;
     public GameObject ButtonEyeCalibration;
     public GameObject vrQuestionnaireToolkit;
@@ -337,7 +338,6 @@ public class GUIControl : MonoBehaviour {
         buttonNextPage.SetActive(false);
 
         torso.GetComponent<Renderer>().enabled = false;   //make torso invisible
-
 
         //##### Initialize VRQuestionnaire
         vrQuestionnaire = vrQuestionnaireToolkit.GetComponentInChildren<VRQuestionnaireToolkit.GenerateQuestionnaire>();
@@ -2239,11 +2239,13 @@ public class GUIControl : MonoBehaviour {
         //THe shoulder position is later used as the root position for the calutation of the cup positions.
 
         //Get Tracker position
-        GameObject tracker = GameObject.Find("Controller (right)");
+        //GameObject tracker = GameObject.Find("Controller (right)");
+
 
         try
         {
-            shoulderPosition = tracker.transform.position;
+            //shoulderPosition = tracker.transform.position;
+            shoulderPosition = rightHand.transform.position;
             shoulderSet = true;
             trackerFoundShoulderPos = true;
             textHintShoulderPos.SetActive(false);
@@ -2268,11 +2270,12 @@ public class GUIControl : MonoBehaviour {
         //Then we put a Vive Tracker next to the fingertips (so that the middle of the Tracker is at the finger tips) and measure the Tracker position.
 
         //Get Tracker position
-        GameObject tracker = GameObject.Find("Controller (right)");
+        //GameObject tracker = GameObject.Find("Controller (right)");
 
         try
         {
-            maxReachPosition = tracker.transform.position;
+            //maxReachPosition = tracker.transform.position;
+            maxReachPosition = rightHand.transform.position;
             maxReachSet = true;
             //Debug.Log("maxReachPosition: " + maxReachPosition.ToString());
 
@@ -2317,7 +2320,7 @@ public class GUIControl : MonoBehaviour {
         //and the virtual table. Then the position of the real table and the virtual table are synchronized.
 
         //Get Tracker position
-        GameObject tracker = GameObject.Find("Controller (right)");
+        //GameObject tracker = GameObject.Find("Controller (right)");
         Vector3 trackerPosition = new Vector3();
 
         //Get virtual table size in world space
@@ -2331,7 +2334,8 @@ public class GUIControl : MonoBehaviour {
 
         try
         {
-            trackerPosition = tracker.transform.position;
+            //trackerPosition = tracker.transform.position;
+            trackerPosition = rightHand.transform.position;
             /*
             Debug.Log("TrackerPostion: " + trackerPosition.ToString());
             Debug.Log("TableSize: " + tableSize.ToString());

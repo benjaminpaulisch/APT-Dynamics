@@ -1,8 +1,6 @@
-﻿//========= Copyright 2016-2022, HTC Corporation. All rights reserved. ===========
+﻿//========= Copyright 2016-2019, HTC Corporation. All rights reserved. ===========
 
 using HTC.UnityPlugin.Utility;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -15,9 +13,6 @@ namespace HTC.UnityPlugin.ColliderEvent
         Transform transform { get; }
         MonoBehaviour monoBehaviour { get; }
 
-        IIndexedSetReadOnly<Collider> enteredColliders { get; }
-        Collider lastEnteredCollider { get; }
-
         Rigidbody rigid { get; }
     }
 
@@ -29,16 +24,17 @@ namespace HTC.UnityPlugin.ColliderEvent
         private bool isUpdating;
         private bool isDisabled;
 
-        private StayingCollidersCollection stayingColliders = new StayingCollidersCollection();
-        private StayingHandlersCollection hoveredObjects = new StayingHandlersCollection();
-        private StayingHandlersCollection lastHoveredObjects = new StayingHandlersCollection();
+        private IndexedSet<Collider> stayingColliders = new IndexedSet<Collider>();
+        private IndexedSet<GameObject> hoveredObjects = new IndexedSet<GameObject>();
 
         private Rigidbody m_rigid;
         private ColliderHoverEventData hoverEventData;
-        private Predicate<GameObject> cannotHandlDragAnyMorePredicate = null;
 
         protected readonly List<ColliderButtonEventData> buttonEventDataList = new List<ColliderButtonEventData>();
         protected readonly List<ColliderAxisEventData> axisEventDataList = new List<ColliderAxisEventData>();
+
+        private List<GameObject> hoverEnterHandlers = new List<GameObject>();
+        private List<GameObject> hoverExitHandlers = new List<GameObject>();
 
         protected class ButtonHandlers
         {
@@ -72,28 +68,13 @@ namespace HTC.UnityPlugin.ColliderEvent
             get { return m_rigid ?? (m_rigid = GetComponent<Rigidbody>()); }
         }
 
-        public IIndexedSetReadOnly<Collider> enteredColliders
-        {
-            get { return stayingColliders; }
-        }
-
-        public Collider lastEnteredCollider
-        {
-            get { return stayingColliders.LastEnteredCollider; }
-        }
-
         public ColliderHoverEventData HoverEventData
         {
             get { return hoverEventData ?? (hoverEventData = new ColliderHoverEventData(this)); }
             protected set { hoverEventData = value; }
         }
 
-        private Predicate<GameObject> CannotHandlDragAnyMorePredicate
-        {
-            get { return cannotHandlDragAnyMorePredicate ?? (cannotHandlDragAnyMorePredicate = CannotHandlDragAnymore); }
-        }
-
-        private bool CannotHandlDragAnymore(GameObject handler)
+        private bool CannotHandlerDragAnymore(GameObject handler)
         {
             return !ExecuteEvents.CanHandleEvent<IColliderEventDragStartHandler>(handler);
         }
@@ -113,7 +94,7 @@ namespace HTC.UnityPlugin.ColliderEvent
                 var eventData = buttonEventDataList[i];
                 var handlers = GetButtonHandlers(i);
 
-                eventData.draggingHandlers.RemoveAll(CannotHandlDragAnyMorePredicate);
+                eventData.draggingHandlers.RemoveAll(CannotHandlerDragAnymore);
 
                 if (!eventData.isPressed) { continue; }
 
@@ -129,39 +110,51 @@ namespace HTC.UnityPlugin.ColliderEvent
             {
                 CleanUp();
             }
-            else
-            {
-                stayingColliders.ResetStayingFlags();
-            }
+
+            stayingColliders.Clear();
 
             isUpdating = false;
         }
 
         protected virtual void OnTriggerStay(Collider other)
         {
-            stayingColliders.SetColliderStaying(other);
+            stayingColliders.AddUnique(other);
         }
 
         protected virtual void Update()
         {
             isUpdating = true;
 
-            // process enter & exit
-            if (stayingColliders.EnteredCount > 0 || stayingColliders.ExitedCount > 0)
+            // process enter
+            var hoveredObjectsPrev = hoveredObjects;
+            hoveredObjects = IndexedSetPool<GameObject>.Get();
+
+            for (int i = stayingColliders.Count - 1; i >= 0; --i)
             {
-                stayingColliders.ExtractLeavedColliders();
+                var collider = stayingColliders[i];
 
-                lastHoveredObjects.SetStayingObjHierarchy(stayingColliders.LastEnteredCollider);
-                lastHoveredObjects.ExtractExitHandlers();
-                lastHoveredObjects.ResetStayingFlag();
+                if (collider == null) { continue; }
 
-                for (int i = stayingColliders.Count - 1; i >= 0; --i)
+                // travel from collider's gameObject to its root
+                for (var tr = collider.transform; !ReferenceEquals(tr, null); tr = tr.parent)
                 {
-                    hoveredObjects.SetStayingObjHierarchy(stayingColliders[i]);
+                    var go = tr.gameObject;
+
+                    if (!hoveredObjects.AddUnique(go)) { break; } // hit traveled gameObject, break and travel from the next collider
+
+                    if (hoveredObjectsPrev.Remove(go)) { continue; } // gameObject already existed in last frame, no need to execute enter event
+
+                    hoverEnterHandlers.Add(go);
                 }
-                hoveredObjects.ExtractExitHandlers();
-                hoveredObjects.ResetStayingFlag();
             }
+
+            // process leave
+            for (int i = hoveredObjectsPrev.Count - 1; i >= 0; --i)
+            {
+                hoverExitHandlers.Add(hoveredObjectsPrev[i]);
+            }
+
+            IndexedSetPool<GameObject>.Release(hoveredObjectsPrev);
 
             // process button events
             for (int i = 0, imax = buttonEventDataList.Count; i < imax; ++i)
@@ -169,7 +162,7 @@ namespace HTC.UnityPlugin.ColliderEvent
                 var eventData = buttonEventDataList[i];
                 var handlers = GetButtonHandlers(i);
 
-                eventData.draggingHandlers.RemoveAll(CannotHandlDragAnyMorePredicate);
+                eventData.draggingHandlers.RemoveAll(CannotHandlerDragAnymore);
 
                 // process button press
                 if (!eventData.isPressed)
@@ -231,7 +224,7 @@ namespace HTC.UnityPlugin.ColliderEvent
             for (int i = 0, imax = axisEventDataList.Count; i < imax; ++i)
             {
                 var eventData = axisEventDataList[i];
-
+                
                 if ((eventData.v4 = eventData.GetDelta()) == Vector4.zero) { continue; }
 
                 var handlers = GetAxisHandlers(i);
@@ -255,15 +248,10 @@ namespace HTC.UnityPlugin.ColliderEvent
             eventData.pressPosition = transform.position;
             eventData.pressRotation = transform.rotation;
 
-            for (int i = stayingColliders.Count - 1; i >= 0; --i)
-            {
-                if (stayingColliders[i] != null) { eventData.pressedRawObjects.AddUnique(stayingColliders[i].gameObject); }
-            }
-
-            // press down
-            GetEventHandlersFromHoveredColliders<IColliderEventPressDownHandler>(eventData.pressedHandlers, handlers.pressDownHandlers);
             // click start
             GetEventHandlersFromHoveredColliders<IColliderEventClickHandler>(eventData.clickingHandlers);
+            // press down
+            GetEventHandlersFromHoveredColliders<IColliderEventPressDownHandler>(handlers.pressDownHandlers);
             // drag start
             GetEventHandlersFromHoveredColliders<IColliderEventDragStartHandler>(eventData.draggingHandlers, handlers.dragStartHandlers);
         }
@@ -271,38 +259,45 @@ namespace HTC.UnityPlugin.ColliderEvent
         protected void ProcessPressing(ColliderButtonEventData eventData, ButtonHandlers handlers)
         {
             // dragging
-            handlers.dragUpdateHandlers.AddRange(eventData.draggingHandlers);
+            for (int i = eventData.draggingHandlers.Count - 1; i >= 0; --i)
+            {
+                handlers.dragUpdateHandlers.Add(eventData.draggingHandlers[i]);
+            }
         }
 
         protected void ProcessPressUp(ColliderButtonEventData eventData, ButtonHandlers handlers)
         {
-            IndexedSet<GameObject> tmp;
             eventData.isPressed = false;
 
-            tmp = eventData.lastPressedRawObjects;
-            eventData.lastPressedRawObjects = eventData.pressedRawObjects;
-            eventData.pressedRawObjects = tmp;
-
             // press up
-            handlers.pressUpHandlers.AddRange(eventData.pressedHandlers);
-
-            tmp = eventData.lastPressedHandlers;
-            eventData.lastPressedHandlers = eventData.pressedHandlers;
-            eventData.pressedHandlers = tmp;
-
+            GetEventHandlersFromHoveredColliders<IColliderEventPressUpHandler>(handlers.pressUpHandlers);
             // drag end
-            handlers.dragEndHandlers.AddRange(eventData.draggingHandlers);
+            for (int i = eventData.draggingHandlers.Count - 1; i >= 0; --i)
+            {
+                handlers.dragEndHandlers.Add(eventData.draggingHandlers[i]);
+            }
             // drop
-            if (eventData.isDragging)
+            if (eventData.draggingHandlers.Count > 0)
             {
                 GetEventHandlersFromHoveredColliders<IColliderEventDropHandler>(handlers.dropHandlers);
             }
-
             // click end (execute only if pressDown handler and pressUp handler are the same)
-            GetMatchedEventHandlersFromHoveredColliders<IColliderEventClickHandler>(h => eventData.clickingHandlers.Remove(h), handlers.clickHandlers);
 
-            eventData.pressedRawObjects.Clear();
-            eventData.pressedHandlers.Clear();
+            for (int i = stayingColliders.Count - 1; i >= 0; --i)
+            {
+                var collider = stayingColliders[i];
+
+                if (collider == null) { continue; }
+
+                var handler = ExecuteEvents.GetEventHandler<IColliderEventClickHandler>(collider.gameObject);
+
+                if (ReferenceEquals(handler, null)) { continue; }
+
+                if (!eventData.clickingHandlers.Remove(handler)) { continue; }
+
+                handlers.clickHandlers.Add(handler);
+            }
+
             eventData.clickingHandlers.Clear();
             eventData.draggingHandlers.Clear();
         }
@@ -325,7 +320,7 @@ namespace HTC.UnityPlugin.ColliderEvent
                 var eventData = buttonEventDataList[i];
                 var handlers = GetButtonHandlers(i);
 
-                eventData.draggingHandlers.RemoveAll(CannotHandlDragAnyMorePredicate);
+                eventData.draggingHandlers.RemoveAll(CannotHandlerDragAnymore);
 
                 if (eventData.isPressed)
                 {
@@ -336,17 +331,23 @@ namespace HTC.UnityPlugin.ColliderEvent
                 {
                     handlers.pressExitHandlers.Add(eventData.pressEnteredObjects[j]);
                 }
+
+                eventData.clickingHandlers.Clear();
+                eventData.draggingHandlers.Clear();
+                eventData.pressEnteredObjects.Clear();
             }
 
             // exit all
-            hoveredObjects.ExtractExitHandlers();
-            lastHoveredObjects.ExtractExitHandlers();
+            for (int i = hoveredObjects.Count - 1; i >= 0; --i)
+            {
+                hoverExitHandlers.Add(hoveredObjects[i]);
+            }
 
-            ExecuteAllEvents();
+            hoveredObjects.Clear();
 
             stayingColliders.Clear();
-            hoveredObjects.ClearStayingObj();
-            lastHoveredObjects.ClearStayingObj();
+
+            ExecuteAllEvents();
         }
 
         private ButtonHandlers GetButtonHandlers(int i)
@@ -361,12 +362,7 @@ namespace HTC.UnityPlugin.ColliderEvent
             return axisEventHanderList[i] ?? (axisEventHanderList[i] = new AxisHandlers());
         }
 
-        private void GetEventHandlersFromHoveredColliders<T>(IList<GameObject> appendHandler, IList<GameObject> appendHandler2 = null) where T : IEventSystemHandler
-        {
-            GetMatchedEventHandlersFromHoveredColliders<T>(null, appendHandler, appendHandler2);
-        }
-
-        private void GetMatchedEventHandlersFromHoveredColliders<T>(System.Predicate<GameObject> match, IList<GameObject> appendHandler, IList<GameObject> appendHandler2 = null) where T : IEventSystemHandler
+        private void GetEventHandlersFromHoveredColliders<T>(params IList<GameObject>[] appendHandlers) where T : IEventSystemHandler
         {
             for (int i = stayingColliders.Count - 1; i >= 0; --i)
             {
@@ -380,10 +376,10 @@ namespace HTC.UnityPlugin.ColliderEvent
 
                 if (!s_gos.Add(handler.GetInstanceID())) { continue; }
 
-                if (match != null && !match(handler)) { continue; }
-
-                if (appendHandler != null) { appendHandler.Add(handler); }
-                if (appendHandler2 != null) { appendHandler2.Add(handler); }
+                foreach (var handlers in appendHandlers)
+                {
+                    handlers.Add(handler);
+                }
             }
 
             s_gos.Clear();
@@ -391,198 +387,45 @@ namespace HTC.UnityPlugin.ColliderEvent
 
         private void ExecuteAllEvents()
         {
-            ExcuteAndClearHandlersEvents(hoveredObjects.exitHandlers, HoverEventData, ExecuteColliderEvents.HoverExitHandler);
-            ExcuteAndClearHandlersEvents(lastHoveredObjects.exitHandlers, HoverEventData, ExecuteColliderEvents.LastHoverExitHandler);
-            ExcuteAndClearHandlersEvents(lastHoveredObjects.enterHandlers, HoverEventData, ExecuteColliderEvents.LastHoverEnterHandler);
-            ExcuteAndClearHandlersEvents(hoveredObjects.enterHandlers, HoverEventData, ExecuteColliderEvents.HoverEnterHandler);
+            ExcuteHandlersEvents(hoverEnterHandlers, HoverEventData, ExecuteColliderEvents.HoverEnterHandler);
 
             for (int i = buttonEventHandlerList.Count - 1; i >= 0; --i)
             {
                 if (buttonEventHandlerList[i] == null) { continue; }
 
-                ExcuteAndClearHandlersEvents(buttonEventHandlerList[i].pressEnterHandlers, buttonEventDataList[i], ExecuteColliderEvents.PressEnterHandler);
+                ExcuteHandlersEvents(buttonEventHandlerList[i].pressEnterHandlers, buttonEventDataList[i], ExecuteColliderEvents.PressEnterHandler);
 
-                ExcuteAndClearHandlersEvents(buttonEventHandlerList[i].pressDownHandlers, buttonEventDataList[i], ExecuteColliderEvents.PressDownHandler);
-                ExcuteAndClearHandlersEvents(buttonEventHandlerList[i].pressUpHandlers, buttonEventDataList[i], ExecuteColliderEvents.PressUpHandler);
-                ExcuteAndClearHandlersEvents(buttonEventHandlerList[i].dragStartHandlers, buttonEventDataList[i], ExecuteColliderEvents.DragStartHandler);
-                ExcuteAndClearHandlersEvents(buttonEventHandlerList[i].dragFixedUpdateHandlers, buttonEventDataList[i], ExecuteColliderEvents.DragFixedUpdateHandler);
-                ExcuteAndClearHandlersEvents(buttonEventHandlerList[i].dragUpdateHandlers, buttonEventDataList[i], ExecuteColliderEvents.DragUpdateHandler);
-                ExcuteAndClearHandlersEvents(buttonEventHandlerList[i].dragEndHandlers, buttonEventDataList[i], ExecuteColliderEvents.DragEndHandler);
+                ExcuteHandlersEvents(buttonEventHandlerList[i].pressDownHandlers, buttonEventDataList[i], ExecuteColliderEvents.PressDownHandler);
+                ExcuteHandlersEvents(buttonEventHandlerList[i].pressUpHandlers, buttonEventDataList[i], ExecuteColliderEvents.PressUpHandler);
+                ExcuteHandlersEvents(buttonEventHandlerList[i].dragStartHandlers, buttonEventDataList[i], ExecuteColliderEvents.DragStartHandler);
+                ExcuteHandlersEvents(buttonEventHandlerList[i].dragFixedUpdateHandlers, buttonEventDataList[i], ExecuteColliderEvents.DragFixedUpdateHandler);
+                ExcuteHandlersEvents(buttonEventHandlerList[i].dragUpdateHandlers, buttonEventDataList[i], ExecuteColliderEvents.DragUpdateHandler);
+                ExcuteHandlersEvents(buttonEventHandlerList[i].dragEndHandlers, buttonEventDataList[i], ExecuteColliderEvents.DragEndHandler);
 
-                ExcuteAndClearHandlersEvents(buttonEventHandlerList[i].dropHandlers, buttonEventDataList[i], ExecuteColliderEvents.DropHandler);
-                ExcuteAndClearHandlersEvents(buttonEventHandlerList[i].clickHandlers, buttonEventDataList[i], ExecuteColliderEvents.ClickHandler);
+                ExcuteHandlersEvents(buttonEventHandlerList[i].dropHandlers, buttonEventDataList[i], ExecuteColliderEvents.DropHandler);
+                ExcuteHandlersEvents(buttonEventHandlerList[i].clickHandlers, buttonEventDataList[i], ExecuteColliderEvents.ClickHandler);
 
-                ExcuteAndClearHandlersEvents(buttonEventHandlerList[i].pressExitHandlers, buttonEventDataList[i], ExecuteColliderEvents.PressExitHandler);
+                ExcuteHandlersEvents(buttonEventHandlerList[i].pressExitHandlers, buttonEventDataList[i], ExecuteColliderEvents.PressExitHandler);
             }
 
             for (int i = axisEventHanderList.Count - 1; i >= 0; --i)
             {
                 if (axisEventHanderList[i] == null) { continue; }
 
-                ExcuteAndClearHandlersEvents(axisEventHanderList[i].axisChangedHandlers, axisEventDataList[i], ExecuteColliderEvents.AxisChangedHandler);
+                ExcuteHandlersEvents(axisEventHanderList[i].axisChangedHandlers, axisEventDataList[i], ExecuteColliderEvents.AxisChangedHandler);
             }
+
+            ExcuteHandlersEvents(hoverExitHandlers, HoverEventData, ExecuteColliderEvents.HoverExitHandler);
         }
 
-        private void ExcuteAndClearHandlersEvents<T>(List<GameObject> handlers, BaseEventData eventData, ExecuteEvents.EventFunction<T> functor) where T : IEventSystemHandler
+        private void ExcuteHandlersEvents<T>(List<GameObject> handlers, BaseEventData eventData, ExecuteEvents.EventFunction<T> functor) where T : IEventSystemHandler
         {
-            if (handlers.Count == 0) { return; }
-
             for (int i = handlers.Count - 1; i >= 0; --i)
             {
                 ExecuteEvents.Execute(handlers[i], eventData, functor);
             }
 
             handlers.Clear();
-        }
-
-        private static void SwapRef<T>(ref T a, ref T b)
-        {
-            var tmp = a;
-            a = b;
-            b = tmp;
-        }
-
-        private class StayingCollidersCollection : IIndexedSetReadOnly<Collider>
-        {
-            private int addCount;
-            private int stayCount;
-            private IndexedTable<Collider, bool> colliderFlags = new IndexedTable<Collider, bool>();
-            private Predicate<KeyValuePair<Collider, bool>> isLeavedPredicate;
-
-            public Collider this[int index] { get { return colliderFlags.GetKeyByIndex(index); } }
-
-            public int Count { get { return colliderFlags.Count; } }
-
-            public int EnteredCount { get { return addCount; } }
-
-            public int ExitedCount { get { return colliderFlags.Count - stayCount; } }
-
-            public Collider LastEnteredCollider { get { return colliderFlags.Count > 0 ? colliderFlags.GetKeyByIndex(colliderFlags.Count - 1) : null; } }
-
-            public bool Contains(Collider item) { return colliderFlags.ContainsKey(item); }
-
-            public void CopyTo(Collider[] array, int arrayIndex) { colliderFlags.Keys.CopyTo(array, arrayIndex); }
-
-            public IEnumerator<Collider> GetEnumerator() { return colliderFlags.Keys.GetEnumerator(); }
-
-            IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
-
-            public int IndexOf(Collider item) { return colliderFlags.IndexOf(item); }
-
-            public void SetColliderStaying(Collider collider)
-            {
-                var index = colliderFlags.IndexOf(collider);
-                if (index < 0)
-                {
-                    ++addCount;
-                    ++stayCount;
-                    colliderFlags.Add(collider, true);
-                }
-                else if (!colliderFlags.GetValueByIndex(index))
-                {
-                    ++stayCount;
-                    colliderFlags.SetValueByIndex(index, true);
-                }
-            }
-
-            public int ExtractLeavedColliders()
-            {
-                if (stayCount < colliderFlags.Count)
-                {
-                    if (isLeavedPredicate == null) { isLeavedPredicate = IsColliderLeaved; }
-                    var removedCount = colliderFlags.RemoveAll(isLeavedPredicate);
-                    stayCount = colliderFlags.Count;
-                    addCount = 0;
-                    return removedCount;
-                }
-                return 0;
-            }
-
-            public void ResetStayingFlags()
-            {
-                for (int i = colliderFlags.Count - 1; i >= 0; --i)
-                {
-                    colliderFlags.SetValueByIndex(i, false);
-                }
-                stayCount = 0;
-                addCount = 0;
-            }
-
-            public void Clear()
-            {
-                colliderFlags.Clear();
-                stayCount = 0;
-                addCount = 0;
-            }
-
-            private bool IsColliderLeaved(KeyValuePair<Collider, bool> pair) { return !pair.Value; }
-        }
-
-        private class StayingHandlersCollection
-        {
-            public List<GameObject> enterHandlers = new List<GameObject>();
-            public List<GameObject> exitHandlers = new List<GameObject>();
-
-            private IndexedTable<GameObject, bool> stayingObjs = new IndexedTable<GameObject, bool>();
-            private Predicate<KeyValuePair<GameObject, bool>> isUnsetAndFindExitObjPredicate;
-
-            public int Count { get { return stayingObjs.Count; } }
-
-            public GameObject this[int i] { get { return stayingObjs.GetKeyByIndex(i); } }
-
-            public void SetStayingObjHierarchy(Collider collider) { if (collider != null) { SetStayingObjHierarchy(collider.gameObject); } }
-
-            public void SetStayingObjHierarchy(GameObject obj)
-            {
-                if (obj == null) { return; }
-
-                for (var tr = obj.transform; tr != null; tr = tr.parent)
-                {
-                    var trObj = tr.gameObject;
-
-                    var trObjIndex = stayingObjs.IndexOf(trObj);
-
-                    if (trObjIndex < 0)
-                    {
-                        enterHandlers.Add(trObj);
-                        stayingObjs.Add(trObj, true);
-                    }
-                    else if (!stayingObjs.GetValueByIndex(trObjIndex))
-                    {
-                        stayingObjs.SetValueByIndex(trObjIndex, true);
-                    }
-                    else
-                    {
-                        // skip if root obj is already recorded
-                        return;
-                    }
-                }
-            }
-
-            public void ExtractExitHandlers()
-            {
-                if (isUnsetAndFindExitObjPredicate == null) { isUnsetAndFindExitObjPredicate = IsUnsetAndMarkExitObj; }
-                stayingObjs.RemoveAll(isUnsetAndFindExitObjPredicate);
-            }
-
-            public void ResetStayingFlag()
-            {
-                for (int i = stayingObjs.Count - 1; i >= 0; --i) { stayingObjs.SetValueByIndex(i, false); }
-            }
-
-            private bool IsUnsetAndMarkExitObj(KeyValuePair<GameObject, bool> pair)
-            {
-                if (pair.Key == null) { return true; }
-                if (pair.Value) { return false; }
-
-                exitHandlers.Add(pair.Key);
-                return true;
-            }
-
-            public void ClearStayingObj()
-            {
-                stayingObjs.Clear();
-            }
         }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using HTC.UnityPlugin.ColliderEvent;
+using HTC.UnityPlugin.Utility;
+using HTC.UnityPlugin.Vive;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -20,13 +22,37 @@ public class ShowMenuOnClick : MonoBehaviour
 
     private HashSet<ColliderButtonEventData> pressingEvents = new HashSet<ColliderButtonEventData>();
 
-    public ColliderButtonEventData.InputButton activeButton { get { return m_activeButton; } set { m_activeButton = value; } }
+    public ColliderButtonEventData.InputButton activeButton
+    {
+        get
+        {
+            return m_activeButton;
+        }
+        set
+        {
+            m_activeButton = value;
+            // set all child MaterialChanger heighlightButton to value;
+            var changers = ListPool<MaterialChanger>.Get();
+            GetComponentsInChildren(changers);
+            for (int i = changers.Count - 1; i >= 0; --i) { changers[i].heighlightButton = value; }
+            ListPool<MaterialChanger>.Release(changers);
+        }
+    }
 
     private void Start()
     {
         buttonOriginPosition = buttonObject.position;
         SetMenuVisible(menuVisible);
     }
+
+#if UNITY_EDITOR
+
+    protected virtual void OnValidate()
+    {
+        activeButton = m_activeButton;
+    }
+
+#endif
 
     public void SetMenuVisible(bool value)
     {

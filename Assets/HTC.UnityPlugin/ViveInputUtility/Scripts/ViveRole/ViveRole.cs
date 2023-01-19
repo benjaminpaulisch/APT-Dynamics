@@ -1,4 +1,4 @@
-﻿//========= Copyright 2016-2022, HTC Corporation. All rights reserved. ===========
+﻿//========= Copyright 2016-2019, HTC Corporation. All rights reserved. ===========
 
 using HTC.UnityPlugin.VRModuleManagement;
 using System;
@@ -20,10 +20,7 @@ namespace HTC.UnityPlugin.Vive
         public readonly static DeviceRoleHandler DefaultDeviceRoleHandler = new DeviceRoleHandler();
         public readonly static HandRoleHandler DefaultHandRoleHandler = new HandRoleHandler();
         public readonly static TrackerRoleHandler DefaultTrackerRoleHandler = new TrackerRoleHandler();
-        public readonly static TrackedHandRoleHandler DefaultTrackedHandRoleHandler = new TrackedHandRoleHandler();
         public readonly static BodyRoleHandler DefaultBodyRoleHandler = new BodyRoleHandler();
-        public readonly static ControllerRoleHandler DefaultControllerRoleHandler = new ControllerRoleHandler();
-        public readonly static PrimaryHandRoleHandler DefaultPrimaryHandRoleHandler = new PrimaryHandRoleHandler();
 
         private static bool s_initialized = false;
 
@@ -60,10 +57,7 @@ namespace HTC.UnityPlugin.Vive
             AssignMapHandler(DefaultDeviceRoleHandler);
             AssignMapHandler(DefaultHandRoleHandler);
             AssignMapHandler(DefaultTrackerRoleHandler);
-            AssignMapHandler(DefaultTrackedHandRoleHandler);
             AssignMapHandler(DefaultBodyRoleHandler);
-            AssignMapHandler(DefaultControllerRoleHandler);
-            AssignMapHandler(DefaultPrimaryHandRoleHandler);
         }
 
         private static void OnDeviceConnected(uint deviceIndex, bool connected)

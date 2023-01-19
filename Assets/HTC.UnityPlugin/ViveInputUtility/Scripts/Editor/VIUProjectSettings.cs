@@ -1,4 +1,4 @@
-﻿//========= Copyright 2016-2022, HTC Corporation. All rights reserved. ===========
+﻿//========= Copyright 2016-2019, HTC Corporation. All rights reserved. ===========
 
 using System.Collections.Generic;
 using System.IO;
@@ -9,42 +9,12 @@ namespace HTC.UnityPlugin.Vive
 {
     public class VIUProjectSettings : ScriptableObject, ISerializationCallbackReceiver
     {
-        private const string DEFAULT_ASSET_PATH = "Assets/VIUSettings/Editor/Resources/VIUProjectSettings.asset";
-        private const string DEFAULT_RESOURCES_PATH = "VIUProjectSettings";
-
         private static VIUProjectSettings s_instance = null;
         private static string s_defaultAssetPath;
         private static string s_partialActionDirPath;
 
-        [SerializeField] private bool m_isInstallingWaveXRPlugin;
-        [SerializeField] private bool m_isInstallingOpenVRXRPlugin;
-        [SerializeField] private List<string> m_ignoreKeys;
-
-        public bool isInstallingWaveXRPlugin
-        {
-            get
-            {
-                return m_isInstallingWaveXRPlugin;
-            }
-            set
-            {
-                m_isInstallingWaveXRPlugin = value;
-                Save();
-            }
-        }
-
-        public bool isInstallingOpenVRXRPlugin
-        {
-            get
-            {
-                return m_isInstallingOpenVRXRPlugin;
-            }
-            set
-            {
-                m_isInstallingOpenVRXRPlugin = value;
-                Save();
-            }
-        }
+        [SerializeField]
+        private List<string> m_ignoreKeys;
 
         private HashSet<string> m_ignoreKeySet;
         private bool m_isDirty;
@@ -68,7 +38,9 @@ namespace HTC.UnityPlugin.Vive
             {
                 if (s_defaultAssetPath == null)
                 {
-                    s_defaultAssetPath = DEFAULT_ASSET_PATH;
+                    var ms = MonoScript.FromScriptableObject(CreateInstance<VIUProjectSettings>());
+                    var msPath = AssetDatabase.GetAssetPath(ms);
+                    s_defaultAssetPath = System.IO.Path.ChangeExtension(msPath, "asset");
                 }
 
                 return s_defaultAssetPath;
@@ -81,25 +53,16 @@ namespace HTC.UnityPlugin.Vive
             {
                 if (string.IsNullOrEmpty(s_partialActionDirPath))
                 {
-                    MonoScript script = MonoScript.FromScriptableObject(Instance);
-                    string path = AssetDatabase.GetAssetPath(script);
-                    s_partialActionDirPath = Path.GetFullPath(Path.GetDirectoryName(path) + "/../Misc/SteamVRExtension/PartialInputBindings");
+                    s_partialActionDirPath = Path.GetFullPath(Path.GetDirectoryName(defaultAssetPath) + "/../Misc/SteamVRExtension/PartialInputBindings");
                 }
 
                 return s_partialActionDirPath;
             }
         }
 
-        public static string partialActionFileName
-        {
-            get { return "actions.json"; }
-        }
+        public static string partialActionFileName { get { return "actions.json"; } }
 
-        public static bool hasChanged
-        {
-            get { return Instance.m_isDirty; }
-            set { Instance.m_isDirty = value; }
-        }
+        public static bool hasChanged { get { return Instance.m_isDirty; } }
 
         public void OnBeforeSerialize()
         {
@@ -147,10 +110,10 @@ namespace HTC.UnityPlugin.Vive
         {
             if (path == null)
             {
-                path = DEFAULT_RESOURCES_PATH;
+                path = defaultAssetPath;
             }
 
-            if ((s_instance = Resources.Load<VIUProjectSettings>(DEFAULT_RESOURCES_PATH)) == null)
+            if ((s_instance = AssetDatabase.LoadAssetAtPath<VIUProjectSettings>(path)) == null)
             {
                 s_instance = CreateInstance<VIUProjectSettings>();
             }
@@ -160,17 +123,20 @@ namespace HTC.UnityPlugin.Vive
         {
             if (path == null)
             {
-                path = AssetDatabase.GetAssetPath(Instance);
+                path = defaultAssetPath;
             }
 
-            if (!string.IsNullOrEmpty(path))
+            if (s_instance == null)
+            {
+                Load(path);
+            }
+
+            if (!string.IsNullOrEmpty(AssetDatabase.GetAssetPath(s_instance)))
             {
                 return;
             }
 
-            path = defaultAssetPath;
-            Directory.CreateDirectory(Path.GetDirectoryName(path));
-            AssetDatabase.CreateAsset(Instance, path);
+            AssetDatabase.CreateAsset(s_instance, path);
         }
 
         public static bool AddIgnoreKey(string key)

@@ -1,4 +1,4 @@
-﻿//========= Copyright 2016-2022, HTC Corporation. All rights reserved. ===========
+﻿//========= Copyright 2016-2019, HTC Corporation. All rights reserved. ===========
 
 using HTC.UnityPlugin.Utility;
 
@@ -20,7 +20,6 @@ namespace HTC.UnityPlugin.VRModuleManagement
         OculusVR = 4,
         DayDream = 5,
         WaveVR = 6,
-        UnityXR = 7,
     }
 
     public enum VRModuleActiveEnum
@@ -33,7 +32,6 @@ namespace HTC.UnityPlugin.VRModuleManagement
         OculusVR = VRModuleSelectEnum.OculusVR,
         DayDream = VRModuleSelectEnum.DayDream,
         WaveVR = VRModuleSelectEnum.WaveVR,
-        UnityXR = VRModuleSelectEnum.UnityXR,
     }
 
     public partial class VRModule : SingletonBehaviour<VRModule>
@@ -134,13 +132,13 @@ namespace HTC.UnityPlugin.VRModuleManagement
 
         public static IVRModuleDeviceState GetCurrentDeviceState(uint deviceIndex)
         {
-            if (Instance == null || Instance.m_currStates == null || !IsValidDeviceIndex(deviceIndex)) { return s_defaultState; }
+            if (!IsValidDeviceIndex(deviceIndex) || Instance == null || Instance.m_currStates == null) { return s_defaultState; }
             return Instance.m_currStates[deviceIndex] ?? s_defaultState;
         }
 
         public static IVRModuleDeviceState GetPreviousDeviceState(uint deviceIndex)
         {
-            if (Instance == null || Instance.m_currStates == null || !IsValidDeviceIndex(deviceIndex)) { return s_defaultState; }
+            if (!IsValidDeviceIndex(deviceIndex) || Instance == null || Instance.m_prevStates == null) { return s_defaultState; }
             return Instance.m_prevStates[deviceIndex] ?? s_defaultState;
         }
 

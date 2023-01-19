@@ -16,7 +16,8 @@ public class IdleChanger : MonoBehaviour
 		anim = GetComponent<Animator> ();
 		currentState = anim.GetCurrentAnimatorStateInfo (0);
 		previousState = currentState;
-		//anim.SetBool("Next", true);
+
+		anim.SetBool("Next", true);	//switch to pointy finger gesture
 	}
 	// Update is called once per frame
 	void  Update ()

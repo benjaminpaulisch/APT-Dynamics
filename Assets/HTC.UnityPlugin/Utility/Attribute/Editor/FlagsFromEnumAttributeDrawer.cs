@@ -1,4 +1,4 @@
-﻿//========= Copyright 2016-2022, HTC Corporation. All rights reserved. ===========
+﻿//========= Copyright 2016-2019, HTC Corporation. All rights reserved. ===========
 
 using System.Collections.Generic;
 using UnityEditor;
@@ -15,6 +15,8 @@ namespace HTC.UnityPlugin.Utility
         private static List<bool> s_displayedMask;
 
         private bool m_foldoutOpen = false;
+
+        private static GUIContent GetTextContent(string text) { s_tempContent.text = text; return s_tempContent; }
 
         static FlagsFromEnumAttributeDrawer()
         {
@@ -149,7 +151,7 @@ namespace HTC.UnityPlugin.Utility
                     var halfWidth = position.width * 0.5f;
                     if (GUI.Button(new Rect(position.x, position.y, halfWidth - 1, EditorGUIUtility.singleLineHeight), "All"))
                     {
-                        realMask = System.Runtime.InteropServices.Marshal.SizeOf(fieldInfo.FieldType) < sizeof(ulong) ? ~0u : ~0ul;
+                        realMask = ~0ul;
                         //m_foldoutOpen = false;
                     }
 

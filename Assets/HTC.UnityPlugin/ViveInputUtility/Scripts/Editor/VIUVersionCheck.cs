@@ -1,4 +1,4 @@
-﻿//========= Copyright 2016-2022, HTC Corporation. All rights reserved. ===========
+﻿//========= Copyright 2016-2019, HTC Corporation. All rights reserved. ===========
 #pragma warning disable 0649
 using System;
 using System.Collections.Generic;
@@ -33,7 +33,7 @@ namespace HTC.UnityPlugin.Vive
             void UpdateCurrentValue();
             bool IsIgnored();
             bool IsUsingRecommendedValue();
-            bool DoDrawRecommend(); // return true if setting accepted
+            void DoDrawRecommend();
             void AcceptRecommendValue();
             void DoIgnore();
             void DeleteIgnore();
@@ -69,7 +69,7 @@ namespace HTC.UnityPlugin.Vive
 
             public void UpdateCurrentValue() { currentValue = currentValueFunc(); }
 
-            public bool DoDrawRecommend()
+            public void DoDrawRecommend()
             {
                 GUILayout.Label(new GUIContent(string.Format(fmtTitle, settingTitle, currentValue), toolTip));
 
@@ -98,8 +98,6 @@ namespace HTC.UnityPlugin.Vive
                 }
 
                 GUILayout.EndHorizontal();
-
-                return recommendBtnClicked;
             }
 
             public void AcceptRecommendValue()
@@ -138,7 +136,6 @@ namespace HTC.UnityPlugin.Vive
         private static bool toggleSkipThisVersion = false;
         private static VIUVersionCheck windowInstance;
         private static List<IPropSetting> s_settings;
-        private static bool editorUpdateRegistered;
         private Texture2D viuLogo;
 
         /// <summary>
@@ -158,24 +155,7 @@ namespace HTC.UnityPlugin.Vive
 
         static VIUVersionCheck()
         {
-            editorUpdateRegistered = true;
             EditorApplication.update += CheckVersionAndSettings;
-
-#if UNITY_2017_2_OR_NEWER
-            EditorApplication.playModeStateChanged += (mode) =>
-            {
-                if (mode == PlayModeStateChange.EnteredEditMode && !editorUpdateRegistered)
-                {
-#else
-            EditorApplication.playmodeStateChanged += () =>
-            {
-                if (!EditorApplication.isPlaying && !EditorApplication.isPlayingOrWillChangePlaymode && !editorUpdateRegistered)
-                {
-#endif
-                    editorUpdateRegistered = true;
-                    EditorApplication.update += CheckVersionAndSettings;
-                }
-            };
         }
 
         public static void AddRecommendedSetting<T>(RecommendedSetting<T> setting)
@@ -189,17 +169,6 @@ namespace HTC.UnityPlugin.Vive
             if (s_settings != null) { return; }
 
             s_settings = new List<IPropSetting>();
-
-#if ENABLE_INPUT_SYSTEM
-            s_settings.Add(new RecommendedSetting<bool>()
-            {
-                settingTitle = "Initialize on Startup",
-                toolTip = VRModuleManagement.VRModuleSettings.INITIALIZE_ON_STARTUP_TOOLTIP,
-                recommendedValueFunc = () => true,
-                currentValueFunc = () => VRModuleManagement.VRModuleSettings.initializeOnStartup,
-                setValueFunc = (v) => VRModuleManagement.VRModuleSettings.initializeOnStartup = v,
-            });
-#endif
 
             foreach (var type in Assembly.GetAssembly(typeof(RecommendedSettingCollection)).GetTypes().Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(typeof(RecommendedSettingCollection))))
             {
@@ -223,7 +192,6 @@ namespace HTC.UnityPlugin.Vive
             if (Application.isPlaying)
             {
                 EditorApplication.update -= CheckVersionAndSettings;
-                editorUpdateRegistered = false;
                 return;
             }
 
@@ -254,12 +222,8 @@ namespace HTC.UnityPlugin.Vive
 
                 if (UrlSuccess(webReq))
                 {
-                    var json = GetWebText(webReq);
-                    if (!string.IsNullOrEmpty(json))
-                    {
-                        latestRepoInfo = JsonUtility.FromJson<RepoInfo>(json);
-                        VersionCheckLog("Fetched");
-                    }
+                    latestRepoInfo = JsonUtility.FromJson<RepoInfo>(GetWebText(webReq));
+                    VersionCheckLog("Fetched");
                 }
 
                 // parse latestVersion and ignoreThisVersionKey
@@ -296,17 +260,15 @@ namespace HTC.UnityPlugin.Vive
             }
 
             EditorApplication.update -= CheckVersionAndSettings;
-            editorUpdateRegistered = false;
         }
 
-        public static bool UpdateIgnoredNotifiedSettingsCount(bool drawNotifiedPrompt)
+        public static void UpdateIgnoredNotifiedSettingsCount(bool drawNotifiedPrompt)
         {
             InitializeSettins();
 
             ignoredSettingsCount = 0;
             shouldNotifiedSettingsCount = 0;
             notifiedSettingsCount = 0;
-            var hasSettingsAccepted = false;
 
             foreach (var setting in s_settings)
             {
@@ -333,13 +295,11 @@ namespace HTC.UnityPlugin.Vive
                             settingScrollPosition = GUILayout.BeginScrollView(settingScrollPosition, GUILayout.ExpandHeight(true));
                         }
 
-                        hasSettingsAccepted |= setting.DoDrawRecommend();
+                        setting.DoDrawRecommend();
                     }
 
                 }
             }
-
-            return hasSettingsAccepted;
         }
 
         // Open recommended setting window (with possible new version prompt)
@@ -369,10 +329,8 @@ namespace HTC.UnityPlugin.Vive
         private static UnityWebRequest GetUnityWebRequestAndSend(string url)
         {
             var webReq = new UnityWebRequest(url);
-#if UNITY_2017_2_OR_NEWER
+#if UNITY_5_4_OR_NEWER
             webReq.SendWebRequest();
-#elif UNITY_5_4_OR_NEWER
-            webReq.Send();
 #endif
             return webReq;
         }
@@ -380,9 +338,9 @@ namespace HTC.UnityPlugin.Vive
         private static string GetWebText(UnityWebRequest wr)
         {
 #if UNITY_5_4_OR_NEWER
-            return wr != null && wr.downloadHandler != null ? wr.downloadHandler.text : string.Empty;
+            return wr.downloadHandler.text;
 #else
-            return wr != null ? wr.text : string.Empty;
+            return wr.text;
 #endif
         }
 
@@ -401,8 +359,6 @@ namespace HTC.UnityPlugin.Vive
         {
             try
             {
-                if (wr == null) { return false; }
-
                 if (!string.IsNullOrEmpty(wr.error))
                 {
                     // API rate limit exceeded, see https://developer.github.com/v3/#rate-limiting
@@ -504,7 +460,7 @@ namespace HTC.UnityPlugin.Vive
                 GUILayout.EndHorizontal();
             }
 
-            var hasSettingsAccepted = UpdateIgnoredNotifiedSettingsCount(true);
+            UpdateIgnoredNotifiedSettingsCount(true);
 
             if (notifiedSettingsCount > 0)
             {
@@ -524,14 +480,12 @@ namespace HTC.UnityPlugin.Vive
                     {
                         for (int i = 10; i >= 0 && notifiedSettingsCount > 0; --i)
                         {
-                            foreach (var setting in s_settings) { if (!setting.SkipCheck() && !setting.IsIgnored() && !setting.IsUsingRecommendedValue()) { setting.AcceptRecommendValue(); } }
+                            foreach (var setting in s_settings) { if (!setting.SkipCheck() && !setting.IsIgnored()) { setting.AcceptRecommendValue(); } }
 
                             VIUSettingsEditor.ApplySDKChanges();
 
                             UpdateIgnoredNotifiedSettingsCount(false);
                         }
-
-                        hasSettingsAccepted = true;
                     }
 
                     if (GUILayout.Button("Ignore All(" + notifiedSettingsCount + ")"))
@@ -570,11 +524,6 @@ namespace HTC.UnityPlugin.Vive
             if (GUILayout.Button("Close"))
             {
                 Close();
-            }
-
-            if (hasSettingsAccepted)
-            {
-                VRModuleManagement.VRModuleManagerEditor.UpdateScriptingDefineSymbols();
             }
         }
 

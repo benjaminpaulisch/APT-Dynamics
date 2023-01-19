@@ -1,4 +1,4 @@
-﻿//========= Copyright 2016-2022, HTC Corporation. All rights reserved. ===========
+﻿//========= Copyright 2016-2019, HTC Corporation. All rights reserved. ===========
 
 using UnityEngine;
 using HTC.UnityPlugin.Vive;
@@ -14,11 +14,6 @@ namespace HTC.UnityPlugin.VRModuleManagement
 {
     public sealed partial class UnityEngineVRModule : VRModule.ModuleBase
     {
-        public override int moduleOrder { get { return (int)DefaultModuleOrder.UnityNativeVR; } }
-
-        public override int moduleIndex { get { return (int)VRModuleSelectEnum.UnityNativeVR; } }
-
-#if !UNITY_2020_1_OR_NEWER
         private static KeyCode[] s_keyCodes = new KeyCode[]
         {
             KeyCode.JoystickButton0,
@@ -91,6 +86,8 @@ namespace HTC.UnityPlugin.VRModuleManagement
         public static int GetUnityAxisIdByIndex(int index) { return index + 1; }
 #endif
 
+        public override int moduleIndex { get { return (int)VRModuleActiveEnum.UnityNativeVR; } }
+
         public override bool ShouldActiveModule() { return VIUSettings.activateUnityNativeVRModule && XRSettings.enabled; }
 
         public override void Update()
@@ -121,7 +118,6 @@ namespace HTC.UnityPlugin.VRModuleManagement
                     Update_L_OculusTouch(prevState, currState);
                     break;
                 case VRModuleDeviceModel.KnucklesLeft:
-                case VRModuleDeviceModel.IndexControllerLeft:
                     Update_L_Knuckles(prevState, currState);
                     break;
                 case VRModuleDeviceModel.WMRControllerLeft:
@@ -144,7 +140,6 @@ namespace HTC.UnityPlugin.VRModuleManagement
                     Update_R_OculusTouch(prevState, currState);
                     break;
                 case VRModuleDeviceModel.KnucklesRight:
-                case VRModuleDeviceModel.IndexControllerRight:
                     Update_R_Knuckles(prevState, currState);
                     break;
                 case VRModuleDeviceModel.WMRControllerRight:
@@ -155,7 +150,6 @@ namespace HTC.UnityPlugin.VRModuleManagement
 
         private static void Update_L_Vive(IVRModuleDeviceState prevState, IVRModuleDeviceStateRW currState)
         {
-            var primaryButtonPress = GetUnityButton(3);
             var menuPress = GetUnityButton(2);
             var padPress = GetUnityButton(8);
             var triggerTouch = GetUnityButton(14);
@@ -166,7 +160,6 @@ namespace HTC.UnityPlugin.VRModuleManagement
             var trigger = GetUnityAxis(9);
             var grip = GetUnityAxis(11);
 
-            currState.SetButtonPress(VRModuleRawButton.A, primaryButtonPress);
             currState.SetButtonPress(VRModuleRawButton.ApplicationMenu, menuPress);
             currState.SetButtonPress(VRModuleRawButton.Grip, grip >= 1.0f);
             currState.SetButtonPress(VRModuleRawButton.Touchpad, padPress);
@@ -182,7 +175,6 @@ namespace HTC.UnityPlugin.VRModuleManagement
 
         private static void Update_R_Vive(IVRModuleDeviceState prevState, IVRModuleDeviceStateRW currState)
         {
-            var primaryButtonPress = GetUnityButton(1);
             var menuPress = GetUnityButton(0);
             var padPress = GetUnityButton(9);
             var triggerTouch = GetUnityButton(15);
@@ -193,7 +185,6 @@ namespace HTC.UnityPlugin.VRModuleManagement
             var trigger = GetUnityAxis(10);
             var grip = GetUnityAxis(12);
 
-            currState.SetButtonPress(VRModuleRawButton.A, primaryButtonPress);
             currState.SetButtonPress(VRModuleRawButton.ApplicationMenu, menuPress);
             currState.SetButtonPress(VRModuleRawButton.Touchpad, padPress);
             currState.SetButtonPress(VRModuleRawButton.Trigger, AxisToPress(prevState.GetButtonPress(VRModuleRawButton.Trigger), trigger, 0.55f, 0.45f));
@@ -410,6 +401,5 @@ namespace HTC.UnityPlugin.VRModuleManagement
             currState.SetAxisValue(VRModuleRawAxis.JoystickX, stickX);
             currState.SetAxisValue(VRModuleRawAxis.JoystickY, -stickY);
         }
-#endif
     }
 }

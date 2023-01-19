@@ -1,8 +1,7 @@
-﻿//========= Copyright 2016-2022, HTC Corporation. All rights reserved. ===========
+﻿//========= Copyright 2016-2019, HTC Corporation. All rights reserved. ===========
 
 using HTC.UnityPlugin.Utility;
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace HTC.UnityPlugin.VRModuleManagement
@@ -14,7 +13,6 @@ namespace HTC.UnityPlugin.VRModuleManagement
         Controller,
         GenericTracker,
         TrackingReference,
-        TrackedHand,
     }
 
     public enum VRModuleDeviceModel
@@ -34,7 +32,6 @@ namespace HTC.UnityPlugin.VRModuleManagement
         DaydreamController,
         ViveFocusHMD,
         ViveFocusFinch,
-        ViveFocusChirp,
         OculusGoController,
         OculusGearVrController,
         WMRHMD,
@@ -42,37 +39,13 @@ namespace HTC.UnityPlugin.VRModuleManagement
         WMRControllerRight,
         ViveCosmosControllerLeft,
         ViveCosmosControllerRight,
-        OculusQuestOrRiftSControllerLeft,
-        OculusQuestOrRiftSControllerRight,
-        [HideInInspector]
-        OculusQuestControllerLeft = OculusQuestOrRiftSControllerLeft,
-        [HideInInspector]
-        OculusQuestControllerRight = OculusQuestOrRiftSControllerRight,
+        OculusQuestControllerLeft,
+        OculusQuestControllerRight,
+        OculusQuestOrRiftSControllerLeft = OculusQuestControllerLeft,
+        OculusQuestOrRiftSControllerRight = OculusQuestControllerRight,
         IndexHMD,
         IndexControllerLeft,
         IndexControllerRight,
-        MagicLeapHMD,
-        MagicLeapController,
-        ViveHandTrackingTrackedHandLeft,
-        ViveHandTrackingTrackedHandRight,
-        WaveLegacyTrackedHandLeft,
-        WaveLegacyTrackedHandRight,
-        WaveTrackedHandLeft,
-        WaveTrackedHandRight,
-        OculusTrackedHandLeft,
-        OculusTrackedHandRight,
-        KhronosSimpleController,
-        ViveFocus3ControllerLeft,
-        ViveFocus3ControllerRight,
-        [HideInInspector, Obsolete("Use ViveFocus3ControllerLeft instead.")]
-        WaveCRControllerLeft = ViveFocus3ControllerLeft,
-        [HideInInspector, Obsolete("Use ViveFocus3ControllerRight instead.")]
-        WaveCRControllerRight = ViveFocus3ControllerRight,
-        ViveTracker3,
-        ViveFlowPhoneController,
-        OculusQuest2ControllerLeft,
-        OculusQuest2ControllerRight,
-        ViveWristTracker,
     }
 
     public enum VRModuleRawButton
@@ -85,7 +58,6 @@ namespace HTC.UnityPlugin.VRModuleManagement
         DPadRight = 5,
         DPadDown = 6,
         A = 7,
-        Joystick = 8,
         ProximitySensor = 31,
         DashboardBack = 2, // Grip
         Touchpad = 32, // Axis0
@@ -99,24 +71,11 @@ namespace HTC.UnityPlugin.VRModuleManagement
         Axis2 = 34,
         Axis3 = 35,
         Axis4 = 36,
-
-        // Gestures
-        GestureIndexPinch,
-        GestureMiddlePinch,
-        GestureRingPinch,
-        GesturePinkyPinch,
-        GestureFist,
-        GestureFive,
-        GestureOk,
-        GestureThumbUp,
-        GestureIndexUp,
     }
 
     public enum VRModuleRawAxis
     {
-        [HideInInspector]
         TouchpadX = Axis0X,
-        [HideInInspector]
         TouchpadY = Axis0Y,
         Trigger = Axis1X,
         CapSenseGrip = Axis2X,
@@ -125,15 +84,8 @@ namespace HTC.UnityPlugin.VRModuleManagement
         RingCurl = Axis4X,
         PinkyCurl = Axis4Y,
 
-        [HideInInspector]
         JoystickX = Axis2X,
-        [HideInInspector]
         JoystickY = Axis2Y,
-
-        Primary2DX = Axis0X,
-        Primary2DY = Axis0Y,
-        Secondary2DX = Axis2X,
-        Secondary2DY = Axis2Y,
 
         // alias
         Axis0X = 0,
@@ -146,12 +98,6 @@ namespace HTC.UnityPlugin.VRModuleManagement
         Axis3Y,
         Axis4X,
         Axis4Y,
-
-        // Gestures
-        IndexPinch,
-        MiddlePinch,
-        RingPinch,
-        PinkyPinch,
     }
 
     public enum VRModuleInput2DType
@@ -165,12 +111,6 @@ namespace HTC.UnityPlugin.VRModuleManagement
         TrackpadOnly = TouchpadOnly,
         JoystickOnly = ThumbstickOnly,
     }
-
-    internal class VRModuleDeviceClassResolver : EnumToIntResolver<VRModuleDeviceClass> { public override int Resolve(VRModuleDeviceClass e) { return (int)e; } }
-    internal class VRModuleDeviceModelResolver : EnumToIntResolver<VRModuleDeviceModel> { public override int Resolve(VRModuleDeviceModel e) { return (int)e; } }
-    internal class VRModuleRawButtonReslver : EnumToIntResolver<VRModuleRawButton> { public override int Resolve(VRModuleRawButton e) { return (int)e; } }
-    internal class VRModuleRawAxisReslver : EnumToIntResolver<VRModuleRawAxis> { public override int Resolve(VRModuleRawAxis e) { return (int)e; } }
-    internal class VRModuleInput2DTypeReslver : EnumToIntResolver<VRModuleInput2DType> { public override int Resolve(VRModuleInput2DType e) { return (int)e; } }
 
     public interface IVRModuleDeviceStateRW
     {
@@ -192,7 +132,6 @@ namespace HTC.UnityPlugin.VRModuleManagement
         Vector3 position { get; set; }
         Quaternion rotation { get; set; }
         RigidPose pose { get; set; }
-        JointEnumArray handJoints { get; }
 
         ulong buttonPressed { get; set; }
         ulong buttonTouched { get; set; }
@@ -236,15 +175,7 @@ namespace HTC.UnityPlugin.VRModuleManagement
         bool GetButtonPress(VRModuleRawButton button);
         bool GetButtonTouch(VRModuleRawButton button);
         float GetAxisValue(VRModuleRawAxis axis);
-
-        JointEnumArray.IReadOnly readOnlyHandJoints { get; }
-
-        int GetValidHandJointCount();
-        bool TryGetHandJointPose(HandJointName jointName, out JointPose pose);
     }
-
-    [Serializable]
-    public class JointEnumArray : EnumArray<HandJointName, JointPose> { }
 
     public partial class VRModule : SingletonBehaviour<VRModule>
     {
@@ -282,8 +213,6 @@ namespace HTC.UnityPlugin.VRModuleManagement
             private Vector3 m_position;
             [SerializeField]
             private Quaternion m_rotation;
-            [SerializeField]
-            private JointEnumArray m_handJoints;
 
             // device property, changed only when connected or disconnected
             public uint deviceIndex { get; private set; }
@@ -305,17 +234,6 @@ namespace HTC.UnityPlugin.VRModuleManagement
             public Quaternion rotation { get { return m_rotation; } set { m_rotation = value; } }
             public RigidPose pose { get { return new RigidPose(m_position, m_rotation); } set { m_position = value.pos; m_rotation = value.rot; } }
 
-            public JointEnumArray handJoints
-            {
-                get
-                {
-                    if (m_handJoints == null) { m_handJoints = new JointEnumArray(); }
-                    return m_handJoints;
-                }
-            }
-
-            public JointEnumArray.IReadOnly readOnlyHandJoints { get { return handJoints != null ? handJoints.ReadOnly : null; } }
-
             // device input state
             [SerializeField]
             private ulong m_buttonPressed;
@@ -332,31 +250,6 @@ namespace HTC.UnityPlugin.VRModuleManagement
             public bool GetButtonTouch(VRModuleRawButton button) { return EnumUtils.GetFlag(m_buttonTouched, (int)button); }
             public float GetAxisValue(VRModuleRawAxis axis) { return m_axisValue[(int)axis]; }
 
-            public bool TryGetHandJointPose(HandJointName jointName, out JointPose pose)
-            {
-                if (m_handJoints == null || !m_handJoints[jointName].isValid)
-                {
-                    pose = default(JointPose);
-                    return false;
-                }
-
-                pose = m_handJoints[jointName];
-                return true;
-            }
-
-            public int GetValidHandJointCount()
-            {
-                int count = 0;
-                if (m_handJoints != null)
-                {
-                    foreach (var handPose in m_handJoints)
-                    {
-                        if (handPose.isValid) { ++count; }
-                    }
-                }
-                return count;
-            }
-
             public void SetButtonPress(VRModuleRawButton button, bool value) { m_buttonPressed = value ? EnumUtils.SetFlag(m_buttonPressed, (int)button) : EnumUtils.UnsetFlag(m_buttonPressed, (int)button); }
             public void SetButtonTouch(VRModuleRawButton button, bool value) { m_buttonTouched = value ? EnumUtils.SetFlag(m_buttonTouched, (int)button) : EnumUtils.UnsetFlag(m_buttonTouched, (int)button); }
             public void SetAxisValue(VRModuleRawAxis axis, float value) { m_axisValue[(int)axis] = value; }
@@ -365,7 +258,7 @@ namespace HTC.UnityPlugin.VRModuleManagement
             public DeviceState(uint deviceIndex)
             {
                 this.deviceIndex = deviceIndex;
-                this.m_axisValue = new float[EnumArrayBase<VRModuleRawAxis>.StaticLength];
+                this.m_axisValue = new float[EnumUtils.GetMaxValue(typeof(VRModuleRawAxis)) + 1];
                 Reset();
             }
 
@@ -391,16 +284,6 @@ namespace HTC.UnityPlugin.VRModuleManagement
                 m_buttonPressed = state.m_buttonPressed;
                 m_buttonTouched = state.m_buttonTouched;
                 Array.Copy(state.m_axisValue, m_axisValue, m_axisValue.Length);
-
-                if (state.m_handJoints == null)
-                {
-                    m_handJoints = null;
-                }
-                else
-                {
-                    if (m_handJoints == null) { m_handJoints = new JointEnumArray(); }
-                    m_handJoints.CopyFrom(state.m_handJoints);
-                }
             }
 
             public void Reset()
@@ -423,53 +306,6 @@ namespace HTC.UnityPlugin.VRModuleManagement
                 m_buttonPressed = 0ul;
                 m_buttonTouched = 0ul;
                 ResetAxisValues();
-
-                if (m_handJoints != null) { m_handJoints.Clear(); }
-            }
-        }
-    }
-
-    public static class VRModuleDeviceModelExtension
-    {
-        public static bool IsRight(this VRModuleDeviceModel deviceModel)
-        {
-            switch (deviceModel)
-            {
-                case VRModuleDeviceModel.OculusTouchRight:
-                case VRModuleDeviceModel.KnucklesRight:
-                case VRModuleDeviceModel.WMRControllerRight:
-                case VRModuleDeviceModel.ViveCosmosControllerRight:
-                case VRModuleDeviceModel.OculusQuestOrRiftSControllerRight:
-                case VRModuleDeviceModel.IndexControllerRight:
-                case VRModuleDeviceModel.ViveHandTrackingTrackedHandRight:
-                case VRModuleDeviceModel.WaveLegacyTrackedHandRight:
-                case VRModuleDeviceModel.WaveTrackedHandRight:
-                case VRModuleDeviceModel.OculusTrackedHandRight:
-                case VRModuleDeviceModel.ViveFocus3ControllerRight:
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
-        public static bool IsLeft(this VRModuleDeviceModel deviceModel)
-        {
-            switch (deviceModel)
-            {
-                case VRModuleDeviceModel.OculusTouchLeft:
-                case VRModuleDeviceModel.KnucklesLeft:
-                case VRModuleDeviceModel.WMRControllerLeft:
-                case VRModuleDeviceModel.ViveCosmosControllerLeft:
-                case VRModuleDeviceModel.OculusQuestOrRiftSControllerLeft:
-                case VRModuleDeviceModel.IndexControllerLeft:
-                case VRModuleDeviceModel.ViveHandTrackingTrackedHandLeft:
-                case VRModuleDeviceModel.WaveLegacyTrackedHandLeft:
-                case VRModuleDeviceModel.WaveTrackedHandLeft:
-                case VRModuleDeviceModel.OculusTrackedHandLeft:
-                case VRModuleDeviceModel.ViveFocus3ControllerLeft:
-                    return true;
-                default:
-                    return false;
             }
         }
     }

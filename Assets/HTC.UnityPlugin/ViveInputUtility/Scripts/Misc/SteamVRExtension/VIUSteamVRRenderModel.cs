@@ -1,10 +1,10 @@
-﻿//========= Copyright 2016-2022, HTC Corporation. All rights reserved. ===========
+﻿//========= Copyright 2016-2019, HTC Corporation. All rights reserved. ===========
 
 using HTC.UnityPlugin.Utility;
 using HTC.UnityPlugin.VRModuleManagement;
 using System.Collections.Generic;
 using UnityEngine;
-#if VIU_STEAMVR && UNITY_STANDALONE
+#if VIU_STEAMVR
 using Valve.VR;
 #endif
 
@@ -204,7 +204,7 @@ namespace HTC.UnityPlugin.Vive.SteamVRExtension
 
             ClearModel();
 
-            if (enabled && !m_isAppQuit && !string.IsNullOrEmpty(renderModelName))
+            if (!m_isAppQuit && !string.IsNullOrEmpty(renderModelName))
             {
                 //Debug.Log(transform.parent.parent.name + " LoadModel " + renderModelName);
                 m_loadingRenderModels.Add(renderModelName);
@@ -301,7 +301,7 @@ namespace HTC.UnityPlugin.Vive.SteamVRExtension
 
         private void UpdateComponents()
         {
-#if VIU_STEAMVR && UNITY_STANDALONE
+#if VIU_STEAMVR
             if (!isModelLoaded) { return; }
 
             if (m_chilTransforms.Count == 0) { return; }
@@ -338,21 +338,21 @@ namespace HTC.UnityPlugin.Vive.SteamVRExtension
 #endif
         }
 
-#if VIU_STEAMVR_2_0_0_OR_NEWER && UNITY_STANDALONE
+#if VIU_STEAMVR_2_0_0_OR_NEWER
         private bool TryGetComponentState(CVRSystem vrSystem, CVRRenderModels vrRenderModels, string componentName, out RenderModel_ComponentState_t componentState)
         {
             componentState = default(RenderModel_ComponentState_t);
             var modeState = default(RenderModel_ControllerMode_State_t);
             return vrRenderModels.GetComponentStateForDevicePath(loadedModelName, componentName, SteamVRModule.GetInputSourceHandleForDevice(m_deviceIndex), ref modeState, ref componentState);
         }
-#elif VIU_STEAMVR && UNITY_STANDALONE
+#elif VIU_STEAMVR
         private static readonly uint s_sizeOfControllerStats = (uint)System.Runtime.InteropServices.Marshal.SizeOf(typeof(VRControllerState_t));
         private bool TryGetComponentState(CVRSystem vrSystem, CVRRenderModels vrRenderModels, string componentName, out RenderModel_ComponentState_t componentState)
         {
             componentState = default(RenderModel_ComponentState_t);
             var modeState = default(RenderModel_ControllerMode_State_t);
             var controllerState = default(VRControllerState_t);
-            if (!vrSystem.GetControllerState(SteamVRModule.GetTrackedIndexByModuleIndex(m_deviceIndex), ref controllerState, s_sizeOfControllerStats)) { return false; }
+            if (!vrSystem.GetControllerState(m_deviceIndex, ref controllerState, s_sizeOfControllerStats)) { return false; }
             if (!vrRenderModels.GetComponentState(loadedModelName, componentName, ref controllerState, ref modeState, ref componentState)) { return false; }
             return true;
         }

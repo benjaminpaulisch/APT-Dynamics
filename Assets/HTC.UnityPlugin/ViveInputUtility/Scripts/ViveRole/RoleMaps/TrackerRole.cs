@@ -1,6 +1,5 @@
-﻿//========= Copyright 2016-2022, HTC Corporation. All rights reserved. ===========
+﻿//========= Copyright 2016-2019, HTC Corporation. All rights reserved. ===========
 
-using HTC.UnityPlugin.Utility;
 using HTC.UnityPlugin.VRModuleManagement;
 
 namespace HTC.UnityPlugin.Vive
@@ -23,8 +22,6 @@ namespace HTC.UnityPlugin.Vive
         Tracker12,
         Tracker13,
     }
-
-    internal class TrackerRoleIntReslver : EnumToIntResolver<TrackerRole> { public override int Resolve(TrackerRole e) { return (int)e; } }
 
     public class TrackerRoleHandler : ViveRole.MapHandler<TrackerRole>
     {

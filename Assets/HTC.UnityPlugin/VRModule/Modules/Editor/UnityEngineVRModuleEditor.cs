@@ -1,7 +1,6 @@
-﻿//========= Copyright 2016-2022, HTC Corporation. All rights reserved. ===========
+﻿//========= Copyright 2016-2019, HTC Corporation. All rights reserved. ===========
 
 using System;
-using HTC.UnityPlugin.Vive;
 using UnityEditor;
 using UnityEngine;
 
@@ -9,7 +8,7 @@ namespace HTC.UnityPlugin.VRModuleManagement
 {
     public static class UnityVRModuleEditor
     {
-#if UNITY_5_5_OR_NEWER && !UNITY_2020_1_OR_NEWER
+#if UNITY_5_5_OR_NEWER
         [InitializeOnLoadMethod]
         private static void StartCheckEnforceInputManagerBindings()
         {
@@ -101,69 +100,5 @@ namespace HTC.UnityPlugin.VRModuleManagement
             serializedInputSettings.ApplyModifiedProperties();
         }
 #endif
-    }
-
-    public class UnityEngineVRSymbolRequirementCollection : VRModuleManagerEditor.SymbolRequirementCollection
-    {
-        public UnityEngineVRSymbolRequirementCollection()
-        {
-            Add(new VRModuleManagerEditor.SymbolRequirement()
-            {
-                symbol = "VIU_XR_GENERAL_SETTINGS",
-                reqTypeNames = new string[] { "UnityEngine.XR.Management.XRGeneralSettings" },
-                reqFileNames = new string[] { "XRGeneralSettings.cs" },
-            });
-
-            Add(new VRModuleManagerEditor.SymbolRequirement()
-            {
-                symbol = "VIU_XR_PACKAGE_METADATA_STORE",
-                reqTypeNames = new string[] { "UnityEditor.XR.Management.Metadata.XRPackageMetadataStore" },
-                reqFileNames = new string[] { "XRPackageMetadata.cs" },
-            });
-
-            Add(new VRModuleManagerEditor.SymbolRequirement()
-            {
-                symbol = "VIU_OPENXR",
-                reqTypeNames = new string[]
-                {
-                    "UnityEditor.XR.OpenXR.OpenXRProjectValidation",
-                    "UnityEditor.XR.OpenXR.OpenXRProjectValidationWindow",
-                    "UnityEngine.XR.OpenXR.OpenXRSettings",
-                    "UnityEngine.XR.OpenXR.Features.OpenXRFeature",
-                },
-                reqFileNames = new string[]
-                {
-                    "OpenXRProjectValidation.cs",
-                    "OpenXRProjectValidationWindow.cs",
-                    "OpenXRFeature.cs",
-                },
-            });
-
-            Add(new VRModuleManagerEditor.SymbolRequirement()
-            {
-                symbol = "VIU_OPENXR_PLUGIN_POSE_CONTROL",
-                reqTypeNames = new string[]
-                {
-                    "UnityEngine.XR.OpenXR.Input.PoseControl",
-                },
-                reqFileNames = new string[]
-                {
-                    "PoseControl.cs",
-                },
-            });
-
-            Add(new VRModuleManagerEditor.SymbolRequirement()
-            {
-                symbol = "VIU_UIS_POSE_CONTROL",
-                reqTypeNames = new string[]
-                {
-                    "UnityEngine.InputSystem.XR.PoseControl",
-                },
-                reqFileNames = new string[]
-                {
-                    "PoseControl.cs",
-                },
-            });
-        }
     }
 }

@@ -1,4 +1,4 @@
-﻿//========= Copyright 2016-2022, HTC Corporation. All rights reserved. ===========
+﻿//========= Copyright 2016-2019, HTC Corporation. All rights reserved. ===========
 
 using HTC.UnityPlugin.Utility;
 using System;
@@ -12,8 +12,6 @@ namespace HTC.UnityPlugin.PoseTracker
         int priority { get; set; }
         [Obsolete]
         void ModifyPose(ref Pose pose, Transform origin);
-        [Obsolete]
         void ModifyPose(ref RigidPose pose, Transform origin);
-        void ModifyPose(ref RigidPose pose, bool useLocal);
     }
 }
