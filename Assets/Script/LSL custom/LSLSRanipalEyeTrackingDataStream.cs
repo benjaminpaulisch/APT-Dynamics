@@ -402,12 +402,12 @@ public class LSLSRanipalEyeTrackingDataStream : MonoBehaviour
                 if (oldHitObject != null)
                 {
                     //old focus:out;object
-                    //Debug.Log("focus:out;object: " + oldHitObject.name);
+                    Debug.Log("focus:out;object: " + oldHitObject.name);
                     focusedObjectsStream.Write("focus:out;object: " + oldHitObject.name);
                 }
 
                 //new focused object
-                //Debug.Log("focus:in;object: " + currentHitObject.name);
+                Debug.Log("focus:in;object: " + currentHitObject.name);
                 focusedObjectsStream.Write("focus:in;object: " + currentHitObject.name);
 
             }
@@ -423,7 +423,7 @@ public class LSLSRanipalEyeTrackingDataStream : MonoBehaviour
             if (oldHitObject != null)
             {
                 //current focus:out;object
-                //Debug.Log("focus:out;object: " + oldHitObject.name);
+                Debug.Log("focus:out;object: " + oldHitObject.name);
                 focusedObjectsStream.Write("focus:out;object: " + oldHitObject.name);
             }
 
