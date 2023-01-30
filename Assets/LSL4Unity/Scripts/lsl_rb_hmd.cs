@@ -22,7 +22,7 @@ public class lsl_rb_hmd : MonoBehaviour {
 
 	public double dataRate=90;
 
-	public const string uid = "21da06a47ac14a1a84d56d629d0486e5";
+	public const string uid = "sdfilgbudzogfjk";
 
 	public double GetDataRate()
 	{
@@ -60,7 +60,7 @@ public class lsl_rb_hmd : MonoBehaviour {
 	void Start () 
 	{
 		
-		head = GameObject.Find("Camera (eye)");
+		head = GameObject.Find("Camera");
 
 		if (head != null)
 			{
