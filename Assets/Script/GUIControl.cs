@@ -2010,7 +2010,9 @@ public class GUIControl : MonoBehaviour {
             "posShoulder:" + shoulderPosition.ToString() + ";" +
             "posMaxReach:" + maxReachPosition.ToString() + ";" +
             "armLengthCalculated:" + armLengthCalculated.ToString() + ";" +
-            "stimulusPositions:" + stimulusPositions.ToString();
+            "stimulusPositions:" + stimulusPositions.ToString() + ";" +
+            "posFixationCross:" + fixationCross.transform.position.ToString() + ";" +
+            "posResting:" + resting.transform.position.ToString();
         marker.Write(tempMarkerText);
         Debug.Log(tempMarkerText);
 
@@ -2138,7 +2140,9 @@ public class GUIControl : MonoBehaviour {
             "posShoulder:" + shoulderPosition.ToString() + ";" +
             "posMaxReach:" + maxReachPosition.ToString() + ";" +
             "armLengthCalculated:" + armLengthCalculated.ToString() + ";" +
-            "stimulusPositions:" + stimulusPositions;
+            "stimulusPositions:" + stimulusPositions + ";" +
+            "posFixationCross:" + fixationCross.transform.position.ToString() + ";" +
+            "posResting:" + resting.transform.position.ToString();
         marker.Write(tempMarkerText);
         Debug.Log(tempMarkerText);
 
