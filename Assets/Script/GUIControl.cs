@@ -339,6 +339,8 @@ public class GUIControl : MonoBehaviour {
 
         torso.GetComponent<Renderer>().enabled = false;   //make torso invisible
 
+        vivePointers.SetActive(false);      //deactivate VivePointers because we only need them during the questionnaires
+
         //##### Initialize VRQuestionnaire
         vrQuestionnaire = vrQuestionnaireToolkit.GetComponentInChildren<VRQuestionnaireToolkit.GenerateQuestionnaire>();
         //StopQuestionnaire(0);       //stop first questionnaire (as it is automaticalle started)
@@ -458,35 +460,52 @@ public class GUIControl : MonoBehaviour {
             // after all trials are finished
             if (experimentEnd)  
             {
-                //write specific end marker
-                /*if (learningStarted)
+                if (!questionnaireStarted)
                 {
-                    marker.Write("learning:end");
-                    Debug.Log("learning:end");
-                }
-                else*/ if (trainingStarted)
-                {
-                    marker.Write("training:end");
-                    Debug.Log("training:end");
-                }
-                /*else if (baselineRunning)
-                {
-                    marker.Write("baselineNew:end");
-                    Debug.Log("baselineNew:end");
-                }*/
-                else
-                {
-                    marker.Write("experiment:end");
-                    Debug.Log("experiment:end");
-                }
+                    //start questionnaire
+                    StartQuestionnaire();
 
-                //activate experiment end text
-                end.SetActive(true);
+                }
+                
+                
+                if (questionnaireFinished)
+                {
+                    //stop questionnaire
+                    StopQuestionnaire();
+                    
+                    
+                    //write specific end marker
+                    /*if (learningStarted)
+                    {
+                        marker.Write("learning:end");
+                        Debug.Log("learning:end");
+                    }
+                    else*/ if (trainingStarted)
+                    {
+                        marker.Write("training:end");
+                        Debug.Log("training:end");
+                    }
+                    /*else if (baselineRunning)
+                    {
+                        marker.Write("baselineNew:end");
+                        Debug.Log("baselineNew:end");
+                    }*/
+                    else
+                    {
+                        marker.Write("experiment:end");
+                        Debug.Log("experiment:end");
+                    }
 
-                experimentStarted = false;
+                    //activate experiment end text
+                    end.SetActive(true);
 
-                //go to main menu
-                StartMainMenu();
+                    experimentStarted = false;
+
+                    //go to main menu
+                    StartMainMenu();
+
+                }
+                    
             }
 
         }//if experimentStarted
