@@ -192,6 +192,8 @@ public class GUIControl : MonoBehaviour {
     private GameObject[] textTrainingPages = new GameObject[6];
     private GameObject[] textExperimentPages = new GameObject[4];
 
+    private IdleChanger vrHandAnimationChanger;
+
 
     void Awake()
     {
@@ -324,6 +326,8 @@ public class GUIControl : MonoBehaviour {
         textExperimentPages[1] = textExperimentPage2;
         textExperimentPages[2] = textExperimentPage3;
         textExperimentPages[3] = textExperimentPage4;
+
+        vrHandAnimationChanger = rightHand.GetComponentInChildren<IdleChanger>();
 
 
         //deactivate the "Start Experiment" and "Training" Buttons:
@@ -582,6 +586,10 @@ public class GUIControl : MonoBehaviour {
                     marker.Write("cue text deactivated");
                     //Debug.Log("Cue deactivated: " + actualTime.ToString());
                     cueActivated = false;
+
+
+                    //change hand to ponty finger pose
+                    vrHandAnimationChanger.GotoPoint();
 
 
                     //activate stimulus
@@ -923,9 +931,13 @@ public class GUIControl : MonoBehaviour {
         //calculate stimulus distance from shoulder (ignoring the height difference)
         currentStimulusDistanceFromShoulder2D = Vector3.Distance(currentStimulusObj.transform.position, new Vector3(shoulderPosition.x, currentStimulusObj.transform.position.y, shoulderPosition.z));
 
-
         //set current cube angle
         currentStimulusAngle = stimulusAngles[cubeSeq[cubeSeqCounter]];
+
+
+        //change hand to fist pose
+        vrHandAnimationChanger.GotoFist();
+
 
         //write trial start marker
         tempMarkerText =

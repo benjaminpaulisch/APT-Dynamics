@@ -45,7 +45,36 @@ public class IdleChanger : MonoBehaviour
 				previousState = currentState;
 			}
 		}
+
+
+		if (anim.GetBool ("Fist")) {
+			currentState = anim.GetCurrentAnimatorStateInfo (0);
+			if (previousState.nameHash != currentState.nameHash) {
+				anim.SetBool ("Fist", false);
+				previousState = currentState;				
+			}
+		}
+		
+		if (anim.GetBool ("Point")) {
+			currentState = anim.GetCurrentAnimatorStateInfo (0);
+			if (previousState.nameHash != currentState.nameHash) {
+				anim.SetBool ("Point", false);
+				previousState = currentState;
+			}
+		}
 	}
+
+
+	public void GotoFist()
+    {
+		anim.SetBool ("Fist", true);
+    }
+
+	public void GotoPoint()
+    {
+		anim.SetBool ("Point", true);
+    }
+
 }
 
 

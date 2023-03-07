@@ -64,3 +64,4 @@ unityProject.vrmanifest
 *.csv
 
 /Assets/Questionnaires/Data/
+Assets/Resources/saved_transform_values
